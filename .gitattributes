@@ -1,0 +1,11 @@
+# Normalise line endings in the repository.
+* text=auto
+
+# These run on Linux. A CRLF shebang makes bash fail with "bad interpreter",
+# so pin them to LF regardless of the checkout platform.
+*.sh            text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+Caddyfile       text eol=lf
+Dockerfile      text eol=lf
+*.dockerignore  text eol=lf

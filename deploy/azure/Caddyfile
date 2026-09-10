@@ -1,0 +1,26 @@
+# Caddy terminates TLS and obtains a Let's Encrypt certificate automatically on
+# first start. *.cloudapp.azure.com is on the Public Suffix List, so the Azure
+# DNS label counts as a registrable domain and can be issued a certificate --
+# no domain purchase required.
+
+{
+	email {$TLS_EMAIL}
+}
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+
+	# Matches client_max_body_size in the app's own nginx layer.
+	request_body {
+		max_size 12MB
+	}
+
+	# The frontend container's nginx already routes /api, /media, /robots.txt
+	# and /sitemap.xml to the backend, so one upstream is enough.
+	reverse_proxy frontend:80
+
+	log {
+		output stdout
+		format console
+	}
+}

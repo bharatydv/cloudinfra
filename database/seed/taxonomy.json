@@ -1,0 +1,135 @@
+{
+  "course_categories": [
+    {
+      "name": "Cloud Computing",
+      "slug": "cloud-computing",
+      "icon": "cloud",
+      "position": 1,
+      "description": "Design, deploy and operate workloads on public cloud platforms."
+    },
+    {
+      "name": "Artificial Intelligence",
+      "slug": "artificial-intelligence",
+      "icon": "brain-circuit",
+      "position": 2,
+      "description": "Foundations of modern AI systems and how to apply them responsibly."
+    },
+    {
+      "name": "Machine Learning",
+      "slug": "machine-learning",
+      "icon": "line-chart",
+      "position": 3,
+      "description": "Supervised and unsupervised learning, model evaluation and deployment."
+    },
+    {
+      "name": "Data Science",
+      "slug": "data-science",
+      "icon": "database",
+      "position": 4,
+      "description": "Turn raw data into decisions with statistics, SQL and visualisation."
+    },
+    {
+      "name": "DevOps",
+      "slug": "devops",
+      "icon": "infinity",
+      "position": 5,
+      "description": "CI/CD, infrastructure as code, containers and production reliability."
+    },
+    {
+      "name": "Digital Marketing",
+      "slug": "digital-marketing",
+      "icon": "megaphone",
+      "position": 6,
+      "description": "Search, content, analytics and paid channels that compound over time."
+    }
+  ],
+  "article_categories": [
+    {
+      "name": "Certification Guides",
+      "slug": "certification-guides",
+      "icon": "award",
+      "position": 1,
+      "description": "Step-by-step preparation guides for technology certifications."
+    },
+    {
+      "name": "Cloud Computing",
+      "slug": "cloud-computing",
+      "icon": "cloud",
+      "position": 2,
+      "description": "Architecture, cost and operations on public cloud."
+    },
+    {
+      "name": "Artificial Intelligence",
+      "slug": "artificial-intelligence",
+      "icon": "brain-circuit",
+      "position": 3,
+      "description": "Applied AI, model selection and evaluation."
+    },
+    {
+      "name": "Machine Learning",
+      "slug": "machine-learning",
+      "icon": "line-chart",
+      "position": 4,
+      "description": "Practical machine learning workflows."
+    },
+    {
+      "name": "Data Science",
+      "slug": "data-science",
+      "icon": "database",
+      "position": 5,
+      "description": "Analysis, statistics and data storytelling."
+    },
+    {
+      "name": "DevOps",
+      "slug": "devops",
+      "icon": "infinity",
+      "position": 6,
+      "description": "Delivery pipelines, platform engineering and reliability."
+    },
+    {
+      "name": "Career",
+      "slug": "career",
+      "icon": "briefcase",
+      "position": 7,
+      "description": "Growing a technology career deliberately."
+    },
+    {
+      "name": "Interview Preparation",
+      "slug": "interview-preparation",
+      "icon": "messages-square",
+      "position": 8,
+      "description": "What technical interviews actually test, and how to prepare."
+    },
+    {
+      "name": "Exam Preparation",
+      "slug": "exam-preparation",
+      "icon": "clipboard-check",
+      "position": 9,
+      "description": "Study techniques and exam-day strategy."
+    },
+    {
+      "name": "Learning Roadmaps",
+      "slug": "learning-roadmaps",
+      "icon": "map",
+      "position": 10,
+      "description": "Ordered paths from beginner to job-ready."
+    }
+  ],
+  "tags": [
+    "AWS",
+    "Google Cloud",
+    "Microsoft Azure",
+    "Kubernetes",
+    "Terraform",
+    "Python",
+    "SQL",
+    "MLOps",
+    "Career Growth",
+    "Study Plan",
+    "Cost Optimisation",
+    "Security",
+    "Beginner",
+    "Roadmap",
+    "Exam Tips"
+  ]
+}

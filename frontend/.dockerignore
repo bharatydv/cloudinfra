@@ -1,0 +1,10 @@
+# node_modules and dist are rebuilt inside the image; shipping them would make
+# the build context hundreds of megabytes.
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.log
+.env
+.env.*
+!.env.example

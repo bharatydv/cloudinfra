@@ -1,0 +1,1044 @@
+{
+  "providers": [
+    {
+      "name": "Google Cloud",
+      "slug": "google-cloud",
+      "accent_color": "#1a73e8",
+      "position": 1,
+      "short_description": "Certification preparation resources for Google Cloud roles.",
+      "description": "Google Cloud certifications are organised by role rather than by product. The foundational track validates vocabulary and service awareness, the associate track validates day-to-day operations, and the professional track validates design judgement under real constraints -- cost, reliability, security and organisational policy.\n\nThe material below is written independently against the publicly published exam guides. It maps each objective onto concepts, hands-on practice and the courses on this platform that cover them.",
+      "website_url": "https://cloud.google.com/learn/certification",
+      "meta_title": "Google Cloud Certification Preparation Resources",
+      "meta_description": "Independent preparation guides, roadmaps and study resources for Google Cloud certifications, mapped to the published exam objectives."
+    },
+    {
+      "name": "AWS",
+      "slug": "aws",
+      "accent_color": "#ff9900",
+      "position": 2,
+      "short_description": "Certification preparation resources for AWS roles.",
+      "description": "The AWS certification portfolio moves from foundational awareness through associate-level implementation to professional-level architecture and operations, with specialty exams for focused domains such as security, networking and machine learning.\n\nPreparation here is concept-first: the exams reward understanding of trade-offs between services far more than memorising service limits.",
+      "website_url": "https://aws.amazon.com/certification/",
+      "meta_title": "AWS Certification Preparation Resources",
+      "meta_description": "Independent AWS certification preparation: roadmaps, exam objective breakdowns, study resources and related courses."
+    },
+    {
+      "name": "Microsoft",
+      "slug": "microsoft",
+      "accent_color": "#0078d4",
+      "position": 3,
+      "short_description": "Certification preparation resources for Microsoft Azure roles.",
+      "description": "Microsoft role-based certifications are structured around job functions -- administrator, developer, architect, data engineer -- with fundamentals exams acting as an on-ramp for people new to the platform.\n\nThese pages break each exam into its published skill areas and connect them to practical exercises you can run in a free tier or trial subscription.",
+      "website_url": "https://learn.microsoft.com/credentials/",
+      "meta_title": "Microsoft Azure Certification Preparation Resources",
+      "meta_description": "Independent preparation material for Microsoft Azure role-based certifications, organised by published exam skill areas."
+    }
+  ],
+  "certifications": [
+    {
+      "provider": "google-cloud",
+      "name": "Professional Cloud Architect",
+      "slug": "professional-cloud-architect",
+      "exam_code": "PCA",
+      "level": "professional",
+      "category": "Cloud Architecture",
+      "position": 1,
+      "is_featured": true,
+      "short_description": "Design, plan and manage secure, scalable and reliable cloud architectures.",
+      "description": "The Professional Cloud Architect exam tests whether you can turn ambiguous business requirements into a defensible cloud design. It is unusual among cloud exams in how much weight it puts on judgement: most questions have several technically workable answers, and the correct one is the one that best fits the stated constraint -- cost ceiling, compliance boundary, recovery objective or team capability.\n\nExpect scenario questions built on multi-tier applications, hybrid connectivity, data residency and migration sequencing. Case studies are published in advance, and working through them thoroughly is the single highest-return preparation activity.\n\nThis is independent preparation material. It is not affiliated with or endorsed by the certification provider. Confirm exam details on the provider's official page.",
+      "audience": "Engineers and architects who already deploy workloads on a public cloud and now have to justify design decisions to stakeholders -- typically two or more years of hands-on infrastructure experience.",
+      "recommended_experience": "Three or more years in IT with at least one year designing and managing cloud solutions. Comfort with networking fundamentals, IAM concepts and at least one infrastructure-as-code tool.",
+      "exam_duration_minutes": 120,
+      "exam_format": "Multiple choice and multiple select, including published case studies",
+      "official_url": "https://cloud.google.com/learn/certification/cloud-architect",
+      "skills": [
+        "Cloud architecture design",
+        "Migration planning",
+        "Cost optimisation",
+        "Identity and access management",
+        "Networking",
+        "Reliability engineering",
+        "Compliance and governance"
+      ],
+      "exam_topics": [
+        {
+          "title": "Designing and planning a cloud solution architecture",
+          "weight": 24,
+          "items": [
+            "Business and technical requirements gathering",
+            "Compute, storage and network selection trade-offs",
+            "Migration strategy and sequencing",
+            "Cost modelling and budget constraints"
+          ]
+        },
+        {
+          "title": "Managing and provisioning the solution infrastructure",
+          "weight": 15,
+          "items": [
+            "Network topology and hybrid connectivity",
+            "Storage systems and data lifecycle",
+            "Infrastructure as code and repeatable provisioning"
+          ]
+        },
+        {
+          "title": "Designing for security and compliance",
+          "weight": 18,
+          "items": [
+            "Identity, roles and least privilege",
+            "Data protection, encryption and key management",
+            "Regulatory and data residency constraints"
+          ]
+        },
+        {
+          "title": "Analysing and optimising processes",
+          "weight": 18,
+          "items": [
+            "Reliability, SLOs and error budgets",
+            "Observability and incident response",
+            "Continuous improvement of delivery pipelines"
+          ]
+        },
+        {
+          "title": "Managing implementation and reliability",
+          "weight": 25,
+          "items": [
+            "Deployment and release strategies",
+            "Business continuity and disaster recovery",
+            "Testing, validation and rollback planning"
+          ]
+        }
+      ],
+      "preparation_roadmap": [
+        {
+          "step": 1,
+          "title": "Cover cloud fundamentals",
+          "description": "Make sure compute, storage, networking and IAM vocabulary is second nature before touching architecture questions.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 2,
+          "title": "Build one non-trivial system",
+          "description": "Deploy a multi-tier application with a managed database, load balancing and private networking. Break it deliberately and fix it.",
+          "estimated_weeks": 3
+        },
+        {
+          "step": 3,
+          "title": "Study the published case studies",
+          "description": "Read each case study, list the constraints, and design a solution for every one before comparing to reference designs.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 4,
+          "title": "Work through the exam guide objective by objective",
+          "description": "Turn each bullet in the official guide into a question you can answer out loud.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 5,
+          "title": "Practice under time pressure",
+          "description": "Scenario questions are long. Rehearse reading a case study and answering within the real time budget.",
+          "estimated_weeks": 1
+        }
+      ],
+      "resources": [
+        {
+          "title": "Professional Cloud Architect study roadmap",
+          "resource_type": "roadmap",
+          "estimated_minutes": 12,
+          "description": "A ten-week plan sequencing fundamentals, hands-on work and case-study practice.",
+          "content": "## How to use this roadmap\n\nThe exam rewards design judgement, so the plan front-loads hands-on work and leaves the last three weeks for objective-by-objective review.\n\n### Weeks 1-2: fundamentals\nCore compute, storage, networking and IAM. If you cannot explain the difference between a regional and a multi-regional storage class and when each is wrong, stay here.\n\n### Weeks 3-5: build\nStand up a multi-tier application with private networking, a managed database, a load balancer and infrastructure as code. Add monitoring, then deliberately cause a failure and practise recovery.\n\n### Weeks 6-7: case studies\nFor each published case study, write down the explicit constraints, the implied constraints, and a design that satisfies both. Compare against reference architectures afterwards, not before.\n\n### Weeks 8-9: objectives\nWalk the official exam guide line by line. Anything you cannot explain becomes a flashcard.\n\n### Week 10: timed practice\nFull-length timed sessions. Review every wrong answer until you can state why the correct option is better, not just that it is correct."
+        },
+        {
+          "title": "Architecture decision checklist",
+          "resource_type": "cheatsheet",
+          "estimated_minutes": 6,
+          "description": "The questions to ask before choosing compute, storage or networking options.",
+          "content": "## Before choosing compute\n- What is the unit of scaling: request, batch job, or long-lived process?\n- Does the workload tolerate cold starts?\n- Is the team able to operate what you are proposing?\n\n## Before choosing storage\n- What is the read/write ratio and the access pattern?\n- What is the durability requirement versus the cost ceiling?\n- Where must the data physically reside?\n\n## Before designing networking\n- What must never traverse the public internet?\n- What is the recovery time objective if a region is lost?\n- Which boundaries are security boundaries and which are only organisational?"
+        },
+        {
+          "title": "Scenario practice: designing for recovery objectives",
+          "resource_type": "practice",
+          "estimated_minutes": 20,
+          "description": "Six scenario questions on RTO/RPO trade-offs, with worked reasoning.",
+          "content": "## How to use these\n\nRead the scenario, commit to an answer in writing, then read the reasoning. Changing your answer after reading the explanation teaches you nothing.\n\n### Scenario 1\nA reporting system can lose up to one hour of data but must be serving again within fifteen minutes of a regional failure. Which pairing of replication and failover strategy fits, and which is over-engineered for the stated requirement?\n\n**Reasoning.** An RPO of one hour permits asynchronous replication; the fifteen-minute RTO is what forces a warm standby rather than a restore-from-backup approach. Candidates commonly over-buy synchronous replication here, which satisfies the requirement but fails the implicit cost constraint.\n\n### Scenario 2\nA transactional system states an RPO of zero. What does that immediately rule out, and what cost does it impose on write latency?\n\n**Reasoning.** Zero RPO rules out any asynchronous path. Synchronous replication across regions adds round-trip latency to every commit, which is the trade-off the exam wants you to name explicitly."
+        }
+      ]
+    },
+    {
+      "provider": "google-cloud",
+      "name": "Associate Cloud Engineer",
+      "slug": "associate-cloud-engineer",
+      "exam_code": "ACE",
+      "level": "associate",
+      "category": "Cloud Operations",
+      "position": 2,
+      "is_featured": true,
+      "short_description": "Deploy applications, monitor operations and manage enterprise cloud solutions.",
+      "description": "The Associate Cloud Engineer exam is the most practical of the cloud associate exams: it assumes you actually use the console and the command line, and it tests recall of how tasks are performed rather than why architectures are chosen.\n\nThe most efficient preparation is repetition on real infrastructure. Candidates who study only through video consistently under-perform on the command-line and IAM questions.\n\nThis is independent preparation material. It is not affiliated with or endorsed by the certification provider. Confirm exam details on the provider's official page.",
+      "audience": "Engineers, sysadmins and graduates moving into a hands-on cloud operations role.",
+      "recommended_experience": "Six or more months working with a public cloud, plus basic Linux and networking.",
+      "exam_duration_minutes": 120,
+      "exam_format": "Multiple choice and multiple select",
+      "official_url": "https://cloud.google.com/learn/certification/cloud-engineer",
+      "skills": [
+        "Resource provisioning",
+        "IAM",
+        "Command line operations",
+        "Monitoring",
+        "Billing and quotas",
+        "Kubernetes basics"
+      ],
+      "exam_topics": [
+        {
+          "title": "Setting up a cloud solution environment",
+          "weight": 20,
+          "items": [
+            "Projects and billing accounts",
+            "Service accounts and IAM roles",
+            "Command line configuration"
+          ]
+        },
+        {
+          "title": "Planning and configuring a cloud solution",
+          "weight": 18,
+          "items": [
+            "Compute sizing",
+            "Storage class selection",
+            "Cost estimation"
+          ]
+        },
+        {
+          "title": "Deploying and implementing a cloud solution",
+          "weight": 25,
+          "items": [
+            "Virtual machines and managed instance groups",
+            "Containers and Kubernetes workloads",
+            "Managed data services"
+          ]
+        },
+        {
+          "title": "Ensuring successful operation",
+          "weight": 20,
+          "items": [
+            "Monitoring and logging",
+            "Resource lifecycle management",
+            "Troubleshooting deployments"
+          ]
+        },
+        {
+          "title": "Configuring access and security",
+          "weight": 17,
+          "items": [
+            "Roles and least privilege",
+            "Service account key handling",
+            "Audit logging"
+          ]
+        }
+      ],
+      "preparation_roadmap": [
+        {
+          "step": 1,
+          "title": "Set up a practice project",
+          "description": "Use a free tier or trial. Everything below happens in a real project you control.",
+          "estimated_weeks": 1
+        },
+        {
+          "step": 2,
+          "title": "Learn the command line properly",
+          "description": "Do every console task a second time on the command line. This is where most marks are won.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 3,
+          "title": "Master IAM",
+          "description": "Roles, service accounts, and least privilege appear throughout the exam, not just in the security section.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 4,
+          "title": "Run containerised workloads",
+          "description": "Deploy, scale and expose a workload on managed Kubernetes end to end.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 5,
+          "title": "Review and drill",
+          "description": "Objective-by-objective review, then timed question practice.",
+          "estimated_weeks": 1
+        }
+      ],
+      "resources": [
+        {
+          "title": "Associate Cloud Engineer study roadmap",
+          "resource_type": "roadmap",
+          "estimated_minutes": 8,
+          "description": "An eight-week hands-on plan built around a single practice project.",
+          "content": "## Principle\n\nEverything in this plan happens inside one practice project that you build up week by week, because the exam tests recall of tasks you have actually performed.\n\n### Weeks 1-2\nProjects, billing, quotas and the command line. Configure the CLI from scratch without notes.\n\n### Weeks 3-4\nIAM in depth: predefined versus custom roles, service accounts, and how permissions are actually evaluated.\n\n### Weeks 5-6\nCompute and containers. Deploy a stateless service behind a load balancer, then the same service on managed Kubernetes.\n\n### Week 7\nOperations: monitoring, logging, alerting and cost review.\n\n### Week 8\nTimed practice and gap closing."
+        },
+        {
+          "title": "Command line drills",
+          "resource_type": "practice",
+          "estimated_minutes": 25,
+          "description": "Twenty tasks to perform from the command line without documentation.",
+          "content": "## Rules\n\nNo documentation on the first attempt. If you need to look something up, mark the task and repeat it two days later.\n\n1. Create a project and set it as the active configuration.\n2. Create a service account and grant it a narrowly scoped role.\n3. Launch a VM with a startup script that installs a web server.\n4. Create a firewall rule allowing only health-check traffic.\n5. Create a managed instance group with autoscaling based on CPU.\n6. Deploy a container image to a managed Kubernetes cluster and expose it.\n7. Create a storage bucket with a lifecycle rule moving objects to a colder class after 30 days.\n8. Grant a user read-only access to one bucket without granting project-wide read access.\n\nRepeat the full list until you can complete it end to end in under an hour."
+        }
+      ]
+    },
+    {
+      "provider": "google-cloud",
+      "name": "Professional Data Engineer",
+      "slug": "professional-data-engineer",
+      "exam_code": "PDE",
+      "level": "professional",
+      "category": "Data Engineering",
+      "position": 3,
+      "short_description": "Design data processing systems and operationalise machine learning models.",
+      "description": "This exam covers the full data lifecycle: ingestion, storage, transformation, analysis and the operational side of machine learning. It expects you to choose between batch and streaming approaches based on latency and correctness requirements, and to reason about schema design and partitioning under cost pressure.\n\nThis is independent preparation material. It is not affiliated with or endorsed by the certification provider. Confirm exam details on the provider's official page.",
+      "audience": "Data engineers and analytics engineers responsible for production pipelines.",
+      "recommended_experience": "Three or more years in data roles, including one year building pipelines on a cloud platform.",
+      "exam_duration_minutes": 120,
+      "exam_format": "Multiple choice and multiple select",
+      "official_url": "https://cloud.google.com/learn/certification/data-engineer",
+      "skills": [
+        "Data pipeline design",
+        "Streaming and batch processing",
+        "Data warehousing",
+        "Schema and partition design",
+        "ML operationalisation",
+        "Data governance"
+      ],
+      "exam_topics": [
+        {
+          "title": "Designing data processing systems",
+          "weight": 22,
+          "items": [
+            "Batch versus streaming trade-offs",
+            "Storage and warehouse selection",
+            "Schema and partitioning strategy"
+          ]
+        },
+        {
+          "title": "Ingesting and processing data",
+          "weight": 25,
+          "items": [
+            "Pipeline orchestration",
+            "Windowing and late-arriving data",
+            "Transformation patterns"
+          ]
+        },
+        {
+          "title": "Storing the data",
+          "weight": 20,
+          "items": [
+            "Warehouse modelling",
+            "Cost and performance tuning",
+            "Retention and lifecycle"
+          ]
+        },
+        {
+          "title": "Preparing and using data for analysis",
+          "weight": 15,
+          "items": [
+            "Query optimisation",
+            "Visualisation and access control"
+          ]
+        },
+        {
+          "title": "Maintaining and automating workloads",
+          "weight": 18,
+          "items": [
+            "Monitoring pipelines",
+            "Failure recovery and idempotency",
+            "Cost governance"
+          ]
+        }
+      ],
+      "preparation_roadmap": [
+        {
+          "step": 1,
+          "title": "Solidify SQL and data modelling",
+          "description": "Window functions, joins at scale, and dimensional modelling.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 2,
+          "title": "Build a batch pipeline",
+          "description": "Ingest, transform and load into a warehouse with orchestration and monitoring.",
+          "estimated_weeks": 3
+        },
+        {
+          "step": 3,
+          "title": "Build a streaming pipeline",
+          "description": "Handle windowing, watermarks and late data explicitly.",
+          "estimated_weeks": 3
+        },
+        {
+          "step": 4,
+          "title": "Cover ML operationalisation",
+          "description": "Feature pipelines, training/serving skew, and model monitoring.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 5,
+          "title": "Objective review and timed practice",
+          "description": "Close remaining gaps against the published guide.",
+          "estimated_weeks": 2
+        }
+      ],
+      "resources": [
+        {
+          "title": "Batch versus streaming: a decision guide",
+          "resource_type": "guide",
+          "estimated_minutes": 10,
+          "description": "How to choose between batch and streaming from stated requirements.",
+          "content": "## Start with the requirement, not the technology\n\nThe question that decides the architecture is: *how stale is the data allowed to be when a decision is made from it?*\n\n### Choose batch when\n- Freshness requirements are measured in hours.\n- Correctness matters more than latency and reprocessing is acceptable.\n- The cost of continuous compute is not justified by the freshness gain.\n\n### Choose streaming when\n- Decisions are made in seconds or minutes.\n- Data arrives continuously and buffering it changes its value.\n- You can accept the operational complexity of windowing and late data.\n\n### The trap\nStreaming pipelines fail differently from batch pipelines. A late-arriving record in a batch job is simply included in the next run; in a streaming job it may fall outside its window and be silently dropped. If the exam scenario mentions out-of-order or delayed events, the correct answer almost always involves explicit windowing and watermark handling."
+        }
+      ]
+    },
+    {
+      "provider": "aws",
+      "name": "Solutions Architect - Associate",
+      "slug": "solutions-architect-associate",
+      "exam_code": "SAA",
+      "level": "associate",
+      "category": "Cloud Architecture",
+      "position": 1,
+      "is_featured": true,
+      "short_description": "Design resilient, cost-optimised architectures on AWS.",
+      "description": "The Solutions Architect - Associate exam is the most widely attempted cloud certification, and its difficulty is consistently underestimated. Questions present a short scenario and four plausible services; the discriminator is usually a single constraint in the stem -- cost, latency, durability or operational overhead.\n\nPreparation should therefore focus on the boundaries between services rather than on their feature lists.\n\nThis is independent preparation material. It is not affiliated with or endorsed by the certification provider. Confirm exam details on the provider's official page.",
+      "audience": "Engineers designing systems on AWS, and developers moving toward architecture work.",
+      "recommended_experience": "One year of hands-on AWS experience designing available, cost-efficient and fault-tolerant systems.",
+      "exam_duration_minutes": 130,
+      "exam_format": "Multiple choice and multiple response",
+      "official_url": "https://aws.amazon.com/certification/certified-solutions-architect-associate/",
+      "skills": [
+        "Architecture design",
+        "High availability",
+        "Cost optimisation",
+        "Security",
+        "Networking",
+        "Storage selection"
+      ],
+      "exam_topics": [
+        {
+          "title": "Design secure architectures",
+          "weight": 30,
+          "items": [
+            "Identity and access controls",
+            "Network segmentation",
+            "Data protection at rest and in transit"
+          ]
+        },
+        {
+          "title": "Design resilient architectures",
+          "weight": 26,
+          "items": [
+            "Multi-AZ and multi-region patterns",
+            "Decoupling with queues and events",
+            "Backup and recovery"
+          ]
+        },
+        {
+          "title": "Design high-performing architectures",
+          "weight": 24,
+          "items": [
+            "Compute and storage selection",
+            "Caching strategies",
+            "Scaling patterns"
+          ]
+        },
+        {
+          "title": "Design cost-optimised architectures",
+          "weight": 20,
+          "items": [
+            "Pricing models",
+            "Storage tiering",
+            "Right-sizing and elasticity"
+          ]
+        }
+      ],
+      "preparation_roadmap": [
+        {
+          "step": 1,
+          "title": "Learn the core service boundaries",
+          "description": "For each pair of similar services, write down the one constraint that decides between them.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 2,
+          "title": "Build a resilient reference stack",
+          "description": "Multi-AZ, autoscaled, behind a load balancer, with a managed database and object storage.",
+          "estimated_weeks": 3
+        },
+        {
+          "step": 3,
+          "title": "Study pricing seriously",
+          "description": "Cost is a scored domain. Understand the pricing model of every core service.",
+          "estimated_weeks": 1
+        },
+        {
+          "step": 4,
+          "title": "Drill scenario questions",
+          "description": "Practise identifying the discriminating constraint in the question stem.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 5,
+          "title": "Timed full-length practice",
+          "description": "Two or three full-length sessions with complete review of wrong answers.",
+          "estimated_weeks": 1
+        }
+      ],
+      "resources": [
+        {
+          "title": "Solutions Architect Associate roadmap",
+          "resource_type": "roadmap",
+          "estimated_minutes": 10,
+          "description": "A nine-week plan weighted toward service-boundary reasoning.",
+          "content": "## Why this plan is shaped this way\n\nThe exam is not a memory test on service features; it is a test of whether you can pick the right tool given one binding constraint. The plan therefore spends more time on comparisons than on individual services.\n\n### Weeks 1-2: core services\nCompute, storage, networking, identity. For every pair of similar services, write one sentence naming the constraint that decides between them.\n\n### Weeks 3-5: build\nDeploy a resilient stack across availability zones with autoscaling, a managed database and object storage. Add a queue and make one component asynchronous.\n\n### Week 6: cost\nWork through the pricing model of each core service. Estimate the monthly cost of the stack you built, then verify against the actual bill.\n\n### Weeks 7-8: scenarios\nPractise reading a scenario and underlining the discriminating constraint before looking at the options.\n\n### Week 9: timed practice."
+        },
+        {
+          "title": "Service selection cheat sheet",
+          "resource_type": "cheatsheet",
+          "estimated_minutes": 5,
+          "description": "One-line discriminators for commonly confused service pairs.",
+          "content": "## Compute\n- Long-running, predictable load and OS control needed -> virtual machines.\n- Bursty, event-driven, sub-15-minute work -> serverless functions.\n- Containerised services needing orchestration -> managed container service.\n\n## Storage\n- Shared POSIX filesystem across instances -> managed file storage.\n- Single-instance block device -> block storage volume.\n- Durable, internet-addressable objects -> object storage.\n\n## Databases\n- Relational with complex joins and transactions -> managed relational database.\n- Predictable single-digit-millisecond key lookups at scale -> managed key-value store.\n- Analytical scans across billions of rows -> data warehouse.\n\n## Decoupling\n- Work must be processed exactly once and can wait -> queue.\n- Many consumers must each see every message -> topic or event bus."
+        },
+        {
+          "title": "Practice: identify the binding constraint",
+          "resource_type": "practice",
+          "estimated_minutes": 15,
+          "description": "Scenario drills that train you to find the deciding detail in the question.",
+          "content": "## Method\n\nFor each scenario, write down the single constraint that eliminates most options before you evaluate any option.\n\n### Scenario 1\nA batch job runs nightly for about forty minutes and must not be interrupted. Which compute model is wrong regardless of cost, and why?\n\n**Answer.** Serverless functions with a fifteen-minute execution ceiling are eliminated by the runtime alone. Cost never enters the decision.\n\n### Scenario 2\nAn application must survive the loss of an entire availability zone with no data loss and under a minute of downtime. Which detail forces synchronous replication?\n\n**Answer.** *No data loss* -- that is an RPO of zero, which asynchronous replication cannot satisfy at any downtime target.\n\n### Scenario 3\nAudit logs must be retained for seven years and are read perhaps twice a year. Which constraint decides the storage class?\n\n**Answer.** Access frequency, not durability. All the candidate classes are equally durable; retrieval cost and minimum storage duration decide it."
+        }
+      ]
+    },
+    {
+      "provider": "aws",
+      "name": "Cloud Practitioner",
+      "slug": "cloud-practitioner",
+      "exam_code": "CLF",
+      "level": "foundational",
+      "category": "Cloud Fundamentals",
+      "position": 2,
+      "short_description": "Foundational understanding of cloud concepts, services, billing and security.",
+      "description": "Cloud Practitioner is a vocabulary and orientation exam. It is a reasonable first step for people in non-engineering roles -- sales, finance, project management -- or for engineers who want a structured overview before an associate exam.\n\nIt is not a substitute for hands-on work, and it does not on its own qualify anyone for a cloud engineering role.\n\nThis is independent preparation material. It is not affiliated with or endorsed by the certification provider. Confirm exam details on the provider's official page.",
+      "audience": "Anyone needing a working vocabulary of cloud services, including non-technical roles.",
+      "recommended_experience": "No prior experience required.",
+      "exam_duration_minutes": 90,
+      "exam_format": "Multiple choice and multiple response",
+      "official_url": "https://aws.amazon.com/certification/certified-cloud-practitioner/",
+      "skills": [
+        "Cloud concepts",
+        "Core services",
+        "Billing and pricing",
+        "Shared responsibility model",
+        "Support models"
+      ],
+      "exam_topics": [
+        {
+          "title": "Cloud concepts",
+          "weight": 24,
+          "items": [
+            "Value proposition of cloud",
+            "Design principles",
+            "Migration benefits"
+          ]
+        },
+        {
+          "title": "Security and compliance",
+          "weight": 30,
+          "items": [
+            "Shared responsibility model",
+            "Identity basics",
+            "Compliance programmes"
+          ]
+        },
+        {
+          "title": "Cloud technology and services",
+          "weight": 34,
+          "items": [
+            "Core compute, storage and network services",
+            "Deployment methods",
+            "Global infrastructure"
+          ]
+        },
+        {
+          "title": "Billing, pricing and support",
+          "weight": 12,
+          "items": [
+            "Pricing models",
+            "Cost management tools",
+            "Support plans"
+          ]
+        }
+      ],
+      "preparation_roadmap": [
+        {
+          "step": 1,
+          "title": "Learn the vocabulary",
+          "description": "Regions, availability zones, elasticity, the shared responsibility model.",
+          "estimated_weeks": 1
+        },
+        {
+          "step": 2,
+          "title": "Tour the core services",
+          "description": "One paragraph per service: what it does and when you would reach for it.",
+          "estimated_weeks": 1
+        },
+        {
+          "step": 3,
+          "title": "Understand billing",
+          "description": "Pricing models, cost tools and support tiers are a scored domain.",
+          "estimated_weeks": 1
+        },
+        {
+          "step": 4,
+          "title": "Practice questions",
+          "description": "Two rounds of practice questions with review.",
+          "estimated_weeks": 1
+        }
+      ],
+      "resources": [
+        {
+          "title": "Cloud vocabulary in one page",
+          "resource_type": "cheatsheet",
+          "estimated_minutes": 5,
+          "description": "The terms the foundational exam assumes you already know.",
+          "content": "## Infrastructure\n- **Region** - a geographic area containing multiple isolated data centre groups.\n- **Availability zone** - one or more discrete data centres with independent power and networking within a region.\n- **Edge location** - a caching endpoint closer to users than the region.\n\n## Economics\n- **Capital versus operating expenditure** - cloud converts up-front hardware purchases into ongoing usage charges.\n- **Elasticity** - capacity follows demand in both directions.\n- **Economies of scale** - unit costs fall as the provider's aggregate scale grows.\n\n## Responsibility\n- **Shared responsibility model** - the provider secures the infrastructure *of* the cloud; the customer secures what they put *in* it. Nearly every security question on the foundational exam reduces to which side of that line a task falls on."
+        }
+      ]
+    },
+    {
+      "provider": "aws",
+      "name": "DevOps Engineer - Professional",
+      "slug": "devops-engineer-professional",
+      "exam_code": "DOP",
+      "level": "professional",
+      "category": "DevOps",
+      "position": 3,
+      "short_description": "Automate delivery, monitoring and governance of systems at scale.",
+      "description": "This exam sits at the intersection of development and operations: continuous delivery, infrastructure as code, monitoring, incident response and governance across many accounts. Questions are long and often require you to spot the operational failure mode in an otherwise reasonable pipeline.\n\nThis is independent preparation material. It is not affiliated with or endorsed by the certification provider. Confirm exam details on the provider's official page.",
+      "audience": "Engineers running production delivery pipelines and platform tooling.",
+      "recommended_experience": "Two or more years provisioning and operating cloud environments, plus scripting proficiency.",
+      "exam_duration_minutes": 180,
+      "exam_format": "Multiple choice and multiple response",
+      "official_url": "https://aws.amazon.com/certification/certified-devops-engineer-professional/",
+      "skills": [
+        "CI/CD",
+        "Infrastructure as code",
+        "Observability",
+        "Incident response",
+        "Multi-account governance",
+        "Deployment strategies"
+      ],
+      "exam_topics": [
+        {
+          "title": "SDLC automation",
+          "weight": 22,
+          "items": [
+            "Pipeline design",
+            "Artefact management",
+            "Automated testing gates"
+          ]
+        },
+        {
+          "title": "Configuration management and IaC",
+          "weight": 17,
+          "items": [
+            "Declarative infrastructure",
+            "Drift detection",
+            "Reusable modules"
+          ]
+        },
+        {
+          "title": "Resilient cloud solutions",
+          "weight": 15,
+          "items": [
+            "Blue/green and canary deployments",
+            "Automated rollback",
+            "Multi-region failover"
+          ]
+        },
+        {
+          "title": "Monitoring and logging",
+          "weight": 15,
+          "items": [
+            "Metrics, logs and traces",
+            "Alerting thresholds",
+            "Log aggregation"
+          ]
+        },
+        {
+          "title": "Incident and event response",
+          "weight": 14,
+          "items": [
+            "Automated remediation",
+            "Event-driven operations",
+            "Runbooks"
+          ]
+        },
+        {
+          "title": "Security and compliance",
+          "weight": 17,
+          "items": [
+            "Policy as code",
+            "Secrets management",
+            "Audit and traceability"
+          ]
+        }
+      ],
+      "preparation_roadmap": [
+        {
+          "step": 1,
+          "title": "Build a real pipeline",
+          "description": "Source to production with automated tests and an approval gate.",
+          "estimated_weeks": 3
+        },
+        {
+          "step": 2,
+          "title": "Add progressive delivery",
+          "description": "Implement canary or blue/green with automated rollback on a real metric.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 3,
+          "title": "Instrument everything",
+          "description": "Metrics, structured logs and traces, with alerts that page on symptoms not causes.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 4,
+          "title": "Practise governance",
+          "description": "Multi-account structure, policy as code and secrets handling.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 5,
+          "title": "Timed scenario practice",
+          "description": "The questions are long; rehearse pacing.",
+          "estimated_weeks": 2
+        }
+      ],
+      "resources": [
+        {
+          "title": "Deployment strategy decision guide",
+          "resource_type": "guide",
+          "estimated_minutes": 8,
+          "description": "When rolling, blue/green and canary deployments are each the right answer.",
+          "content": "## Rolling\nReplaces instances gradually in place. Cheapest in infrastructure, but both versions serve traffic simultaneously, so it requires backward-compatible changes. Rollback is slow because it is another rolling operation.\n\n## Blue/green\nStands up a complete parallel environment and switches traffic at once. Rollback is a traffic switch, so it is close to instantaneous -- which is why exam scenarios that demand *immediate* rollback point here. The cost is running two full environments during the cutover.\n\n## Canary\nSends a small percentage of traffic to the new version and promotes it based on observed metrics. This is the only strategy that catches failures that appear solely under real production traffic, and it is what scenarios describing *gradual exposure with automated rollback on error rate* are asking for.\n\n## The database question\nNone of these strategies solves incompatible schema changes. If a scenario mentions a schema migration alongside a deployment strategy, the answer almost always involves expanding the schema first, deploying, then contracting -- not the deployment strategy itself."
+        }
+      ]
+    },
+    {
+      "provider": "microsoft",
+      "name": "Azure Fundamentals",
+      "slug": "azure-fundamentals",
+      "exam_code": "AZ-900",
+      "level": "foundational",
+      "category": "Cloud Fundamentals",
+      "position": 1,
+      "short_description": "Core cloud concepts, Azure services, governance and pricing.",
+      "description": "AZ-900 establishes shared vocabulary for anyone working around Azure. It covers cloud concepts, the main service families, and the governance and cost tooling that surrounds them.\n\nIt is a genuinely useful on-ramp, and it is short -- but like all fundamentals exams it certifies awareness, not capability.\n\nThis is independent preparation material. It is not affiliated with or endorsed by the certification provider. Confirm exam details on the provider's official page.",
+      "audience": "Newcomers to cloud, including non-technical roles working alongside engineering teams.",
+      "recommended_experience": "No prior experience required.",
+      "exam_duration_minutes": 45,
+      "exam_format": "Multiple choice and multiple response",
+      "official_url": "https://learn.microsoft.com/credentials/certifications/azure-fundamentals/",
+      "skills": [
+        "Cloud concepts",
+        "Azure architecture",
+        "Core services",
+        "Governance",
+        "Cost management"
+      ],
+      "exam_topics": [
+        {
+          "title": "Cloud concepts",
+          "weight": 27,
+          "items": [
+            "Benefits of cloud computing",
+            "Service models",
+            "Consumption-based pricing"
+          ]
+        },
+        {
+          "title": "Azure architecture and services",
+          "weight": 38,
+          "items": [
+            "Regions and availability zones",
+            "Compute, storage and networking",
+            "Identity services"
+          ]
+        },
+        {
+          "title": "Azure management and governance",
+          "weight": 35,
+          "items": [
+            "Cost management",
+            "Policy and locks",
+            "Monitoring tools"
+          ]
+        }
+      ],
+      "preparation_roadmap": [
+        {
+          "step": 1,
+          "title": "Cloud concepts",
+          "description": "Service models, deployment models and the economics of consumption pricing.",
+          "estimated_weeks": 1
+        },
+        {
+          "step": 2,
+          "title": "Core services tour",
+          "description": "Compute, storage, networking and identity at a conceptual level.",
+          "estimated_weeks": 1
+        },
+        {
+          "step": 3,
+          "title": "Governance and cost",
+          "description": "Policy, locks, tags and cost analysis -- the largest scored area.",
+          "estimated_weeks": 1
+        },
+        {
+          "step": 4,
+          "title": "Practice questions",
+          "description": "One round of practice with full review.",
+          "estimated_weeks": 1
+        }
+      ],
+      "resources": [
+        {
+          "title": "AZ-900 in four evenings",
+          "resource_type": "roadmap",
+          "estimated_minutes": 6,
+          "description": "A compressed plan for candidates with some IT background.",
+          "content": "## Evening 1 - concepts\nService models, deployment models, capital versus operating expenditure, elasticity. Write the definitions in your own words.\n\n## Evening 2 - services\nOne paragraph per core service family: what it is, and the single situation you would choose it for.\n\n## Evening 3 - governance and cost\nThis is the largest scored area. Cover policies, resource locks, tags, cost analysis and budgets, and know which tool answers which question.\n\n## Evening 4 - practice\nA full practice round, then re-read only the objectives you missed.\n\nIf you have no IT background, double each stage rather than skipping the practice."
+        }
+      ]
+    },
+    {
+      "provider": "microsoft",
+      "name": "Azure Administrator Associate",
+      "slug": "azure-administrator-associate",
+      "exam_code": "AZ-104",
+      "level": "associate",
+      "category": "Cloud Operations",
+      "position": 2,
+      "is_featured": true,
+      "short_description": "Implement, manage and monitor identity, storage, compute and networking in Azure.",
+      "description": "AZ-104 is a hands-on administration exam. It expects familiarity with the portal, the command line and templates, and it tests configuration detail: address space planning, role assignment scope, storage redundancy options and backup configuration.\n\nReading alone is not sufficient preparation; the questions assume muscle memory.\n\nThis is independent preparation material. It is not affiliated with or endorsed by the certification provider. Confirm exam details on the provider's official page.",
+      "audience": "System administrators and cloud engineers responsible for running Azure environments.",
+      "recommended_experience": "Six months or more administering Azure, plus networking and identity fundamentals.",
+      "exam_duration_minutes": 120,
+      "exam_format": "Multiple choice, case studies and hands-on style items",
+      "official_url": "https://learn.microsoft.com/credentials/certifications/azure-administrator/",
+      "skills": [
+        "Identity and governance",
+        "Storage administration",
+        "Compute management",
+        "Virtual networking",
+        "Monitoring and backup"
+      ],
+      "exam_topics": [
+        {
+          "title": "Manage identities and governance",
+          "weight": 22,
+          "items": [
+            "Users, groups and roles",
+            "Subscriptions and management groups",
+            "Policy assignment"
+          ]
+        },
+        {
+          "title": "Implement and manage storage",
+          "weight": 18,
+          "items": [
+            "Redundancy options",
+            "Access control and shared access",
+            "File and blob services"
+          ]
+        },
+        {
+          "title": "Deploy and manage compute resources",
+          "weight": 25,
+          "items": [
+            "Virtual machines and scale sets",
+            "Templates and images",
+            "Container hosting"
+          ]
+        },
+        {
+          "title": "Configure and manage virtual networking",
+          "weight": 22,
+          "items": [
+            "Address spaces and subnets",
+            "Network security groups",
+            "Peering and private access",
+            "Load balancing"
+          ]
+        },
+        {
+          "title": "Monitor and maintain resources",
+          "weight": 13,
+          "items": [
+            "Metrics and alerts",
+            "Backup and recovery",
+            "Log queries"
+          ]
+        }
+      ],
+      "preparation_roadmap": [
+        {
+          "step": 1,
+          "title": "Networking first",
+          "description": "Address planning, subnets, security groups and peering underpin most other domains.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 2,
+          "title": "Identity and governance",
+          "description": "Role assignment scope is a common source of wrong answers.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 3,
+          "title": "Compute and storage",
+          "description": "Build, image, scale and back up real resources.",
+          "estimated_weeks": 3
+        },
+        {
+          "step": 4,
+          "title": "Monitoring and recovery",
+          "description": "Alerts, log queries and restore drills.",
+          "estimated_weeks": 1
+        },
+        {
+          "step": 5,
+          "title": "Timed practice",
+          "description": "Full-length practice with review of every miss.",
+          "estimated_weeks": 1
+        }
+      ],
+      "resources": [
+        {
+          "title": "Virtual network planning worksheet",
+          "resource_type": "guide",
+          "estimated_minutes": 10,
+          "description": "How to plan address space, subnets and security boundaries before deploying anything.",
+          "content": "## Plan the address space once\n\nResizing an address space after workloads are deployed is painful, and exam scenarios often hinge on a range that was chosen too small.\n\n1. **Reserve generously.** Pick a private range large enough for every environment plus future peering, and make sure it does not overlap with on-premises ranges. Overlapping ranges make peering impossible -- that is frequently the hidden constraint in a question.\n2. **Subnet by trust boundary, not by service.** Group resources that share a security posture, because network security groups apply at the subnet level.\n3. **Leave room per subnet.** Some platform services reserve addresses within a subnet, so the usable count is lower than the raw size suggests.\n4. **Decide what needs private access.** Anything holding regulated data should reach platform services over a private endpoint rather than a public one.\n\n## Security group rules\nRules are evaluated by priority, lowest number first, and the first match wins. If a scenario shows a broad allow rule at a low priority number, everything below it is unreachable -- that is usually the intended answer."
+        },
+        {
+          "title": "Role assignment scope drills",
+          "resource_type": "practice",
+          "estimated_minutes": 12,
+          "description": "Practice choosing the narrowest scope that satisfies a stated requirement.",
+          "content": "## The principle being tested\n\nAlways choose the narrowest scope that satisfies the requirement, and the least privileged built-in role that covers the listed actions.\n\n### Drill 1\nA contractor must restart virtual machines in one resource group and nothing else. What scope and role?\n\n**Answer.** The role that permits restart on virtual machines, assigned at that resource group. A subscription-level assignment satisfies the task but violates least privilege, which is what the question is testing.\n\n### Drill 2\nAn auditor must read every resource across three subscriptions and change nothing. What is the efficient answer?\n\n**Answer.** A reader role assigned once at the management group containing those subscriptions, rather than three separate assignments.\n\n### Drill 3\nA team needs to manage access for their own resources without gaining data access. Which role family applies?\n\n**Answer.** The administrator role that grants permission management without data-plane rights -- the exam consistently separates control-plane from data-plane permissions."
+        }
+      ]
+    },
+    {
+      "provider": "microsoft",
+      "name": "Azure Solutions Architect Expert",
+      "slug": "azure-solutions-architect-expert",
+      "exam_code": "AZ-305",
+      "level": "expert",
+      "category": "Cloud Architecture",
+      "position": 3,
+      "short_description": "Design identity, governance, data, infrastructure and continuity solutions on Azure.",
+      "description": "AZ-305 is a design exam. It presents requirements and asks which solution best satisfies them, with cost, compliance and operational overhead acting as the usual discriminators. It assumes administrator-level knowledge as a prerequisite rather than teaching it.\n\nThis is independent preparation material. It is not affiliated with or endorsed by the certification provider. Confirm exam details on the provider's official page.",
+      "audience": "Architects and senior engineers responsible for solution design on Azure.",
+      "recommended_experience": "Advanced experience across identity, networking, data platforms and governance, plus prior administration experience.",
+      "exam_duration_minutes": 120,
+      "exam_format": "Multiple choice and case studies",
+      "official_url": "https://learn.microsoft.com/credentials/certifications/azure-solutions-architect/",
+      "skills": [
+        "Identity design",
+        "Governance design",
+        "Data platform design",
+        "Business continuity",
+        "Infrastructure design",
+        "Migration"
+      ],
+      "exam_topics": [
+        {
+          "title": "Design identity, governance and monitoring",
+          "weight": 26,
+          "items": [
+            "Authentication and authorisation design",
+            "Governance hierarchy",
+            "Monitoring strategy"
+          ]
+        },
+        {
+          "title": "Design data storage solutions",
+          "weight": 22,
+          "items": [
+            "Relational and non-relational selection",
+            "Data integration",
+            "Data protection"
+          ]
+        },
+        {
+          "title": "Design business continuity solutions",
+          "weight": 26,
+          "items": [
+            "Backup and recovery design",
+            "High availability across regions",
+            "Recovery objectives"
+          ]
+        },
+        {
+          "title": "Design infrastructure solutions",
+          "weight": 26,
+          "items": [
+            "Compute selection",
+            "Application architecture",
+            "Migration approach"
+          ]
+        }
+      ],
+      "preparation_roadmap": [
+        {
+          "step": 1,
+          "title": "Confirm administrator-level knowledge",
+          "description": "AZ-305 assumes it. Fill gaps before starting design study.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 2,
+          "title": "Study requirement-to-design mapping",
+          "description": "Practise converting stated requirements into constraints.",
+          "estimated_weeks": 3
+        },
+        {
+          "step": 3,
+          "title": "Design for continuity",
+          "description": "Recovery objectives drive a quarter of the exam.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 4,
+          "title": "Work the case studies",
+          "description": "Long scenarios need a repeatable reading method.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 5,
+          "title": "Timed practice",
+          "description": "Rehearse pacing across long case studies.",
+          "estimated_weeks": 1
+        }
+      ],
+      "resources": [
+        {
+          "title": "Reading a case study under time pressure",
+          "resource_type": "guide",
+          "estimated_minutes": 7,
+          "description": "A repeatable method for long architecture scenarios.",
+          "content": "## The method\n\n1. **Read the questions first.** You are looking for specific constraints, not general comprehension.\n2. **Underline every number.** Recovery objectives, retention periods, user counts and budget ceilings are almost always the discriminators.\n3. **Separate stated from implied requirements.** *Must comply with data residency rules* is stated; *therefore cross-region replication to another geography is unacceptable* is implied, and the implied version is what eliminates options.\n4. **Eliminate before selecting.** Most options fail on exactly one constraint. Find that constraint rather than arguing for a favourite.\n5. **Prefer managed over self-managed** when requirements are otherwise equally met -- reduced operational overhead is a stated design goal in most scenarios.\n\n## Common trap\nAn option that satisfies every technical requirement but ignores a stated cost or complexity limit is still wrong. The exam treats those limits as hard constraints."
+        }
+      ]
+    }
+  ]
+}

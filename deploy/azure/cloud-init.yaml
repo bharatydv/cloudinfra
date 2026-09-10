@@ -1,0 +1,80 @@
+#cloud-config
+# Runs once, on first boot of the Azure VM. Installs Docker Engine and adds swap
+# so the Vite production build survives on a 2 GiB machine.
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - ca-certificates
+  - curl
+  - gnupg
+  - unattended-upgrades
+
+write_files:
+  - path: /etc/sysctl.d/99-learnbase.conf
+    permissions: '0644'
+    content: |
+      # Prefer RAM, but allow swap for build-time spikes.
+      vm.swappiness=10
+
+  - path: /usr/local/sbin/learnbase-bootstrap.sh
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      ADMIN_USER="$(getent passwd 1000 | cut -d: -f1)"
+
+      # --- Swap ---------------------------------------------------------
+      # A 2 GiB VM cannot run `npm ci && vite build` without it.
+      if [ ! -f /swapfile ]; then
+        fallocate -l 4G /swapfile
+        chmod 600 /swapfile
+        mkswap /swapfile
+      fi
+      swapon --show | grep -q '/swapfile' || swapon /swapfile
+      grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+      sysctl --system
+
+      # --- Docker Engine + Compose plugin -------------------------------
+      install -m 0755 -d /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+        -o /etc/apt/keyrings/docker.asc
+      chmod a+r /etc/apt/keyrings/docker.asc
+
+      . /etc/os-release
+      cat > /etc/apt/sources.list.d/docker.list <<EOL
+      deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu ${VERSION_CODENAME} stable
+      EOL
+
+      apt-get update
+      DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        docker-ce docker-ce-cli containerd.io \
+        docker-buildx-plugin docker-compose-plugin
+
+      systemctl enable --now docker
+
+      # Let the admin user run docker without sudo.
+      usermod -aG docker "$ADMIN_USER"
+
+      # Cap log growth: without this, container logs fill the 30 GiB disk.
+      cat > /etc/docker/daemon.json <<'EOL'
+      {
+        "log-driver": "json-file",
+        "log-opts": { "max-size": "10m", "max-file": "3" }
+      }
+      EOL
+      systemctl restart docker
+
+      # --- Deployment directory ----------------------------------------
+      mkdir -p /opt/learnbase
+      chown "$ADMIN_USER":"$ADMIN_USER" /opt/learnbase
+
+      # --- Automatic security updates -----------------------------------
+      systemctl enable --now unattended-upgrades || true
+
+      touch /var/log/learnbase-bootstrap.done
+
+runcmd:
+  - [ /usr/local/sbin/learnbase-bootstrap.sh ]

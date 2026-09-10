@@ -1,0 +1,212 @@
+#!/usr/bin/env bash
+#
+# Provision LearnBase on a single Azure VM running the Docker stack.
+#
+# Why a VM rather than Container Apps: this app is stateful. It needs
+# PostgreSQL, and a managed Postgres instance costs more per month than the
+# whole VM does — while a Postgres container on the VM costs nothing beyond
+# the disk it already has. Media uploads want a persistent filesystem for the
+# same reason. Caddy gets a free Let's Encrypt certificate for the Azure DNS
+# label, so there is no domain to buy either.
+#
+# Prerequisites (you run this — it needs a browser):
+#   az login
+#
+# Then:
+#   SUBSCRIPTION_ID=<id> bash deploy/azure/deploy.sh
+#
+# Safe to re-run: every step checks for existing resources first. To ship new
+# code to an already-provisioned VM, use deploy/azure/redeploy.sh instead.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/../.."
+. deploy/azure/config.sh
+
+require_account
+
+SUBSCRIPTION="$(az_ account show --query id -o tsv | tr -d '\r')"
+SUB_NAME="$(az_ account show --query name -o tsv | tr -d '\r')"
+
+if [ -z "$DNS_LABEL" ]; then
+  DNS_LABEL="learnbase-$(echo "$SUBSCRIPTION" | tr -d '-' | cut -c1-12)"
+fi
+
+say "Subscription ${SUB_NAME} -- ${SUBSCRIPTION}"
+say "Location ${LOCATION} | VM ${VM_NAME} (${VM_SIZE}) | label ${DNS_LABEL}"
+
+# ---------------------------------------------------------------------------
+# Resource group — one container for everything, so teardown is a single
+# `az group delete -n learnbase-rg`.
+# ---------------------------------------------------------------------------
+say "Resource group ${RESOURCE_GROUP}"
+if ! az_ group show -n "$RESOURCE_GROUP" >/dev/null 2>&1; then
+  az_ group create -n "$RESOURCE_GROUP" -l "$LOCATION" -o none
+fi
+
+# ---------------------------------------------------------------------------
+# The VM. cloud-init installs Docker, adds a 4 GiB swapfile so the Vite build
+# survives on 2 GiB of RAM, caps container log growth and enables unattended
+# security upgrades.
+# ---------------------------------------------------------------------------
+say "Virtual machine ${VM_NAME}"
+VM_CREATED=0
+if az_ vm show -n "$VM_NAME" -g "$RESOURCE_GROUP" >/dev/null 2>&1; then
+  echo "    already exists — leaving it alone"
+else
+  az_ vm create \
+    -n "$VM_NAME" -g "$RESOURCE_GROUP" -l "$LOCATION" \
+    --image "$VM_IMAGE" \
+    --size "$VM_SIZE" \
+    --admin-username "$ADMIN_USER" \
+    --generate-ssh-keys \
+    --public-ip-sku Standard \
+    --public-ip-address-dns-name "$DNS_LABEL" \
+    --storage-sku "$OS_DISK_SKU" \
+    --os-disk-size-gb "$OS_DISK_GB" \
+    --custom-data deploy/azure/cloud-init.yaml \
+    --nsg-rule SSH \
+    -o none
+  VM_CREATED=1
+fi
+
+# ---------------------------------------------------------------------------
+# Inbound HTTP/HTTPS. Checked by name rather than blindly re-running
+# `az vm open-port`, which fails when a rule already holds the priority.
+# ---------------------------------------------------------------------------
+say "Network rules"
+NSG="$(az_ network nsg list -g "$RESOURCE_GROUP" \
+  --query "[?starts_with(name, '${VM_NAME}')].name | [0]" -o tsv | tr -d '\r')"
+
+if [ -z "$NSG" ]; then
+  echo "    could not find the NSG for ${VM_NAME}" >&2
+  exit 1
+fi
+
+open_port() {
+  local name="$1" port="$2" priority="$3"
+  if az_ network nsg rule show -g "$RESOURCE_GROUP" --nsg-name "$NSG" -n "$name" >/dev/null 2>&1; then
+    echo "    ${name} already open"
+  else
+    az_ network nsg rule create -g "$RESOURCE_GROUP" --nsg-name "$NSG" -n "$name" \
+      --priority "$priority" --access Allow --protocol Tcp --direction Inbound \
+      --source-address-prefixes '*' --source-port-ranges '*' \
+      --destination-address-prefixes '*' --destination-port-ranges "$port" \
+      -o none
+    echo "    opened ${port}"
+  fi
+}
+open_port allow-http  80  900
+open_port allow-https 443 901
+
+FQDN="$(vm_fqdn)"
+if [ -z "$FQDN" ]; then
+  echo "    the VM has no DNS name; set DNS_LABEL and re-run" >&2
+  exit 1
+fi
+say "Hostname ${FQDN}"
+
+# ---------------------------------------------------------------------------
+# Production environment file. Generated once and never regenerated — it holds
+# the only copy of the database password and JWT secret.
+# ---------------------------------------------------------------------------
+if [ -f .env.production ]; then
+  say "Reusing existing .env.production"
+else
+  say "Generating .env.production"
+
+  if [ -z "$TLS_EMAIL" ]; then
+    if [ -t 0 ]; then
+      printf '    Email for Let'"'"'s Encrypt expiry notices: '
+      read -r TLS_EMAIL
+    fi
+  fi
+  if [ -z "$TLS_EMAIL" ]; then
+    echo "    TLS_EMAIL is required on the first run. Re-run as:" >&2
+    echo "      TLS_EMAIL=you@example.com SUBSCRIPTION_ID=${SUBSCRIPTION} bash deploy/azure/deploy.sh" >&2
+    exit 1
+  fi
+
+  DB_PASSWORD="$(gen_secret 32)"
+  JWT_SECRET="$(gen_secret 64)"
+  ADMIN_PASSWORD="$(gen_secret 16)aA1!"
+
+  cat > .env.production <<ENVEOF
+# Generated by deploy/azure/deploy.sh. Keep this file out of version control.
+# redeploy.sh copies it to ${APP_DIR}/.env on the VM.
+
+# --- Core ---------------------------------------------------------------
+ENVIRONMENT=production
+DEBUG=false
+LOG_LEVEL=INFO
+
+# --- Database -----------------------------------------------------------
+# DATABASE_URL is assembled from these three by ${COMPOSE_FILE}.
+POSTGRES_USER=learnbase
+POSTGRES_PASSWORD=${DB_PASSWORD}
+POSTGRES_DB=learnbase
+
+# --- Security -----------------------------------------------------------
+JWT_SECRET=${JWT_SECRET}
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+REFRESH_TOKEN_EXPIRE_DAYS=14
+PASSWORD_HASH_SCHEME=argon2
+
+# --- Public URL / TLS ---------------------------------------------------
+# To move to a custom domain: point a CNAME at ${FQDN},
+# change the five values below to that domain, then re-run redeploy.sh.
+SITE_DOMAIN=${FQDN}
+TLS_EMAIL=${TLS_EMAIL}
+FRONTEND_URL=https://${FQDN}
+PUBLIC_SITE_URL=https://${FQDN}
+BACKEND_CORS_ORIGINS=https://${FQDN}
+API_V1_PREFIX=/api
+
+# --- Rate limiting ------------------------------------------------------
+RATE_LIMIT_ENABLED=true
+RATE_LIMIT_DEFAULT=120/minute
+RATE_LIMIT_AUTH=10/minute
+
+# --- Optional infrastructure -------------------------------------------
+REDIS_URL=
+PAYMENT_PROVIDER=noop
+PAYMENT_CURRENCY=USD
+EMAIL_PROVIDER=console
+EMAIL_FROM_ADDRESS=no-reply@${FQDN}
+EMAIL_FROM_NAME=LearnBase
+
+# Media is stored on the VM disk in the media_data docker volume. Move to
+# object storage before you outgrow a single machine.
+STORAGE_PROVIDER=local
+
+# --- Seed admin ---------------------------------------------------------
+# Only used if you deploy with SEED=1. Change the password after first login.
+SEED_ADMIN_EMAIL=admin@example.com
+SEED_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+SEED_ADMIN_NAME=Platform Admin
+ENVEOF
+
+  echo "    wrote .env.production — this is the only copy of those secrets"
+fi
+
+# ---------------------------------------------------------------------------
+# cloud-init runs a full apt upgrade before installing Docker, so a freshly
+# created VM is not ready for several minutes.
+# ---------------------------------------------------------------------------
+if [ "$VM_CREATED" -eq 1 ]; then
+  say "Waiting for Docker to finish installing (3-6 minutes)"
+  for _ in $(seq 1 30); do
+    if ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 \
+        "${ADMIN_USER}@${FQDN}" true >/dev/null 2>&1; then
+      break
+    fi
+    sleep 10
+  done
+  ssh -o StrictHostKeyChecking=accept-new "${ADMIN_USER}@${FQDN}" 'cloud-init status --wait'
+fi
+
+# ---------------------------------------------------------------------------
+# Ship the code. Kept in redeploy.sh so provisioning and shipping cannot drift.
+# ---------------------------------------------------------------------------
+exec bash deploy/azure/redeploy.sh

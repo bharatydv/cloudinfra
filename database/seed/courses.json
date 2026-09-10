@@ -1,0 +1,655 @@
+{
+  "courses": [
+    {
+      "title": "Cloud Computing Fundamentals",
+      "slug": "cloud-computing-fundamentals",
+      "category": "cloud-computing",
+      "level": "beginner",
+      "icon": "cloud",
+      "price": "0",
+      "is_featured": true,
+      "duration_minutes": 360,
+      "certifications": [
+        "cloud-practitioner",
+        "azure-fundamentals",
+        "associate-cloud-engineer"
+      ],
+      "short_description": "Understand how public cloud actually works, from regions and virtual machines to cost and security.",
+      "description": "Most cloud courses start with a console tour. This one starts with the problems cloud was built to solve, because service names change and the underlying reasoning does not.\n\nYou will learn how physical infrastructure is abstracted into regions and availability zones, why the shared responsibility model determines who is accountable when something breaks, how the main compute and storage options differ in ways that matter, and how consumption pricing turns architecture decisions into monthly costs.\n\nBy the end you will be able to read a cloud architecture diagram, explain why each component is there, and estimate roughly what it costs to run.",
+      "learning_outcomes": [
+        "Explain regions, availability zones and how they affect resilience",
+        "Apply the shared responsibility model to decide who secures what",
+        "Choose between virtual machines, containers and serverless for a given workload",
+        "Select an appropriate storage class from access pattern and durability needs",
+        "Estimate the running cost of a simple architecture",
+        "Describe how identity and access management prevents over-permissioning"
+      ],
+      "requirements": [
+        "Basic computer literacy",
+        "No programming or infrastructure experience required"
+      ],
+      "modules": [
+        {
+          "title": "What cloud computing actually is",
+          "description": "The problems public cloud solves, and the vocabulary used to describe it.",
+          "lessons": [
+            {
+              "title": "Why cloud replaced buying servers",
+              "duration_minutes": 20,
+              "content": "## The problem with owning hardware\n\nBefore public cloud, capacity was a purchasing decision made months ahead of demand. You estimated peak load, bought hardware to match, and then owned that peak capacity permanently -- paying for it during the 95% of the time you did not need it, and still being short during the 5% you underestimated.\n\nThat produced two failure modes that shaped everything cloud does:\n\n- **Over-provisioning.** Money spent on idle capacity, plus the operational burden of maintaining machines that mostly wait.\n- **Under-provisioning.** Demand arrives, capacity does not, and the lead time to add more is measured in weeks.\n\n## What changed\n\nPublic cloud converts that capital purchase into a usage charge. Capacity becomes something you request in seconds and release when you are done, and you pay for what you consumed.\n\nThis has three consequences worth internalising early:\n\n1. **Architecture became an economic decision.** Choosing a larger instance is no longer a procurement request; it is a line item that recurs monthly. Engineers now make cost decisions whether or not they realise it.\n2. **Failure became something you design around, not prevent.** When capacity is disposable, the correct response to a failed machine is to replace it, not repair it.\n3. **Speed of iteration went up.** Trying an idea costs an afternoon rather than a purchase order.\n\n## What did not change\n\nCloud does not remove the need to understand networking, storage characteristics or security. It changes who operates the hardware, not whether those concepts matter. The rest of this course covers the parts that still require your judgement.",
+              "is_preview": true,
+              "resources": []
+            },
+            {
+              "title": "Service models: IaaS, PaaS and SaaS",
+              "duration_minutes": 20,
+              "content": "## A single question separates the three\n\n*How much of the stack do you still operate?*\n\n### Infrastructure as a service\nYou get virtual machines, disks and networks. The provider runs the physical hardware and hypervisor; you run the operating system upward -- patching, configuration, and everything installed on it. Maximum control, maximum operational work.\n\n### Platform as a service\nYou get a managed runtime: you supply the application, the provider runs the operating system, patching and scaling. You give up the ability to install arbitrary system software in exchange for not maintaining any.\n\n### Software as a service\nYou get a finished application. You configure it and manage your data inside it; you operate none of it.\n\n## How to choose in practice\n\nThe honest default is: **use the most managed option that meets your requirements.** Every layer you take on is a layer you must patch, monitor and staff.\n\nMove down the stack only when something forces you to -- a specific kernel version, a licensing constraint, a network topology the managed service cannot express, or a cost profile that only works with reserved capacity you manage yourself.\n\n## The trap\n\nTeams often choose infrastructure as a service because it feels safer or more flexible, then discover they have signed up for permanent operational work they never budgeted for. Flexibility you do not use is pure cost.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Regions, availability zones and edge locations",
+              "duration_minutes": 25,
+              "content": "## The physical reality underneath\n\nA **region** is a geographic area -- roughly, a metropolitan area -- containing multiple isolated groups of data centres. Regions are far apart, so a disaster affecting one does not affect another. They are also independently priced, and network traffic between them costs money and takes time.\n\nAn **availability zone** is one or more discrete data centres within a region, with independent power, cooling and networking. Zones within a region are close enough for low-latency synchronous replication but isolated enough that a power failure or flood in one does not take down another.\n\nAn **edge location** is a smaller facility used for caching content closer to users than the region is.\n\n## Why this determines your architecture\n\nThree design decisions follow directly:\n\n1. **Which region.** Driven by where your users are (latency), where your data is legally allowed to live (residency), and price -- regions do not cost the same.\n2. **How many zones.** A single-zone deployment fails when that zone fails. Spreading across zones is the cheapest meaningful resilience you can buy, and it is usually a configuration change rather than an architectural one.\n3. **Whether to span regions.** Multi-region is significantly more expensive and complex. It is justified by a recovery objective that a single region cannot meet, or by users far enough away that latency hurts -- not by a general wish for reliability.\n\n## A rule of thumb\n\nMulti-zone by default. Multi-region only when a written requirement forces it.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Core services and how to choose between them",
+          "description": "Compute, storage and networking, framed as decisions rather than feature lists.",
+          "lessons": [
+            {
+              "title": "Compute: virtual machines, containers and serverless",
+              "duration_minutes": 30,
+              "content": "## The three models\n\n**Virtual machines** give you a whole operating system. You control everything and you maintain everything. Best when you need specific system-level software, long-running processes, or predictable steady load where reserved pricing pays off.\n\n**Containers** package an application with its dependencies and run it on shared infrastructure. You control the application environment but not the host. Best for services that scale horizontally and are deployed frequently.\n\n**Serverless functions** run your code in response to events and charge per invocation. You control nothing but the code. Best for bursty, event-driven work with idle periods.\n\n## The decision, honestly\n\nAsk three questions:\n\n1. **What is the unit of work?** A request, a batch job, or a process that must stay resident? Resident processes rule out functions immediately.\n2. **How spiky is demand?** Deeply spiky, with long idle periods, favours per-invocation pricing. Steady load favours reserved capacity.\n3. **What can the team operate?** A container platform that nobody on the team understands is not the cheaper option regardless of the pricing page.\n\n## The constraints that decide it\n\nSome constraints eliminate options outright, and these are worth memorising:\n\n- Execution time limits eliminate serverless functions for long-running jobs.\n- Cold-start latency eliminates serverless for latency-critical synchronous paths unless you pay to keep instances warm.\n- Specific OS or kernel requirements eliminate managed container platforms.\n- Licensing tied to physical cores can eliminate shared infrastructure entirely.\n\nWhen an exam question or a design review presents four workable options, one of these constraints is usually what makes three of them wrong.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Storage: objects, blocks and files",
+              "duration_minutes": 25,
+              "content": "## Three shapes of storage\n\n**Object storage** holds whole files addressed by a key, reachable over HTTP, effectively unlimited in size, and extremely durable. It cannot be mounted as a filesystem and you cannot modify part of an object in place. Use it for uploads, backups, static assets and data lakes.\n\n**Block storage** is a virtual disk attached to one machine. It behaves like a physical drive: format it, mount it, write to it at the block level. Use it for databases and operating system disks.\n\n**File storage** is a shared filesystem multiple machines can mount at once. More expensive per gigabyte, but the only option when several machines genuinely need the same mutable filesystem.\n\n## Storage classes and the cost trap\n\nWithin object storage there are classes trading retrieval cost against storage cost. Colder classes are dramatically cheaper to store and progressively more expensive -- and slower -- to read.\n\nThe trap: colder classes usually carry a **minimum storage duration**. Moving objects to an archive class and then deleting or reading them a week later can cost more than leaving them in the standard class. Lifecycle rules should reflect real access patterns, not an assumption that colder is always cheaper.\n\n## Choosing\n\n- Does more than one machine need to write to it simultaneously? -> file storage.\n- Does something need to treat it as a disk? -> block storage.\n- Otherwise -> object storage, and pick the class from how often it is actually read.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Networking and the shared responsibility model",
+              "duration_minutes": 25,
+              "content": "## Private networks in the cloud\n\nYour resources live inside a virtual network with an address range you choose, divided into subnets. Two rules matter more than the rest:\n\n1. **Address ranges must not overlap** with anything you may later need to connect to. Overlapping ranges make peering to another network or to on-premises impossible without renumbering, which is far more painful than planning generously up front.\n2. **Subnets are usually the unit of security policy.** Group resources by trust boundary rather than by application tier for its own sake.\n\nAnything that must not be reachable from the internet should have no public address at all -- a firewall rule you can misconfigure is weaker than an address that does not exist.\n\n## The shared responsibility model\n\nThis is the single most useful mental model in cloud security, and it appears on every foundational exam.\n\n**The provider secures the cloud itself:** physical facilities, hardware, the hypervisor, and the managed service internals.\n\n**You secure what you put in it:** your data, who can access it, how your network is configured, how your application is written, and how your credentials are handled.\n\nThe line moves depending on the service model. On a virtual machine, operating-system patching is yours. On a managed database, it is the provider's -- but the database user permissions are still yours.\n\n## Why breaches happen\n\nAlmost never because the provider's infrastructure failed. Overwhelmingly because of the customer side of that line: a storage bucket left publicly readable, an over-permissive role, a credential committed to a repository. Understanding which side of the line a task falls on is most of practical cloud security.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Cost, identity and putting it together",
+          "description": "The two topics that decide whether a cloud deployment is sustainable.",
+          "lessons": [
+            {
+              "title": "How cloud pricing actually works",
+              "duration_minutes": 25,
+              "content": "## Four things you pay for\n\n1. **Compute time** - per second or hour, varying by size. Usually the largest line item.\n2. **Storage** - per gigabyte-month, varying by class and redundancy.\n3. **Data transfer** - inbound is typically free; outbound to the internet and between regions is not. This is the line that surprises people.\n4. **Requests and operations** - per-API-call charges on storage and serverless services.\n\n## Pricing models\n\n- **On demand** - no commitment, highest unit price. Correct for unpredictable or short-lived work.\n- **Committed or reserved** - one to three year commitment for a substantial discount. Correct for steady baseline load you are confident will persist.\n- **Spot or preemptible** - deeply discounted spare capacity that can be reclaimed with little notice. Correct for interruptible batch work, wrong for anything a user is waiting on.\n\nA common production pattern is reserved capacity for the baseline, on-demand for normal variation, spot for batch.\n\n## Estimating before you build\n\nBefore deploying anything, write down: how many instances of what size, running how many hours; how many gigabytes stored in which class; and roughly how much data leaves the network each month. Multiply by the published rates. You will not be exact, but you will be within the right order of magnitude -- which is enough to catch a design that is unaffordable before you build it.\n\n## Where costs actually run away\n\nIdle non-production environments, forgotten storage that nothing reads, over-sized instances chosen defensively, and cross-region data transfer added without anyone modelling the volume.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Identity and access management",
+              "duration_minutes": 25,
+              "content": "## The model\n\nEvery cloud platform expresses access the same way: a **principal** (a person, a group, or a workload identity) is granted a **role** (a bundle of permitted actions) at a **scope** (the set of resources it applies to).\n\nGet those three right and most access problems disappear.\n\n## Least privilege, concretely\n\nGrant the narrowest role that covers the actions needed, at the narrowest scope that covers the resources needed. Broad grants at broad scopes are the single most common cloud misconfiguration, and they are usually made for convenience during setup and never revisited.\n\nA practical test: if you cannot name the specific task that requires a permission, remove it and wait for something to break. Something breaking is cheap; a compromised over-permissioned credential is not.\n\n## Workload identity beats keys\n\nApplications need to authenticate too. The wrong way is a long-lived access key stored in a config file, because it will eventually be committed to a repository, shared in a chat message, or left behind on a decommissioned machine.\n\nThe right way is an identity attached to the compute resource itself, from which short-lived credentials are issued automatically. Nothing to store, nothing to leak, nothing to rotate manually.\n\n## Groups, not individuals\n\nAssign roles to groups and manage membership. Per-person assignments become impossible to audit within a year, and the audit is the point.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Design exercise: a small production system",
+              "duration_minutes": 30,
+              "content": "## The brief\n\nDesign the infrastructure for a web application with a database. Requirements:\n\n- Roughly 5,000 daily users, concentrated in one country.\n- Must survive the loss of a single data centre.\n- User-uploaded images, retained indefinitely but rarely re-read after 60 days.\n- Data must remain within the country.\n- Modest budget; the team is three engineers with no dedicated operations staff.\n\n## Work it through before reading on\n\nWrite down the constraints and what each one eliminates.\n\n## Reference reasoning\n\n**Region.** Data residency decides it -- a region inside the country, not the cheapest region available. This constraint alone eliminates most options.\n\n**Zones.** \"Survive the loss of a single data centre\" means multi-zone within that region. It does *not* mean multi-region; adding a second region here would satisfy the requirement while badly overshooting the budget, which makes it the wrong answer.\n\n**Compute.** A team of three with no operations staff points to a managed platform rather than self-managed virtual machines. Traffic at this scale is modest and steady, so serverless per-invocation pricing offers little advantage over a small always-on managed service.\n\n**Database.** A managed relational database with a standby in a second zone. Automated backups and patching are handled, which matters more than the price difference at this team size.\n\n**Images.** Object storage with a lifecycle rule moving objects to a cooler class after 60 days -- matching the stated access pattern, not an assumption that colder is always better.\n\n**Networking.** The database has no public address. The application reaches it privately.\n\n**Identity.** A workload identity on the application for storage and database access; no static keys anywhere.\n\n## The point\n\nEvery decision traced back to a stated constraint. When you cannot name the constraint driving a choice, you are guessing -- and that is exactly what both design reviews and certification exams are testing for.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Introduction to Artificial Intelligence",
+      "slug": "introduction-to-artificial-intelligence",
+      "category": "artificial-intelligence",
+      "level": "beginner",
+      "icon": "brain-circuit",
+      "price": "0",
+      "is_featured": true,
+      "duration_minutes": 300,
+      "certifications": [],
+      "short_description": "What modern AI systems can and cannot do, how they are built, and how to evaluate them honestly.",
+      "description": "A conceptual introduction for people who need to reason about AI systems rather than train them from scratch.\n\nThe course covers what distinguishes machine learning from traditional software, how neural networks and language models actually produce output, where these systems reliably fail, and how to evaluate a claim about an AI system's performance without taking the claim on faith.\n\nThere is no advanced mathematics. There is a lot of emphasis on evaluation, because the difference between a useful AI system and an impressive demonstration is almost always measurement.",
+      "learning_outcomes": [
+        "Explain how machine learning differs from rule-based software",
+        "Describe at a conceptual level how neural networks and language models work",
+        "Identify common failure modes including hallucination and distribution shift",
+        "Evaluate an AI claim using appropriate metrics rather than accuracy alone",
+        "Recognise where bias enters a machine learning pipeline",
+        "Decide when a problem is a poor fit for machine learning"
+      ],
+      "requirements": [
+        "Comfort with basic statistics is helpful but not required",
+        "No programming required"
+      ],
+      "modules": [
+        {
+          "title": "What AI is, precisely",
+          "description": "Separating the field from the marketing.",
+          "lessons": [
+            {
+              "title": "Rules versus learned behaviour",
+              "duration_minutes": 20,
+              "content": "## Traditional software\n\nA developer writes rules. The rules are inspected, tested and, when wrong, corrected in a specific place. Behaviour is a direct consequence of instructions someone wrote deliberately.\n\n## Machine learning\n\nYou supply examples of inputs and desired outputs, and an algorithm searches for a function that maps between them. Nobody writes the rule. The rule is discovered, encoded as numbers, and is generally not interpretable by reading it.\n\n## The trade you are making\n\nMachine learning is worth it when the rules are genuinely hard to write down. Nobody can specify in code what makes an image contain a cat; a model can learn it from examples.\n\nBut you give up three things:\n\n1. **Inspectability.** You cannot read the model to find out why it made a decision.\n2. **Predictability on new inputs.** The model behaves well on data resembling its training data, and its behaviour outside that distribution is not guaranteed.\n3. **Determinism about correctness.** You cannot prove the model is right; you can only measure how often it is right on data you have.\n\n## When not to use machine learning\n\nIf the rule can be written down, write it down. A regular expression that validates an email format is better than a model that classifies email addresses: it is faster, free, auditable, and correct by construction. Reaching for a model where a rule suffices adds cost, latency and an entire class of failure modes for no benefit.",
+              "is_preview": true,
+              "resources": []
+            },
+            {
+              "title": "Supervised, unsupervised and reinforcement learning",
+              "duration_minutes": 25,
+              "content": "## Supervised learning\n\nYou have inputs paired with correct answers. The model learns to predict the answer. This covers the large majority of deployed machine learning: classification (which category?) and regression (what value?).\n\nThe binding constraint is labelled data. Labels are expensive, and label quality caps model quality -- a model trained on inconsistently labelled data learns the inconsistency.\n\n## Unsupervised learning\n\nYou have inputs with no answers, and you want structure: clusters of similar items, dimensionality reduction, anomaly detection.\n\nThe difficulty is evaluation. With no ground truth, \"good\" is a judgement call, and clustering results can look meaningful while being an artefact of the distance metric you chose.\n\n## Reinforcement learning\n\nAn agent takes actions in an environment and receives rewards. It learns a policy that maximises cumulative reward.\n\nPowerful in simulation, difficult in the physical world, because it learns by trying things -- and in a real environment, trying things has consequences. It also optimises exactly what you reward, which is rarely exactly what you meant.\n\n## Choosing\n\n- Do you have labelled examples of what you want predicted? -> supervised.\n- Do you want to find structure you cannot describe in advance? -> unsupervised.\n- Are you optimising a sequence of decisions with delayed feedback? -> reinforcement.\n\nMost business problems that appear to need reinforcement learning are better served by supervised learning plus explicit rules.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "How neural networks learn",
+              "duration_minutes": 25,
+              "content": "## The structure\n\nA neural network is layers of simple units. Each unit multiplies its inputs by weights, sums them, adds a bias and applies a non-linear function. Stack enough layers and the network can approximate very complex mappings.\n\nThe non-linearity is essential: without it, any stack of layers collapses mathematically into a single linear layer, and the depth buys nothing.\n\n## Training, in four steps\n\n1. **Forward pass.** Push an input through and get a prediction.\n2. **Loss.** Compute a number measuring how wrong it was.\n3. **Backward pass.** Compute, for every weight, the direction that would reduce the loss.\n4. **Update.** Nudge every weight slightly in that direction.\n\nRepeat millions of times. That is the entire algorithm. There is no reasoning step and no comprehension; there is iterative error reduction.\n\n## Overfitting: the central problem\n\nA model with enough capacity can memorise its training data, achieving near-perfect training accuracy while performing badly on anything new. It has learned the specific examples rather than the pattern.\n\nThis is why you always hold out data the model never sees during training. **Training accuracy is not evidence of anything.** A model reported without a held-out evaluation set should be treated as unevaluated.\n\n## Why more data usually beats a cleverer model\n\nMore, cleaner, more representative data reduces overfitting directly and improves behaviour on inputs the model has not seen. In practice, teams reach for architectural sophistication when they should be fixing their data.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Language models and where they fail",
+          "description": "How large language models produce text, and the failure modes that follow from it.",
+          "lessons": [
+            {
+              "title": "How language models generate text",
+              "duration_minutes": 25,
+              "content": "## Next-token prediction\n\nA language model is trained on one task: given a sequence of text, predict what comes next. Text is broken into tokens -- roughly word fragments -- and the model outputs a probability distribution over the possible next token. One is selected, appended, and the process repeats.\n\nEverything the model appears to do emerges from this. It has no separate module for reasoning, facts or intent. Coherent argument and factual recall are both consequences of predicting plausible continuations of text.\n\n## Why attention mattered\n\nEarlier architectures processed text sequentially and struggled to connect distant words. Attention lets every token be weighted against every other token directly, so a pronoun can be linked to a noun many sentences earlier. That change, plus scale, produced the current generation of models.\n\n## What follows from the training objective\n\nThree consequences are worth stating plainly:\n\n1. **Plausibility is the objective, not truth.** The model produces text that looks like a good continuation. Accurate text is usually plausible, which is why it is often right -- but plausibility is what is being optimised.\n2. **Knowledge has a cutoff.** Anything after training is unknown unless supplied in the prompt.\n3. **There is no internal fact-check.** Nothing compares the output against a source of truth unless you build that step yourself.\n\n## Practical implication\n\nA language model is an excellent tool for transforming text you supply and a fundamentally unreliable one for recalling facts you did not supply. Systems that give the model its sources and ask it to work from them are far more reliable than systems that rely on what the model absorbed during training.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Hallucination, bias and distribution shift",
+              "duration_minutes": 25,
+              "content": "## Hallucination\n\nA model states something false with the same fluency as something true. This is not a bug that will be patched away -- it follows directly from optimising for plausible continuations. A fabricated citation is plausible-looking text; that is precisely what the model was trained to produce.\n\nMitigations that actually help: supply the source material in the prompt, require citations that can be checked programmatically, and constrain the output format. Mitigations that do not help: instructing the model not to hallucinate.\n\n## Bias\n\nBias enters at four points, and only the last is about the algorithm:\n\n1. **Sampling.** Who is represented in the training data, and who is not.\n2. **Labelling.** Human annotators bring their own assumptions.\n3. **Objective.** What you chose to optimise encodes a value judgement.\n4. **Deployment.** A model performing acceptably on average can perform badly for a specific group.\n\nThis is why aggregate accuracy is insufficient. Performance must be measured per relevant subgroup, or you will ship something that works well overall and fails a minority of users consistently.\n\n## Distribution shift\n\nModels degrade when live data drifts away from training data -- and it always drifts, because the world changes. A model trained on last year's user behaviour is describing last year.\n\nThe practical requirement is monitoring: track input distributions and output distributions in production, and alert on change. A model with no monitoring is a model whose current accuracy nobody knows.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Evaluating an AI claim",
+              "duration_minutes": 30,
+              "content": "## Accuracy is usually the wrong number\n\nConsider a fraud detector on a dataset where 1% of transactions are fraudulent. A model that labels everything as legitimate is 99% accurate and completely worthless.\n\nWhenever classes are imbalanced -- which is most interesting problems -- accuracy hides the failure.\n\n## The metrics that carry information\n\n- **Precision** - of the items flagged, what fraction were correct? Low precision means false alarms.\n- **Recall** - of the items that should have been flagged, what fraction were? Low recall means misses.\n- **F1** - the harmonic mean of the two, useful as a single summary.\n\nPrecision and recall trade against each other. Which one you favour is a business decision, not a technical one: a cancer screen should favour recall and accept false alarms; a spam filter should favour precision and accept some spam getting through, because deleting real mail is worse.\n\n## Questions to ask about any AI claim\n\n1. **Measured on what data?** Held-out data the model never saw, or training data?\n2. **Which metric, and why that one?**\n3. **Compared against what baseline?** A model must beat the simplest reasonable alternative -- often a handful of rules -- or it is not earning its complexity.\n4. **How does it perform per subgroup**, not just on average?\n5. **When was it last evaluated on current production data?**\n\nA claim that survives all five is credible. Most published claims do not survive the first.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Applying AI responsibly",
+          "description": "Deciding when to use these systems, and how to deploy them without causing harm.",
+          "lessons": [
+            {
+              "title": "Deciding whether to use machine learning at all",
+              "duration_minutes": 25,
+              "content": "## Four questions before you start\n\n1. **Can the rule be written down?** If yes, write it. Rules are cheaper, faster, auditable and correct by construction.\n2. **Do you have enough representative data?** Not just volume -- representativeness. Data from one region, one season or one customer segment produces a model that works only there.\n3. **What does being wrong cost?** A recommendation that misses is a minor annoyance. A loan decision that misses is a serious harm to a person and a legal exposure to you. The cost of error determines how much evaluation and human oversight the system needs.\n4. **Can you tell whether it is working in production?** If you cannot measure quality after deployment, you cannot operate the system responsibly -- you can only hope.\n\n## Problems that are a poor fit\n\n- Rare events with almost no positive examples.\n- Domains where the underlying relationship changes faster than you can retrain.\n- Decisions that legally require an explanation you cannot produce.\n- Anything where a simple rule already performs acceptably.\n\n## The honest default\n\nStart with the simplest thing that could work -- often rules, or a basic statistical model -- and measure it. That baseline tells you whether a more complex model is worth its cost. Teams that skip the baseline routinely deploy expensive models that beat nothing.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Humans in the loop, and where to place them",
+              "duration_minutes": 25,
+              "content": "## Three patterns\n\n**Human in the loop.** Every decision is reviewed by a person before it takes effect. Highest safety, lowest throughput. Correct for high-stakes, low-volume decisions -- medical, legal, financial.\n\n**Human on the loop.** The system acts automatically; people monitor and can intervene. Correct for moderate stakes at volume, provided the monitoring is real rather than nominal.\n\n**Human out of the loop.** Fully automatic. Only defensible when errors are cheap and reversible.\n\n## Placing the human where it helps\n\nReviewing everything is expensive and produces rubber-stamping: a reviewer who approves 500 correct decisions in a row stops reading the 501st.\n\nBetter is to route by model confidence -- automate the confident majority and send genuinely uncertain cases to a person. This concentrates human attention where it changes the outcome. It requires calibrated confidence scores, which are worth building for that reason alone.\n\n## Recourse\n\nAnyone affected by an automated decision needs a way to contest it, and someone with authority to reverse it. This is increasingly a legal requirement, and it is the right design regardless. A system with no appeal path is a system whose errors are permanent.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Course review and where to go next",
+              "duration_minutes": 20,
+              "content": "## What you should now be able to do\n\n- Explain why a learned rule differs fundamentally from a written one, and what you trade for it.\n- Describe how a neural network is trained and why held-out evaluation is non-negotiable.\n- Explain how a language model produces text, and why hallucination follows from that mechanism.\n- Pick an appropriate metric for a problem and challenge a claim measured with the wrong one.\n- Name where bias enters a pipeline, and why aggregate accuracy hides subgroup failure.\n- Decide when a problem should not be solved with machine learning.\n\n## Where to go from here\n\nIf you want to build models, the next step is a machine learning course covering the actual workflow: data preparation, model selection, validation strategy and deployment.\n\nIf you want to work with data more broadly, a data science course covering statistics, SQL and visualisation gives you the foundation that machine learning sits on.\n\nIf your role is to evaluate or govern AI systems rather than build them, you already have most of what you need. The highest-value next step is practice: take three AI claims from vendors or papers and run each through the five evaluation questions from module two.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Machine Learning Fundamentals",
+      "slug": "machine-learning-fundamentals",
+      "category": "machine-learning",
+      "level": "intermediate",
+      "icon": "line-chart",
+      "price": "49.00",
+      "is_featured": true,
+      "duration_minutes": 420,
+      "certifications": [
+        "professional-data-engineer"
+      ],
+      "short_description": "The end-to-end machine learning workflow: data preparation, model selection, validation and deployment.",
+      "description": "A practical course on the workflow that surrounds a model, because the model is rarely the hard part.\n\nYou will work through framing a problem, preparing and splitting data without leaking information, choosing between model families, validating honestly, and the operational realities of running a model in production -- monitoring, drift and retraining.\n\nExamples use Python and scikit-learn conventions, but the reasoning transfers to any toolkit.",
+      "learning_outcomes": [
+        "Frame a business problem as a well-posed machine learning task",
+        "Prepare data and avoid the common sources of leakage",
+        "Choose a validation strategy appropriate to the data structure",
+        "Select between linear models, tree ensembles and neural networks with reasons",
+        "Diagnose underfitting and overfitting from learning curves",
+        "Plan monitoring and retraining for a deployed model"
+      ],
+      "requirements": [
+        "Working knowledge of Python",
+        "Basic statistics: mean, variance, distributions",
+        "Familiarity with SQL is helpful"
+      ],
+      "modules": [
+        {
+          "title": "Framing and preparing",
+          "description": "The decisions made before any model is trained, which determine whether the project can succeed.",
+          "lessons": [
+            {
+              "title": "Turning a business problem into an ML problem",
+              "duration_minutes": 30,
+              "content": "## Most failures happen here\n\nA project that is framed badly cannot be rescued by a better model. Framing means answering four questions precisely.\n\n### 1. What exactly is being predicted?\n\n\"Predict customer churn\" is not a specification. \"Predict whether an account with an active subscription today will have cancelled 30 days from now\" is. The second version tells you what a row is, what the label is, and when it is known.\n\n### 2. What is available at prediction time?\n\nThis is the question that kills projects late. If a feature is only recorded after the event you are predicting, it cannot be used -- however predictive it looks in the training data. A cancellation-reason field predicts churn perfectly and is worthless, because it exists only after churn.\n\n### 3. What is the decision this prediction changes?\n\nIf no action follows from the prediction, the model has no value regardless of accuracy. Name the action first, then work backwards to the prediction that would inform it, and to the metric that reflects whether the action improved.\n\n### 4. What does a mistake cost, in each direction?\n\nFalse positives and false negatives almost never cost the same. Retention offers sent to customers who would have stayed cost you a discount; missed churners cost a customer. That ratio determines your decision threshold, and it is a business input, not a technical one.\n\n## Write it down\n\nA one-page framing document -- prediction target, prediction time, available features, decision, cost of each error type, and success metric -- takes an hour and prevents most of the ways these projects fail.",
+              "is_preview": true,
+              "resources": []
+            },
+            {
+              "title": "Data preparation and leakage",
+              "duration_minutes": 35,
+              "content": "## Leakage: the most expensive bug in machine learning\n\nLeakage is any situation where information reaches the model that would not be available at prediction time. It produces excellent validation scores and a model that fails immediately in production, and it is often discovered only after deployment.\n\n### Target leakage\n\nA feature encodes the answer. The cancellation-reason field for churn. A `discount_applied` flag that is only ever set for converted customers.\n\n**Test:** for every feature, ask when its value is written relative to the event being predicted. Anything written after is leakage.\n\n### Train/test contamination\n\nYou compute a transformation -- scaling, imputation, encoding -- over the whole dataset and then split. The training set now carries information about the test set.\n\n**Fix:** split first. Fit every transformation on the training set only, then apply it to validation and test. A pipeline object that bundles preprocessing with the model makes this the default rather than a discipline you have to remember.\n\n### Temporal leakage\n\nRandomly splitting time-ordered data lets the model train on the future and be evaluated on the past. Every score is meaningless.\n\n**Fix:** for any data with a time dimension, split chronologically. Train on earlier, validate on later. Always.\n\n### Group leakage\n\nThe same entity appears in both training and test sets -- multiple visits from one patient, several sessions from one user. The model memorises the entity rather than learning the pattern.\n\n**Fix:** split by group, so all records for an entity land on one side.\n\n## Missing values\n\nBefore imputing, ask *why* the value is missing. Missing because a sensor failed is different from missing because the question does not apply. The second case often means the missingness itself is informative -- add an indicator column rather than silently filling in a median and destroying the signal.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Feature engineering that earns its keep",
+              "duration_minutes": 30,
+              "content": "## What features are for\n\nA model can only use relationships expressible in the representation you give it. Feature engineering is making the useful structure visible.\n\n## Techniques that consistently pay off\n\n**Ratios and differences.** Absolute values are often less informative than relative ones. `spend_this_month / average_monthly_spend` captures a change that raw spend does not.\n\n**Time deltas.** `days_since_last_login` is nearly always more useful than a raw timestamp, because the model does not have to learn the relationship to \"now\".\n\n**Aggregations over windows.** Count, mean and variance of a behaviour over 7, 30 and 90 days lets the model see both recent state and trend.\n\n**Sensible categorical encoding.** One-hot for low cardinality. For high cardinality, target encoding works but leaks badly if computed outside the training fold -- it must be fitted inside cross-validation, not before it.\n\n## What usually does not pay off\n\nAutomatically generating hundreds of polynomial interactions. This inflates dimensionality, increases overfitting risk, and destroys interpretability, usually for a negligible gain. Domain knowledge that suggests one specific interaction beats brute force reliably.\n\n## The discipline\n\nAdd features in small batches and measure. A feature that does not improve validation performance is not free -- it costs computation, adds a pipeline dependency that can break, and gives the model another opportunity to overfit.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Modelling and validation",
+          "description": "Choosing a model family and measuring performance in a way you can trust.",
+          "lessons": [
+            {
+              "title": "Choosing a model family",
+              "duration_minutes": 30,
+              "content": "## Start with a baseline\n\nBefore any model, establish what trivial performance looks like: predict the majority class, or predict the mean. Every subsequent result is measured against that. Without it you cannot tell whether 82% accuracy is impressive or embarrassing.\n\n## Linear and logistic regression\n\nFast, interpretable, hard to overfit with regularisation, and a genuinely strong baseline on tabular data with mostly linear relationships. Coefficients are directly explainable, which matters when a decision must be justified.\n\nUse when interpretability is required, when data is limited, or as the baseline you must beat.\n\n## Tree ensembles\n\nGradient-boosted trees and random forests are the practical default for tabular data. They handle non-linearity and interactions without manual engineering, tolerate mixed feature types, need no scaling, and are relatively robust to outliers.\n\nThey are usually the right answer for structured business data, and they win most tabular competitions for good reason.\n\n## Neural networks\n\nDominant for unstructured data -- images, audio, text -- where the network learns the representation itself. On tabular data they typically match rather than beat a well-tuned gradient boosting model while costing far more to train and operate.\n\nUse for unstructured inputs, very large datasets, or when transfer learning from a pretrained model gives you a large head start.\n\n## An honest default\n\nTabular data: baseline, then gradient boosting, then consider anything else only if that is insufficient. Unstructured data: a pretrained network fine-tuned on your data. Deviating from this needs a reason you can state.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Validation strategy",
+              "duration_minutes": 30,
+              "content": "## The purpose\n\nValidation estimates performance on data the model has never seen. Every choice below exists to keep that estimate honest.\n\n## Three-way split\n\n- **Training set** - the model learns from this.\n- **Validation set** - you compare models and tune hyperparameters against this.\n- **Test set** - you touch this once, at the end.\n\nThe test set is separate from validation because repeatedly tuning against the validation set gradually overfits to it. After fifty experiments, your validation score is optimistic. The test set is the only unbiased number you have, and checking it twice destroys that property.\n\n## Cross-validation\n\nWith limited data, k-fold cross-validation uses all of it: split into k parts, train on k-1 and validate on the remainder, rotate, average. More reliable than a single split, at k times the compute.\n\n**Stratified** k-fold preserves class proportions in each fold, and should be the default for classification with imbalance.\n\n## Time series\n\nStandard cross-validation is invalid on time-ordered data. Use forward chaining: train on the first n periods, validate on n+1; expand and repeat. This mirrors how the model will actually be used -- predicting forward from history.\n\n## Grouped data\n\nIf records cluster by entity, use grouped splitting so an entity never appears on both sides. Otherwise you are measuring memorisation.\n\n## Diagnosing from learning curves\n\nPlot training and validation error against training set size.\n\n- **Both high, converged** -> underfitting. The model is too simple, or the features lack signal. More data will not help.\n- **Training low, validation high, large gap** -> overfitting. More data, stronger regularisation, or a simpler model will help.\n- **Both low and close** -> working. Consider whether more capacity buys anything.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Metrics and thresholds",
+              "duration_minutes": 30,
+              "content": "## Classification\n\nAccuracy is misleading under class imbalance -- always. Use:\n\n- **Precision** - correctness of positive predictions.\n- **Recall** - coverage of actual positives.\n- **F1** - harmonic mean, for a single summary.\n- **ROC AUC** - ranking quality across all thresholds; can look flattering on heavily imbalanced data.\n- **PR AUC** - precision-recall area, more informative when positives are rare.\n\n## The threshold is a business decision\n\nA classifier outputs a probability. Converting it to a decision requires a threshold, and 0.5 is a default, not an answer.\n\nSet the threshold from the relative cost of the two error types. If a false negative costs ten times a false positive, lower the threshold until the ratio of errors reflects that. Do this deliberately with the people who own the cost, and revisit it when the costs change.\n\n## Calibration\n\nIf your system uses the probability itself -- routing uncertain cases to humans, or feeding an expected-value calculation -- the probabilities must be calibrated: among cases predicted at 0.7, about 70% should be positive.\n\nMany models, especially boosted trees, are poorly calibrated by default. Check with a calibration plot and correct it if the probability values matter. If you only use the ranking, calibration is irrelevant.\n\n## Regression\n\n- **MAE** - average absolute error, in the units of the target, robust to outliers.\n- **RMSE** - penalises large errors more heavily; use when big misses are disproportionately costly.\n- **MAPE** - percentage error, useful across different scales, but undefined and unstable near zero.\n\nReport the one that matches how the prediction is used, and report it against the baseline.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Deployment and operations",
+          "description": "What happens after the model works on your machine.",
+          "lessons": [
+            {
+              "title": "Serving a model",
+              "duration_minutes": 30,
+              "content": "## Two serving patterns\n\n**Batch.** Predictions are computed on a schedule and written to a store the application reads. Simple, cheap, easy to monitor, and correct whenever predictions do not need to reflect events from the last few minutes.\n\n**Online.** The model is behind an API and predicts per request. Necessary when the input only exists at request time. Brings latency budgets, availability requirements and scaling concerns.\n\nStart with batch unless a requirement forces online. A surprising share of production models never needed real-time serving.\n\n## Training/serving skew\n\nThe most common production failure: features computed one way during training and another way at serving time. A different default for missing values, a different unit, a different time zone -- and the model silently degrades.\n\nThe structural fix is to compute features through the same code path in both places. Serialise the entire preprocessing pipeline with the model rather than reimplementing it in the serving layer.\n\n## What to version\n\nAll four together: training data snapshot, feature pipeline, model artefact, and the code that serves it. Being unable to reproduce a model that is making decisions today is an operational and often a regulatory problem.\n\n## Rollout\n\nDeploy behind a flag. Send a small share of traffic to the new model, compare against the incumbent on live data, and expand only if it holds up. Offline validation is necessary but not sufficient -- production traffic differs from your test set in ways you did not anticipate.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Monitoring, drift and retraining",
+              "duration_minutes": 30,
+              "content": "## A model that is not monitored has unknown accuracy\n\nNot good accuracy or bad accuracy -- unknown. Performance degrades silently, because nothing errors when predictions get worse.\n\n## What to monitor\n\n**Input distributions.** Track summary statistics per feature and alert on significant shifts. This catches upstream pipeline breakage -- a changed unit, a field that started arriving null -- which is far more common than genuine drift.\n\n**Output distributions.** A sudden change in the rate of positive predictions is a strong signal that something changed, and you see it immediately, without waiting for labels.\n\n**Actual performance, once labels arrive.** This is the real number, but it lags -- sometimes by months, if the outcome takes months to observe. Plan for that lag rather than being surprised by it.\n\n**Prediction latency and error rates.** Ordinary service health, still your responsibility.\n\n## Drift\n\n**Data drift** - the input distribution moves. **Concept drift** - the relationship between inputs and target changes, which is worse because inputs can look entirely normal.\n\n## Retraining\n\nThree strategies:\n\n- **Scheduled** - retrain on a fixed cadence. Simple, predictable, sometimes unnecessary and sometimes too late.\n- **Triggered** - retrain when monitoring crosses a threshold. Efficient, requires trustworthy monitoring.\n- **Continuous** - retrain constantly. Powerful and easy to get wrong; a feedback loop where the model influences the data it later trains on can drift steadily away from reality.\n\nStart scheduled, move to triggered once you trust your monitoring. And always validate a retrained model against the incumbent before promoting it -- retraining on newer data does not automatically produce a better model.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Project: end-to-end walkthrough",
+              "duration_minutes": 35,
+              "content": "## The brief\n\nBuild a model predicting whether a subscription customer will cancel within 30 days. Available data: account records, monthly usage, support tickets, and billing history.\n\n## Step 1 - frame it\n\n- **Row.** One active subscription on a given date.\n- **Label.** Cancelled within the following 30 days.\n- **Prediction time.** Features must use only data available on that date.\n- **Decision.** Send a retention offer.\n- **Costs.** A false positive costs one discount. A false negative costs a customer's remaining lifetime value. They differ by roughly an order of magnitude, which will set the threshold.\n\n## Step 2 - build the dataset\n\nFor each customer, sample observation dates. For each, compute features using only prior data and the label using the following 30 days.\n\n**The trap.** Any field written at cancellation time -- cancellation reason, final invoice flag -- is leakage. Audit every column against the prediction date.\n\n## Step 3 - split\n\nChronologically, and grouped by customer. Train on the earliest period, validate on the next, hold out the most recent as test. Random splitting here would produce a beautiful, meaningless result.\n\n## Step 4 - baseline\n\nA simple rule: flag anyone whose usage dropped more than 50% month over month. Measure precision and recall. This is the number to beat, and it is often better than expected.\n\n## Step 5 - model\n\nLogistic regression first, for interpretability and a sanity check on the features. Then gradient boosting. Compare both against the rule baseline on the validation set.\n\n## Step 6 - threshold\n\nUsing the 10:1 cost ratio, choose the threshold that minimises expected cost -- not the one that maximises F1. These are different, and the second is the wrong objective here.\n\n## Step 7 - deploy\n\nBatch scoring nightly is sufficient; retention offers do not need sub-second latency. Version data, pipeline, model and serving code together.\n\n## Step 8 - monitor\n\nTrack feature distributions and the daily positive rate immediately. Actual performance can only be measured with a 30-day lag, so build the dashboard to expect that.\n\n## Step 9 - measure the business outcome\n\nRun a holdout group that receives no offer. Without it you cannot distinguish customers the offer saved from customers who were never going to leave -- and that, not the model's AUC, is what the project was for.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Data Science Fundamentals",
+      "slug": "data-science-fundamentals",
+      "category": "data-science",
+      "level": "beginner",
+      "icon": "database",
+      "price": "0",
+      "duration_minutes": 330,
+      "certifications": [
+        "professional-data-engineer"
+      ],
+      "short_description": "Statistics, SQL and visualisation skills that turn raw data into defensible decisions.",
+      "description": "A foundations course for people who need to analyse data and be trusted with the conclusion.\n\nIt covers the statistics that matter in practice -- distributions, variation, uncertainty and the difference between correlation and causation -- alongside the SQL required to get the data in the first place and the visualisation principles that make a finding legible.\n\nThe emphasis throughout is on not fooling yourself, which is the hardest and most valuable part of the work.",
+      "learning_outcomes": [
+        "Describe a dataset using appropriate summary statistics",
+        "Write SQL that aggregates and joins across multiple tables correctly",
+        "Quantify uncertainty and explain what a confidence interval does and does not mean",
+        "Distinguish correlation from causation and identify confounders",
+        "Design a chart that communicates a finding without distorting it",
+        "Recognise common analytical traps including survivorship bias and Simpson's paradox"
+      ],
+      "requirements": [
+        "Comfort with spreadsheets",
+        "No prior statistics or programming required"
+      ],
+      "modules": [
+        {
+          "title": "Describing data honestly",
+          "description": "Summary statistics, distributions and the ways averages mislead.",
+          "lessons": [
+            {
+              "title": "Centre, spread and shape",
+              "duration_minutes": 25,
+              "content": "## Three numbers, not one\n\nReporting only an average discards most of what the data says.\n\n**Centre.** The mean is the arithmetic average and is pulled hard by outliers. The median is the middle value and is not. When they differ substantially, the distribution is skewed -- and which one you report changes the story. Income data is the canonical case: mean income and median income can support opposite conclusions from the same dataset.\n\n**Spread.** Standard deviation summarises typical distance from the mean. The interquartile range -- the middle 50% -- is more robust when outliers are present. Two datasets with identical means can behave completely differently, and the spread is what tells you.\n\n**Shape.** Symmetric, skewed, or multi-modal. A bimodal distribution -- two distinct clusters -- makes the average describe a value that almost nobody actually has. This happens constantly with mixed populations, and no summary statistic will reveal it. Only a histogram will.\n\n## Always plot the distribution first\n\nBefore computing anything, look at a histogram. Summary statistics are compressions, and every compression loses information. The classic demonstration is a set of datasets with identical means, variances and correlations that look entirely different when plotted -- one is a straight line, one is a circle, one is dominated by a single outlier.\n\n## What to report\n\nFor a skewed distribution, report the median and the interquartile range, and say that it is skewed. For a symmetric one, mean and standard deviation are fine. Either way, show the distribution.",
+              "is_preview": true,
+              "resources": []
+            },
+            {
+              "title": "Variation and why it matters more than the average",
+              "duration_minutes": 25,
+              "content": "## Every measurement varies\n\nIf conversion rate was 3.1% last week and 3.4% this week, has anything changed? Without knowing how much this metric normally fluctuates, the question is unanswerable -- and acting on the difference is superstition.\n\n## Common-cause and special-cause variation\n\n**Common cause** is the ordinary fluctuation inherent in the process. It is noise. Responding to it makes things worse, because you are adjusting a system in response to randomness.\n\n**Special cause** is a genuine change with an identifiable reason. It is signal, and it warrants investigation.\n\nDistinguishing them is the entire skill. The practical method is to plot the metric over time with bands showing the historical range of normal variation. Points inside the bands are noise; points outside, or sustained runs on one side, are signal.\n\n## Why weekly comparisons mislead\n\nComparing this week to last week uses two data points, which cannot separate signal from noise. A run chart with twenty weeks of history answers the question honestly and takes no longer to produce.\n\n## Sample size\n\nSmall samples produce extreme values by chance. The regions with both the highest and the lowest rates of a rare condition tend to be the least populated ones -- not because of anything about those regions, but because small denominators produce volatile rates.\n\nAny ranking of small groups by a rate is mostly ranking them by sample size. Check the denominator before believing the ordering.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Uncertainty and confidence intervals",
+              "duration_minutes": 30,
+              "content": "## A point estimate without uncertainty is incomplete\n\n\"Conversion is 4.2%\" is a measurement of a sample. The underlying rate is not exactly 4.2%, and how far off it might be depends on how much data you have.\n\n## Standard error\n\nThe standard error describes how much your estimate would vary if you repeated the measurement. It shrinks with the square root of sample size -- so quadrupling your data halves your uncertainty. That square-root relationship is why doubling a sample helps less than people expect.\n\n## What a 95% confidence interval means\n\nIf you repeated the whole procedure many times, about 95% of the intervals constructed this way would contain the true value.\n\nIt does **not** mean there is a 95% probability the true value is in this particular interval. That is a different claim requiring different machinery. The distinction sounds pedantic and is not: it is the difference between a statement about the procedure and a statement about this one result.\n\n## Practical use\n\n1. **Report intervals alongside estimates.** \"4.2% (95% CI: 3.8-4.6%)\" tells the reader how much to trust the number.\n2. **Overlapping intervals mean the difference is not established.** If variant A is 4.2% (3.8-4.6) and variant B is 4.4% (4.0-4.8), you have not shown B is better.\n3. **Wide intervals mean collect more data**, not \"pick the higher number\".\n\n## Multiple comparisons\n\nTest twenty things at the 95% level and you expect roughly one false positive by chance alone. This is why dashboards with dozens of metrics always show something \"significant\" -- and why deciding what you are testing before you look at the data matters so much.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Getting the data",
+          "description": "SQL for real analysis, including the joins and aggregations that go wrong quietly.",
+          "lessons": [
+            {
+              "title": "SQL for analysis",
+              "duration_minutes": 35,
+              "content": "## The clauses, in execution order\n\nSQL is written in one order and executed in another, which explains most beginner confusion:\n\n1. `FROM` and `JOIN` - assemble the rows\n2. `WHERE` - filter individual rows\n3. `GROUP BY` - collapse into groups\n4. `HAVING` - filter groups\n5. `SELECT` - choose output columns\n6. `ORDER BY` / `LIMIT` - sort and truncate\n\nThe practical consequence: `WHERE` filters before aggregation and `HAVING` filters after. Filtering out rows before counting is different from filtering out groups after counting, and mixing them up produces wrong answers that look plausible.\n\n## Aggregation\n\n```sql\nSELECT category,\n       COUNT(*)          AS orders,\n       COUNT(DISTINCT customer_id) AS customers,\n       SUM(amount)       AS revenue,\n       AVG(amount)       AS average_order\nFROM orders\nWHERE created_at >= '2026-01-01'\nGROUP BY category\nHAVING COUNT(*) >= 100\nORDER BY revenue DESC;\n```\n\nNote `COUNT(*)` versus `COUNT(DISTINCT customer_id)`. Reporting order count when the question was about customers is one of the most common analytical errors, and nothing in the query flags it.\n\n## NULL behaves differently\n\n`NULL` is not a value; it is the absence of one. `NULL = NULL` is not true -- use `IS NULL`. Aggregate functions skip nulls, so `AVG(amount)` over ten rows where three are null divides by seven, not ten. Whether that is what you wanted depends entirely on why those values are missing.\n\n## Window functions\n\nWhen you need a per-row value computed across a group without collapsing rows:\n\n```sql\nSELECT customer_id, order_date, amount,\n       SUM(amount) OVER (PARTITION BY customer_id ORDER BY order_date)\n         AS running_total,\n       ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date)\n         AS order_sequence\nFROM orders;\n```\n\nRunning totals, rankings within groups, and period-over-period comparisons all become straightforward. This is the single highest-leverage thing to learn after basic aggregation.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Joins and the mistakes they hide",
+              "duration_minutes": 30,
+              "content": "## The four joins\n\n- `INNER JOIN` - rows matching in both tables.\n- `LEFT JOIN` - all rows from the left, nulls where no match.\n- `RIGHT JOIN` - the mirror image, rarely used because rewriting as a left join reads better.\n- `FULL OUTER JOIN` - everything from both sides.\n\n## The silent failure: fan-out\n\nJoining a one-row-per-customer table to a many-rows-per-customer table duplicates the customer row once per match. If you then sum a customer-level value, you have multiplied it by the number of matching rows.\n\n```sql\n-- Wrong: annual_value is counted once per order\nSELECT c.region, SUM(c.annual_value)\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nGROUP BY c.region;\n```\n\nThis produces a large, confident, wrong number with no error. Aggregate to the right grain first:\n\n```sql\nSELECT c.region, SUM(c.annual_value)\nFROM customers c\nWHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id)\nGROUP BY c.region;\n```\n\n## Filtering a left join in the wrong place\n\n```sql\n-- Silently becomes an inner join\nSELECT c.id, o.amount\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.status = 'complete';\n```\n\nThe `WHERE` clause discards the null rows the left join just produced. Move the condition into the `ON` clause to keep customers with no completed orders.\n\n## The habit that catches both\n\nCheck the row count before and after every join. If it changed and you did not intend it to, stop and find out why before writing another line.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Data quality checks that catch real problems",
+              "duration_minutes": 25,
+              "content": "## Run these before any analysis\n\nMost wrong conclusions come from bad data, not bad statistics.\n\n### 1. Row counts over time\n\n```sql\nSELECT date_trunc('day', created_at) AS day, COUNT(*)\nFROM events GROUP BY 1 ORDER BY 1;\n```\n\nA gap or a sudden step change is a pipeline problem, not a business insight. Finding this after presenting the analysis is considerably worse than finding it before.\n\n### 2. Null rates per column\n\nA column that is 3% null historically and 40% null last month means something upstream changed. Analysing it as though nothing happened produces a confident wrong answer.\n\n### 3. Duplicates on the key you assume is unique\n\n```sql\nSELECT id, COUNT(*) FROM customers GROUP BY id HAVING COUNT(*) > 1;\n```\n\nAssumed-unique keys that are not unique cause the fan-out problem from the previous lesson.\n\n### 4. Impossible values\n\nNegative quantities, dates in the future, ages above 150, percentages above 100. These indicate either a data problem or a definition you have misunderstood -- both worth knowing about.\n\n### 5. Referential integrity\n\nOrphaned foreign keys mean rows will silently vanish from inner joins.\n\n## Automate it\n\nA short script running these checks against a new dataset takes an hour to write and will save you from publishing a wrong number at least once. Trust is expensive to rebuild.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Communicating findings",
+          "description": "Visualisation and the reasoning traps that survive good analysis.",
+          "lessons": [
+            {
+              "title": "Charts that inform rather than impress",
+              "duration_minutes": 25,
+              "content": "## Match the chart to the question\n\n- **Comparing categories** -> bar chart, sorted by value unless there is a natural order.\n- **Change over time** -> line chart, time on the horizontal axis.\n- **Relationship between two variables** -> scatter plot.\n- **Distribution of one variable** -> histogram or box plot.\n- **Part of a whole** -> stacked bar, almost always clearer than a pie chart; pie charts only work with two or three slices.\n\n## The rules that matter\n\n**Start bar charts at zero.** Bar length encodes value, so a truncated axis distorts the comparison. Line charts may use a non-zero axis when showing change, but say so.\n\n**Sort by value.** Alphabetical ordering hides the pattern the chart exists to show.\n\n**Label directly.** Putting labels on the lines beats a legend that forces the reader to look back and forth matching colours.\n\n**Do not encode with colour alone.** Roughly one in twelve men has some colour vision deficiency. Use position, shape or direct labels as well.\n\n**Show uncertainty** where it exists. A bar chart of point estimates implies a precision the data does not support.\n\n## Say what the chart shows\n\nTitle the chart with the finding, not the variables. \"Revenue fell 18% after the March pricing change\" is a title. \"Revenue by month\" is a caption. The first does the work; the second makes the reader do it.\n\n## Remove everything else\n\nGridlines, borders, background fills, 3D effects and decorative colour add nothing and cost attention. Every element should be answering the question.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Correlation, causation and confounding",
+              "duration_minutes": 30,
+              "content": "## Why correlation is not causation\n\nTwo variables moving together admits four explanations:\n\n1. A causes B.\n2. B causes A.\n3. Something else causes both -- a **confounder**.\n4. Coincidence, especially with many variables and a small sample.\n\nThe data alone cannot distinguish these. Only the design of the study can.\n\n## Confounding, concretely\n\nIce cream sales correlate with drowning deaths. Neither causes the other; hot weather causes both. The correlation is real, the causal claim is nonsense, and no amount of additional correlational data fixes it.\n\nThe practical version: customers who use feature X have higher retention. Does X cause retention, or do already-engaged customers adopt X? Engagement is the confounder, and treating the correlation as causal leads to building more of X for people who will never use it.\n\n## What establishes causation\n\n**Randomised experiment.** Assign treatment at random, and randomisation balances all confounders -- including ones you never thought of. This is why experiments are the gold standard and why the random part is non-negotiable.\n\n**Quasi-experimental methods.** When randomisation is impossible, techniques like difference-in-differences and regression discontinuity can support causal claims under assumptions you must state and defend.\n\n**Controlling for confounders.** Helps only for confounders you measured. Unmeasured confounding is invisible.\n\n## Simpson's paradox\n\nA trend can appear in every subgroup and reverse in the aggregate, when group sizes differ. A treatment can have a higher success rate than the alternative in both mild and severe cases, yet a lower overall rate, because it was used more often on severe cases.\n\n**Always check whether an aggregate holds within subgroups.** If it reverses, the aggregate is the misleading number.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Survivorship bias and other traps",
+              "duration_minutes": 25,
+              "content": "## Survivorship bias\n\nAnalysing only the things that made it through a filter, and generalising to everything.\n\nThe canonical example: engineers examining returning aircraft for bullet holes and proposing to armour the areas most frequently hit. The correct conclusion is the opposite -- those are the survivable hits. The planes hit elsewhere did not return to be measured.\n\nThe everyday versions:\n- Studying only current customers to understand churn. The churned ones are the population you need.\n- Studying successful companies for the practices that cause success, without checking whether failed companies did the same things.\n- Analysing users who completed onboarding to understand why people drop out.\n\n**The check:** who is missing from this dataset, and were they removed by something related to what I am measuring?\n\n## Selection bias\n\nYour sample is not representative of the population you want to describe. Survey respondents differ systematically from non-respondents -- typically holding stronger opinions. A satisfaction survey answered by 4% of customers measures the satisfaction of people motivated to answer surveys.\n\n## Regression to the mean\n\nExtreme measurements tend to be followed by less extreme ones, purely by statistics. The worst-performing stores improve after an intervention -- and would have improved without it. Without a control group you cannot separate the intervention from the regression, and you will systematically over-credit interventions applied to outliers.\n\n## The habit\n\nBefore presenting a finding, ask: who is missing, what else could produce this pattern, and would I have believed the opposite result as readily? The last question catches more errors than the first two.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "DevOps Fundamentals",
+      "slug": "devops-fundamentals",
+      "category": "devops",
+      "level": "intermediate",
+      "icon": "infinity",
+      "price": "39.00",
+      "duration_minutes": 390,
+      "certifications": [
+        "devops-engineer-professional",
+        "azure-administrator-associate"
+      ],
+      "short_description": "Version control, CI/CD, containers, infrastructure as code and the practices that keep production stable.",
+      "description": "DevOps is often taught as a tool list. This course teaches it as a set of feedback loops: shorten the time between making a change and learning whether it worked, and most delivery problems shrink.\n\nYou will cover branching strategy, pipeline design, containers, declarative infrastructure, observability and incident response -- with attention to the operational failure modes that only appear under real traffic.",
+      "learning_outcomes": [
+        "Choose a branching strategy that matches your release cadence",
+        "Design a pipeline with meaningful quality gates",
+        "Build and run containerised applications",
+        "Manage infrastructure declaratively and detect drift",
+        "Instrument a service with metrics, logs and traces",
+        "Run an incident and a blameless review that changes something"
+      ],
+      "requirements": [
+        "Command line comfort",
+        "Basic Git usage",
+        "Some experience deploying an application"
+      ],
+      "modules": [
+        {
+          "title": "Delivery pipelines",
+          "description": "Getting a change from a developer's machine to production safely and repeatedly.",
+          "lessons": [
+            {
+              "title": "Branching strategies and their costs",
+              "duration_minutes": 25,
+              "content": "## The trade-off\n\nEvery branching strategy trades isolation against integration pain. Longer-lived branches mean less interference day to day and more conflict at merge time.\n\n## Trunk-based development\n\nEveryone commits to one main branch, several times a day. Incomplete work hides behind feature flags. Integration problems surface within hours, when they are small.\n\nRequires: fast, reliable automated tests, and feature flags. Without those it is reckless.\n\nSuits teams deploying daily or more often, which is most product teams.\n\n## Feature branching\n\nEach change gets a branch, reviewed and merged when complete. Familiar and low-ceremony.\n\nThe cost grows with branch lifetime. A branch open for three weeks accumulates conflicts and delays feedback until the merge -- exactly when it is most expensive to act on. Keep branches under a few days.\n\n## Release branching\n\nA long-lived branch per release, with fixes cherry-picked across.\n\nNecessary when you genuinely support multiple versions in the field -- installed software, mobile apps with slow adoption. Expensive otherwise: maintaining parallel branches consumes real engineering time.\n\n## Choosing honestly\n\nIf you deploy continuously to one production environment, trunk-based with short-lived branches is almost certainly right. Release branching is a response to a constraint -- supporting old versions -- not a default. Teams frequently adopt heavy branching models for release cadences they do not have.",
+              "is_preview": true,
+              "resources": []
+            },
+            {
+              "title": "Designing a CI pipeline",
+              "duration_minutes": 30,
+              "content": "## What the pipeline is for\n\nA pipeline answers one question as fast as possible: *is this change safe to ship?*\n\nEvery stage should either increase confidence or be removed.\n\n## Stage ordering\n\nOrder by speed, cheapest first, so failures surface early:\n\n1. **Lint and format** - seconds\n2. **Unit tests** - a minute or two\n3. **Build artefact** - a few minutes\n4. **Integration tests** - longer, needs dependencies\n5. **Security and dependency scanning** - parallel with the above\n6. **Deploy to staging** - automatic\n7. **Smoke tests against staging**\n8. **Deploy to production** - automatic or gated\n\n## Speed is a feature\n\nA pipeline over roughly ten minutes changes behaviour: people batch changes to avoid waiting, and batched changes are riskier and harder to debug. Optimising the pipeline is optimising the team's ability to work in small increments.\n\nParallelise independent stages, cache dependencies, and run only affected tests where the tooling supports it.\n\n## Flaky tests are worse than missing tests\n\nA test that fails intermittently teaches the team to re-run rather than investigate. Once that habit forms, real failures get re-run too, and the pipeline has stopped providing information.\n\nQuarantine flaky tests immediately, fix them or delete them. Tolerating them is the costlier option.\n\n## Build once\n\nProduce one artefact and promote that same artefact through environments. Rebuilding per environment means the thing you tested is not the thing you shipped, which quietly invalidates everything the pipeline told you.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Deployment strategies and rollback",
+              "duration_minutes": 30,
+              "content": "## Rolling\n\nReplace instances gradually. Cheapest in infrastructure, but both versions serve traffic simultaneously -- so changes must be backward compatible. Rollback is another slow rolling operation.\n\n## Blue/green\n\nRun two complete environments and switch traffic at once. Rollback is a traffic switch, effectively instant. The cost is running double capacity during the cutover. Choose this when the requirement is *immediate* rollback.\n\n## Canary\n\nRoute a small percentage to the new version, watch metrics, promote or roll back automatically. The only strategy that catches failures which appear solely under real production traffic and real data.\n\nRequires good metrics and a defined promotion rule. Without an objective rule you are just deploying slowly.\n\n## The database is the hard part\n\nNo deployment strategy handles an incompatible schema change, because the database is shared state that cannot be duplicated cheaply.\n\nUse expand/contract:\n\n1. **Expand** - add the new column, keep the old one. Deploy code writing both.\n2. **Migrate** - backfill.\n3. **Switch** - deploy code reading the new column.\n4. **Contract** - after everything is stable, drop the old column.\n\nEach step is independently reversible. Combining them into one migration produces the deployment that cannot be rolled back at 3am.\n\n## Make rollback boring\n\nThe rollback path must be tested, automated and routine. A rollback procedure that is only exercised during incidents will fail during an incident.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Containers and infrastructure as code",
+          "description": "Reproducible environments, from a single image to a whole platform.",
+          "lessons": [
+            {
+              "title": "Containers, properly",
+              "duration_minutes": 30,
+              "content": "## The problem they solve\n\n\"Works on my machine\" is a dependency problem. A container packages the application with its dependencies and filesystem so it runs identically wherever the runtime exists.\n\nUnlike a virtual machine, containers share the host kernel -- which is why they start in milliseconds instead of minutes, and why they provide weaker isolation.\n\n## Writing an image that is not terrible\n\n**Order layers by change frequency.** Dependency installation before application code, so a code change does not invalidate the dependency cache.\n\n**Use multi-stage builds.** Compile in a build stage with full toolchain, copy only the artefact into a minimal runtime stage. Images often shrink by an order of magnitude, which speeds every pull.\n\n**Do not run as root.** Create a user and switch to it. Container escape becomes considerably more valuable to an attacker when the process is root.\n\n**Pin base image versions.** `:latest` means your build is not reproducible and can break without any change on your side.\n\n**Never bake in secrets.** Image layers are permanent and inspectable; a secret added in one layer and removed in the next is still in the image.\n\n## Statelessness\n\nContainers should be disposable. Anything that must survive restart belongs in a volume, a database or object storage. Writing state to the container filesystem produces a system that works until the first restart.\n\n## Orchestration\n\nOne container is easy. Dozens across many hosts -- with scheduling, health checks, service discovery, rolling updates and scaling -- is what orchestration platforms exist for. Adopt one when you have that problem, not before; the operational overhead is real and it is not free.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Infrastructure as code",
+              "duration_minutes": 30,
+              "content": "## Why declarative wins\n\nImperative scripts describe steps. Run them twice and you may get a different result. Declarative configuration describes the desired end state, and the tool computes the difference from reality.\n\nThat difference is the whole value: infrastructure becomes reviewable, versioned and reproducible, and you can see what a change will do before it happens.\n\n## Practices that matter\n\n**Everything in version control.** Infrastructure changes get reviewed like code changes, because they are at least as risky.\n\n**Plan before apply.** Always read the plan. \"Destroy and recreate\" on a database is exactly the kind of thing a plan reveals and an apply does not undo.\n\n**Remote state with locking.** Two engineers applying simultaneously against local state corrupts it. Use a shared backend with locking from day one.\n\n**Modules for repetition, not for everything.** Extract a module when a pattern recurs across environments. Premature abstraction produces modules with twenty parameters that are harder to read than the resources they wrap.\n\n**Separate state per environment.** A blast radius that spans production and staging is a design defect.\n\n## Drift\n\nSomeone makes a manual change in the console. Reality diverges from the code, and the next apply either reverts their fix or fails confusingly.\n\nDetect drift on a schedule and treat it as a defect. The underlying fix is usually access control: if people can change production by hand, they will, particularly during incidents.\n\n## Secrets\n\nNever in the code, and be aware that many tools store values in state files in plain text. Use a secrets manager and reference secrets rather than embedding them.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Observability: metrics, logs and traces",
+              "duration_minutes": 30,
+              "content": "## Monitoring versus observability\n\nMonitoring answers questions you thought of in advance -- is CPU high, is the service up. Observability is being able to answer questions you did not anticipate, from the data the system already emits.\n\nProduction failures are mostly the questions you did not anticipate.\n\n## The three signals\n\n**Metrics.** Numeric time series. Cheap to store, fast to query, good for alerting and trends. Poor for explaining a specific request, because aggregation discards the individual.\n\n**Logs.** Discrete events with context. Expensive at volume but essential for detail. Emit **structured** logs -- JSON with consistent fields -- so they can be queried rather than grepped.\n\n**Traces.** The path of one request across services, with timing per hop. The only practical way to find which of fifteen services caused a latency spike.\n\n## Alert on symptoms, not causes\n\nAlert when users are affected: elevated error rate, latency beyond the objective, a queue growing without bound.\n\nDo not page on high CPU. High CPU may be entirely fine. Cause-based alerts produce noise, noise produces ignored pages, and ignored pages produce missed incidents.\n\n## Percentiles, not averages\n\nAverage latency hides the tail. If the mean is 200ms and the 99th percentile is 8 seconds, one request in a hundred is unusable -- and at scale that is a large number of people. Track p50, p95 and p99.\n\n## Every alert needs a runbook\n\nAn alert that fires at 3am with no documented response wastes the on-call engineer's most expensive hours. If you cannot write down what to do about it, it should not page.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Running production",
+          "description": "Reliability targets, incidents and the review that actually changes something.",
+          "lessons": [
+            {
+              "title": "SLOs and error budgets",
+              "duration_minutes": 30,
+              "content": "## Why 100% is the wrong target\n\nPerfect availability is unachievable and pursuing it is economically irrational. Each additional nine costs disproportionately more, and beyond a point users cannot perceive the difference -- their own network is less reliable than your service.\n\n## The vocabulary\n\n- **SLI** - a measured indicator, such as the proportion of requests served successfully under 300ms.\n- **SLO** - your internal target for that indicator, such as 99.9% over 30 days.\n- **SLA** - a contractual commitment with financial consequences, always set looser than the SLO.\n\n## Error budgets\n\nAn SLO of 99.9% permits 0.1% failure -- roughly 43 minutes over 30 days. That is the error budget, and it converts reliability from an argument into a number.\n\n**Budget remaining:** ship features, take risks, deploy on Friday.\n\n**Budget exhausted:** feature work stops, reliability work starts, until the budget recovers.\n\nThis is the mechanism's real value. It replaces \"engineering wants to ship, operations wants stability\" with a shared measurement that both sides agreed on in advance, when nobody was under pressure.\n\n## Choosing a target\n\nSet SLOs from what users actually need, not from what sounds impressive. A batch reporting system does not need 99.99%; a payment path might. Setting every service to the same high target wastes effort where it does not matter and creates alert noise that erodes attention where it does.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Incident response",
+              "duration_minutes": 30,
+              "content": "## Roles first\n\nIn any incident beyond the trivial, name these explicitly and out loud:\n\n- **Incident commander** - coordinates, decides, and does not debug. The most common failure is the commander getting absorbed in the problem and nobody running the incident.\n- **Operations lead** - makes the changes.\n- **Communications lead** - updates stakeholders so the commander is not interrupted.\n\n## Mitigate before diagnosing\n\nRestore service first. Roll back, fail over, disable the feature flag, scale up. Understanding *why* is important and it is not urgent while users are affected.\n\nThe strongest instinct during an incident is to find the root cause. Resist it until service is restored.\n\n## Communicate on a timer\n\nUpdate on a fixed cadence -- every 30 minutes -- even when the update is \"still investigating, no change\". Silence is interpreted as absence, and generates interruptions that slow the response.\n\n## Keep a timeline\n\nSomeone records what was observed, what was tried, and when. Memory reconstructs incidents inaccurately and confidently. The timeline is the input to the review.\n\n## Declare early\n\nTeams systematically declare incidents too late, hoping the problem resolves itself. Declaring an incident that turns out to be minor costs a little coordination overhead. Not declaring one that turns out to be major costs hours.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Blameless reviews that change something",
+              "duration_minutes": 25,
+              "content": "## Why blameless\n\nNot for comfort -- for accuracy. If naming what you did leads to blame, people describe events carefully rather than completely, and the review is built on an incomplete account.\n\nThe premise: people act reasonably given the information available to them at the time. If the outcome was bad, the system made a bad action look reasonable. Fixing that is possible; making people more careful is not.\n\n## Avoid counterfactual thinking\n\n\"They should have checked the config first.\" That describes a world that did not happen and produces no change. Ask instead: what made not checking the config the reasonable action? Was the check undocumented, slow, or easy to forget under pressure? Those are fixable.\n\n## Structure\n\n1. **Timeline** - what happened, factually, with timestamps.\n2. **Impact** - who was affected, how many, for how long.\n3. **Contributing factors** - plural. Real incidents have several; \"the root cause\" is usually an oversimplification that lets you stop looking too early.\n4. **What went well** - detection, mitigation, communication. Reinforce what worked.\n5. **Action items** - each with an owner and a date.\n\n## The test of a good review\n\nDid it produce action items that are actually completed?\n\nA review generating twenty items that nobody does is worse than one generating two that get done, because it consumed the time and produced the appearance of learning. Prioritise ruthlessly, assign explicitly, and track completion in the same system as feature work.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Digital Marketing Fundamentals",
+      "slug": "digital-marketing-fundamentals",
+      "category": "digital-marketing",
+      "level": "beginner",
+      "icon": "megaphone",
+      "price": "0",
+      "duration_minutes": 300,
+      "certifications": [],
+      "short_description": "Search, content, analytics and paid channels, taught as a measurable system rather than a set of tactics.",
+      "description": "Digital marketing is usually taught as a list of channels. This course treats it as a measurement problem: what does a customer cost to acquire, what are they worth, and which activities actually move those two numbers.\n\nIt covers search fundamentals, content that compounds, analytics you can trust, paid acquisition arithmetic, email, and honest attribution -- including why last-click reporting systematically misleads.",
+      "learning_outcomes": [
+        "Calculate acquisition cost and customer value, and use the ratio to make decisions",
+        "Perform keyword research based on intent rather than volume",
+        "Apply on-page and technical SEO fundamentals",
+        "Set up analytics with events that reflect real business outcomes",
+        "Evaluate a paid campaign on contribution rather than clicks",
+        "Explain attribution models and the biases each one introduces"
+      ],
+      "requirements": [
+        "No prior marketing experience required",
+        "Basic spreadsheet comfort"
+      ],
+      "modules": [
+        {
+          "title": "The arithmetic underneath",
+          "description": "The two numbers that determine whether any marketing activity is worth doing.",
+          "lessons": [
+            {
+              "title": "Acquisition cost and customer value",
+              "duration_minutes": 25,
+              "content": "## Two numbers\n\n**Customer acquisition cost (CAC)** - total spend on acquiring customers over a period, divided by the number of customers acquired. Include ad spend, tooling, and the loaded cost of people doing the work. Excluding salaries produces a flattering number that leads to bad decisions.\n\n**Customer lifetime value (LTV)** - the gross margin a customer produces over their relationship with you. Margin, not revenue: a customer generating $1,000 of revenue at 20% margin is worth $200.\n\n## The ratio\n\nLTV divided by CAC is the summary judgement.\n\n- **Below 1** - you lose money on every customer. Growth accelerates the loss.\n- **Around 1-2** - marginal. Little room for error.\n- **Around 3** - generally healthy.\n- **Above 5** - often means you are under-investing and leaving growth unclaimed.\n\n## Payback period matters as much\n\nA good ratio with a two-year payback still consumes cash for two years. A business with limited cash needs a short payback period even at a lower ratio. Model both.\n\n## Segment before deciding\n\nBlended CAC across all channels hides everything useful. One channel at $40 and another at $300 average to a number that describes neither, and the decision -- spend more here, less there -- requires the split.\n\nThe same applies to LTV: segments differ enormously, and a channel with high CAC may be entirely justified if it brings the segment with triple the lifetime value.\n\n## Start here\n\nBefore optimising a headline or a bid, know these numbers. Most marketing decisions become straightforward once you do, and almost none are decidable without them.",
+              "is_preview": true,
+              "resources": []
+            },
+            {
+              "title": "Funnels and where they leak",
+              "duration_minutes": 25,
+              "content": "## The stages\n\nAwareness, consideration, conversion, retention. The labels matter less than the discipline of measuring the transition rate between each pair.\n\n## Find the leak before optimising anything\n\nIf 10,000 people visit, 500 start a trial, 50 convert and 40 stay past month three, the conversion rates are 5%, 10% and 80%.\n\nDoubling traffic doubles everything downstream and is expensive. Improving trial-to-paid from 10% to 15% costs nothing in media and produces the same absolute gain. The largest opportunity is almost always the worst-performing transition, not the top of the funnel -- and it is almost always where less attention is spent.\n\n## Instrument every step\n\nYou cannot improve a transition you do not measure. Each stage needs a defined, tracked event. Vague stages produce vague conclusions.\n\n## Cohorts, not aggregates\n\nAggregate conversion rate mixes people who arrived last week with people who arrived last year, and changes in mix look like changes in performance.\n\nGroup users by when they arrived and track each group separately. This is the only way to see whether a change actually improved anything, because it compares like with like.\n\n## Retention is the multiplier\n\nRetention appears at the bottom of the funnel and affects every number above it, because it determines lifetime value and therefore how much you can afford to spend acquiring. A product with weak retention cannot be fixed with marketing spend -- it can only be made to lose money faster.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Search and content",
+          "description": "Building traffic that compounds instead of stopping when spend stops.",
+          "lessons": [
+            {
+              "title": "Keyword research by intent",
+              "duration_minutes": 30,
+              "content": "## Intent beats volume\n\nSearch queries fall into four intents, and they convert very differently:\n\n- **Informational** - \"what is kubernetes\". High volume, low immediate commercial value, excellent for building an audience.\n- **Navigational** - \"aws console login\". Someone going somewhere specific. Not winnable unless it is your brand.\n- **Commercial investigation** - \"best cloud certification for beginners\". Actively comparing. High value.\n- **Transactional** - \"buy aws training course\". Ready to act. Highest value, lowest volume, most competition.\n\nA thousand monthly searches with transactional intent is worth more than fifty thousand informational ones. Ranking keyword lists by volume is the most common mistake in search strategy.\n\n## Check what already ranks\n\nBefore targeting a keyword, search it. The results tell you what the search engine believes the intent is. If the first page is entirely comparison articles, a product page will not rank there no matter how well optimised -- you are answering a different question than the one being asked.\n\n## Difficulty versus authority\n\nCompetitive terms require authority you may not have yet. Newer sites should start with specific, longer queries where the existing results are weak, build authority, then move up.\n\nA realistic first-year strategy is dozens of specific pages, not three competitive ones.\n\n## Cluster, do not scatter\n\nGroup related keywords into topics. One thorough page covering a topic and its related questions outperforms five thin pages splitting the same topic and competing with each other -- which is a self-inflicted problem search engines will not resolve for you.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "On-page and technical SEO",
+              "duration_minutes": 30,
+              "content": "## On-page essentials\n\n**Title tag.** The strongest single on-page signal and the headline in search results. Put the primary term near the front. Roughly 60 characters before truncation.\n\n**Meta description.** Not a ranking factor, but it is the ad copy for your result and it drives click-through rate. Write it for a human deciding whether to click.\n\n**One H1**, describing the page, followed by a real H2/H3 hierarchy. Headings are structure, not styling; skipping levels for visual reasons breaks the outline for screen readers as well as crawlers.\n\n**URLs** short, readable, lowercase, hyphen-separated, stable. Changing a URL discards its accumulated authority unless you redirect properly.\n\n**Internal links** with descriptive anchor text. They distribute authority and tell search engines how your content relates. This is the most under-used tactic in most content programmes.\n\n**Image alt text** describing the image. Accessibility first; search visibility follows.\n\n## Technical fundamentals\n\n**Crawlable.** If a crawler cannot reach a page, nothing else matters. Check robots.txt and make sure important pages are not blocked by accident.\n\n**Indexable.** A page with a noindex tag will not appear regardless of quality. Verify it on templates, where a single mistake affects every page using it.\n\n**Canonical URLs.** Filter and sort parameters create many URLs for the same content. Canonical tags consolidate the signals instead of splitting them.\n\n**Sitemap.** Generate it from your live content so it never goes stale.\n\n**Speed and stability.** Slow pages lose users before they lose rankings. Layout that shifts while loading causes mis-taps and is measured directly.\n\n**Mobile.** Indexing is mobile-first. The mobile rendering is the canonical one.\n\n**Structured data** where it accurately describes visible content. Marking up ratings or FAQs that do not appear on the page is a policy violation and risks manual action -- the short-term gain is not worth it.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Content that compounds",
+              "duration_minutes": 25,
+              "content": "## Why content differs from ads\n\nAn ad stops producing the moment you stop paying. A page that ranks keeps producing traffic for years at near-zero marginal cost. That is the entire argument for content, and it only holds if the content actually ranks.\n\n## What ranks\n\nContent that answers the query more completely and more usefully than what currently ranks. That is a high bar and it does not have a shortcut. Thin content produced at volume was viable a decade ago and is not now.\n\n## A working structure\n\n1. **Answer the question in the first paragraph.** Readers arriving from search have a specific question. Making them scroll past an introduction costs you most of them.\n2. **Then provide depth** for those who want it.\n3. **Use headings** so the page can be scanned.\n4. **Include specifics** -- numbers, examples, worked cases. Specificity is what distinguishes useful content from summarised consensus.\n5. **Link internally** to related material.\n\n## Update rather than accumulate\n\nRefreshing a page that already ranks is usually higher return than publishing a new one. Rankings drift as competitors update; keeping strong pages current defends traffic you already earned.\n\nAudit quarterly: find pages losing position, update them first.\n\n## Measuring honestly\n\nTraffic is a proxy. What matters is whether the traffic converts. A page attracting 10,000 uninterested visitors is worth less than one attracting 200 who become customers -- and reporting the first number is how content programmes survive without producing results.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Measurement and paid channels",
+          "description": "Analytics you can trust, and paid acquisition evaluated on contribution.",
+          "lessons": [
+            {
+              "title": "Analytics that measure outcomes",
+              "duration_minutes": 30,
+              "content": "## Measure decisions, not pageviews\n\nDefault analytics reports pageviews and sessions, which are inputs rather than outcomes. Define events that correspond to things your business cares about: signup started, signup completed, trial activated, purchase, subscription renewed.\n\n## Name events consistently\n\nAdopt a convention before you start -- `object_action` in lower snake case -- and document every event with its properties. Analytics implementations decay into unusable event lists within a year without this, and cleaning it up afterwards is far more work than doing it once.\n\n## Distinguish micro and macro conversions\n\nMacro conversions are the outcomes you care about: purchase, subscription. Micro conversions are leading indicators: email signup, pricing page view, documentation visit.\n\nMicro conversions arrive sooner and in larger numbers, which makes them useful for fast feedback -- provided you have verified they actually correlate with the macro conversion. Optimising a micro conversion that does not predict revenue is a common and expensive mistake.\n\n## Watch for tracking loss\n\nAd blockers, privacy settings, consent choices and cookie restrictions all remove data, and not at random. Users blocking trackers differ systematically from those who do not.\n\nTreat analytics as directionally useful rather than exact. When precision matters -- revenue reporting -- use server-side data from your own database, not the analytics tool.\n\n## Sanity-check against the source of truth\n\nIf analytics reports 340 purchases and the database says 380, find out why before making decisions from either. Unexplained gaps usually mean the tracking is broken somewhere specific.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Paid acquisition arithmetic",
+              "duration_minutes": 30,
+              "content": "## The only question\n\nDoes a dollar in produce more than a dollar of margin out, within an acceptable payback period? Everything else is detail.\n\n## The chain\n\nImpressions -> clicks (CTR) -> landing page visits -> conversions (CVR) -> customers -> margin.\n\nCost per acquisition = cost per click divided by conversion rate. A $2 click at 2% conversion is $100 per customer. Halving the click cost and halving the conversion rate leaves you exactly where you started -- which is why optimising one metric in isolation so often produces no change in outcome.\n\n## Where the leverage is\n\nConversion rate improvements usually beat bid optimisation, because conversion rate multiplies through the whole chain and is not competed away by other bidders.\n\nMessage-match is the cheapest available win: the landing page should continue the specific promise of the ad. Sending ad traffic to a generic homepage discards a large share of what you paid for.\n\n## Match structure to intent\n\n**Search** captures existing demand -- someone is already looking. Highest intent, most competitive, usually the best starting point.\n\n**Social and display** create demand among people who were not looking. Lower intent, cheaper clicks, needs stronger creative and a longer measurement window.\n\n**Retargeting** re-engages people who already visited. Cheap and effective, but reported performance is inflated -- many of those people would have returned anyway. Discount retargeting numbers accordingly.\n\n## Test properly\n\nChange one variable, run to a predetermined sample size, and decide at the end. Stopping a test the moment it looks favourable produces a stream of false positives, and it is the single most common way paid programmes convince themselves of things that are not true.",
+              "is_preview": false,
+              "resources": []
+            },
+            {
+              "title": "Attribution and its limits",
+              "duration_minutes": 25,
+              "content": "## The problem\n\nA customer sees a social ad, reads two articles, searches your brand, clicks a paid search ad and converts. Which touchpoint gets credit?\n\nEvery answer is a modelling choice, and every model is wrong in a specific direction.\n\n## The models\n\n**Last click.** All credit to the final touchpoint. The default in most tools, and the reason brand search and retargeting look extraordinary while everything that created the demand looks useless.\n\n**First click.** All credit to the first. The opposite bias -- over-credits discovery, ignores what closed.\n\n**Linear.** Equal credit to every touchpoint. Simple, and treats a passing impression as equal to the decisive interaction.\n\n**Time decay.** More credit to touchpoints nearer conversion. Reasonable for short cycles, still discounts early influence.\n\n**Data-driven.** Statistical estimation of incremental contribution. Best available, requires substantial volume, and is still a model.\n\n## What actually establishes causation\n\nHolding out. Turn a channel off for a defined period or a defined region and observe what happens to total conversions.\n\nThis is uncomfortable -- it means deliberately not spending -- and it is the only method that answers the real question: *what would have happened anyway?*\n\nChannels that look excellent under last-click attribution frequently show little incremental effect under a holdout, because they were capturing demand that already existed.\n\n## Practical position\n\nUse an attribution model for day-to-day directional decisions, and run periodic holdout tests for the decisions that matter -- budget allocation across channels. Never treat attributed conversions as a measurement of incremental value, because they are not one.",
+              "is_preview": false,
+              "resources": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

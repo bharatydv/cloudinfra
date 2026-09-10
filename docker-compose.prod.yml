@@ -1,0 +1,86 @@
+# Production stack for the single-VM Azure deployment.
+#
+# Standalone -- do NOT combine with docker-compose.yml, which publishes
+# development ports. Everything except Caddy stays on the internal network.
+#
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+name: learnbase
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-learnbase}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-learnbase}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # No published port: the database is reachable only from the compose network.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-learnbase} -d ${POSTGRES_DB:-learnbase}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-learnbase}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-learnbase}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - media_data:/app/uploads
+      # app/seed/run.py resolves its JSON at /database/seed, which lives outside
+      # the backend build context -- mount it so seeding works in the container.
+      - ./database/seed:/database/seed:ro
+    # forwarded-allow-ips is needed for rate limiting to see the real client IP:
+    # the immediate peer is the frontend container, not 127.0.0.1.
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+             --proxy-headers --forwarded-allow-ips='*'"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Same-origin: the SPA calls /api, which its own nginx proxies to the
+        # backend. No cross-origin request, so no CORS preflight in the browser.
+        VITE_API_BASE_URL: /api
+        VITE_SITE_URL: ${PUBLIC_SITE_URL:?PUBLIC_SITE_URL is required}
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?SITE_DOMAIN is required}
+      TLS_EMAIL: ${TLS_EMAIL:?TLS_EMAIL is required}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/azure/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Certificates live here; losing this volume means re-issuing from
+      # Let's Encrypt, which is rate limited.
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+
+volumes:
+  postgres_data:
+  media_data:
+  caddy_data:
+  caddy_config:

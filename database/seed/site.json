@@ -1,0 +1,271 @@
+{
+  "faqs": [
+    {
+      "question": "What certifications can I prepare for?",
+      "answer": "We publish independent preparation material for widely recognised technology certifications across cloud, data, AI and DevOps. Each certification page lists the exam objectives it covers, recommended courses and study resources. Exams are booked and awarded by the certification vendor, not by us.",
+      "category": "home",
+      "position": 1,
+      "is_published": true
+    },
+    {
+      "question": "Are the courses beginner friendly?",
+      "answer": "Yes. Every course is labelled Beginner, Intermediate or Advanced, and the beginner tracks assume no prior experience. Each course page lists its prerequisites up front so you can tell before enrolling whether it is the right starting point.",
+      "category": "home",
+      "position": 2,
+      "is_published": true
+    },
+    {
+      "question": "Are courses self-paced?",
+      "answer": "All courses are self-paced. Lessons stay available once you enroll, your progress is saved automatically, and you can pick up on any device from wherever you stopped.",
+      "category": "home",
+      "position": 3,
+      "is_published": true
+    },
+    {
+      "question": "Do I receive a course completion certificate?",
+      "answer": "Yes. Completing every lesson in a course issues a completion certificate from this platform. It records what you finished here and is not a vendor certification -- those are earned by passing the vendor's own exam.",
+      "category": "home",
+      "position": 4,
+      "is_published": true
+    },
+    {
+      "question": "How does certification preparation work?",
+      "answer": "Each certification page maps the published exam objectives to a preparation roadmap, related courses and study resources. You work through the roadmap, use the practice resources to find gaps, then book the exam directly with the certification provider.",
+      "category": "home",
+      "position": 5,
+      "is_published": true
+    },
+    {
+      "question": "Can I access courses on mobile?",
+      "answer": "Yes. The site is fully responsive, and the lesson player, progress tracking and dashboard all work on phones and tablets.",
+      "category": "home",
+      "position": 6,
+      "is_published": true
+    },
+    {
+      "question": "Do you provide practice tests?",
+      "answer": "We publish practice resources and knowledge checks built from public exam objectives. They are study aids for finding weak areas -- they are not real exam questions and they are not supplied by the certification vendors.",
+      "category": "home",
+      "position": 7,
+      "is_published": true
+    },
+    {
+      "question": "How can I contact support?",
+      "answer": "Use the contact form and our team will reply by email. Include your account email and the course or certification involved so we can help faster.",
+      "category": "home",
+      "position": 8,
+      "is_published": true
+    },
+    {
+      "question": "Do I need to pay to start learning?",
+      "answer": "Free courses can be started as soon as you create an account. Paid courses require checkout, and access is granted once the payment is confirmed.",
+      "category": "courses",
+      "position": 1,
+      "is_published": true
+    },
+    {
+      "question": "Can I retake lessons?",
+      "answer": "Yes, as often as you like. Marking a lesson complete only updates your progress; the content stays available.",
+      "category": "courses",
+      "position": 2,
+      "is_published": true
+    },
+    {
+      "question": "How long do I keep access?",
+      "answer": "Enrollments do not expire. Once you are enrolled, the course stays in your dashboard.",
+      "category": "courses",
+      "position": 3,
+      "is_published": true
+    },
+    {
+      "question": "Are you affiliated with the certification providers?",
+      "answer": "No. This platform is independent. We are not affiliated with, endorsed by, or authorised as a training partner of any certification vendor, and we do not issue vendor certifications. All vendor names are used only to describe what our preparation material covers.",
+      "category": "certifications",
+      "position": 1,
+      "is_published": true
+    },
+    {
+      "question": "Where do I book the actual exam?",
+      "answer": "Directly with the certification provider. Each certification page links to the vendor's official page, which is the authoritative source for exam cost, format, scheduling and policy.",
+      "category": "certifications",
+      "position": 2,
+      "is_published": true
+    },
+    {
+      "question": "How current is the exam information?",
+      "answer": "We update certification pages when vendors publish objective changes. Because vendors can change exams at any time, always confirm the details on the official page before booking.",
+      "category": "certifications",
+      "position": 3,
+      "is_published": true
+    },
+    {
+      "question": "How long does preparation usually take?",
+      "answer": "It depends on your starting point. Each certification includes a suggested roadmap with rough time estimates per stage, which you can compress or extend to fit.",
+      "category": "certifications",
+      "position": 4,
+      "is_published": true
+    },
+    {
+      "question": "Who is this platform for?",
+      "answer": "Students, recent graduates and working professionals who want structured, practical technology skills and a clear path toward a certification.",
+      "category": "about",
+      "position": 1,
+      "is_published": true
+    },
+    {
+      "question": "How is the content produced?",
+      "answer": "Courses and guides are written in-house against published exam objectives and current vendor documentation, then revised as those sources change.",
+      "category": "about",
+      "position": 2,
+      "is_published": true
+    },
+    {
+      "question": "Do you guarantee a job or a passing score?",
+      "answer": "No, and we will not claim otherwise. We provide structured learning material and practice resources; outcomes depend on your own preparation and the vendor's exam.",
+      "category": "about",
+      "position": 3,
+      "is_published": true
+    }
+  ],
+  "testimonials": [
+    {
+      "user_name": "Demo Learner A",
+      "role": "Placeholder profile - sample content",
+      "content": "Placeholder testimonial used to demonstrate layout during development. Replace with a real, attributed quote before launch.",
+      "rating": 5,
+      "position": 1,
+      "is_published": true,
+      "is_demo": true
+    },
+    {
+      "user_name": "Demo Learner B",
+      "role": "Placeholder profile - sample content",
+      "content": "Placeholder testimonial used to demonstrate layout during development. Replace with a real, attributed quote before launch.",
+      "rating": 5,
+      "position": 2,
+      "is_published": true,
+      "is_demo": true
+    },
+    {
+      "user_name": "Demo Learner C",
+      "role": "Placeholder profile - sample content",
+      "content": "Placeholder testimonial used to demonstrate layout during development. Replace with a real, attributed quote before launch.",
+      "rating": 4,
+      "position": 3,
+      "is_published": true,
+      "is_demo": true
+    }
+  ],
+  "settings": [
+    {
+      "key": "brand",
+      "is_public": true,
+      "description": "Brand identity. Change here to rebrand without touching code.",
+      "value": {
+        "brandName": "LearnBase",
+        "brandTagline": "Learn. Get Certified. Build Your Future.",
+        "brandDescription": "Structured courses and independent certification preparation resources for cloud, AI, data and DevOps careers.",
+        "logo": null,
+        "logoMark": "LB",
+        "primaryDomain": "example.com",
+        "supportEmail": "support@example.com",
+        "socialLinks": {
+          "linkedin": null,
+          "x": null,
+          "youtube": null,
+          "github": null
+        }
+      }
+    },
+    {
+      "key": "contact",
+      "is_public": true,
+      "description": "Contact details shown on /contact and in the footer. Blank fields are hidden.",
+      "value": {
+        "email": "support@example.com",
+        "phone": null,
+        "address": null,
+        "responseTime": "We usually reply within two business days."
+      }
+    },
+    {
+      "key": "about",
+      "is_public": true,
+      "description": "Editable copy for the About page.",
+      "value": {
+        "story": "This platform started from a simple observation: most people preparing for a technology certification are not short of material, they are short of structure. Documentation, videos and forum threads are scattered, inconsistent in depth, and rarely mapped to what an exam actually tests. We build the missing layer -- ordered paths that connect fundamentals, practice and exam objectives.",
+        "mission": "Make structured, honest technology education accessible to anyone willing to put in the work.",
+        "vision": "A learner anywhere can go from curiosity to job-ready competence without guessing what to study next.",
+        "whyWeExist": "Certification preparation is full of shortcuts that do not survive contact with a real exam or a real job. We would rather teach the underlying concepts and be explicit about what we are not: we are independent, we do not issue vendor certifications, and we do not promise outcomes we cannot control.",
+        "values": [
+          {
+            "title": "Accuracy over hype",
+            "description": "We describe what our material covers and link to the vendor for anything authoritative."
+          },
+          {
+            "title": "Structure over volume",
+            "description": "A shorter ordered path beats an endless content library."
+          },
+          {
+            "title": "Practice over passive watching",
+            "description": "Every module ends with something you have to do."
+          }
+        ],
+        "team": [],
+        "achievements": [],
+        "achievementsNote": "We publish metrics here only once they are real and verifiable."
+      }
+    },
+    {
+      "key": "legal",
+      "is_public": true,
+      "description": "Legal page copy rendered at /privacy, /terms, /refund-policy, /disclaimer, /cookie-policy.",
+      "value": {
+        "lastUpdated": "2026-09-08",
+        "companyName": "LearnBase",
+        "disclaimer": "This platform is independent. It is not affiliated with, endorsed by, sponsored by, or an authorised training partner of any certification provider. Product and certification names are the trademarks of their respective owners and are used only to describe the subject matter of our preparation material. We do not issue vendor certifications and we do not guarantee exam results, employment or salary outcomes. Always confirm exam details on the certification provider's official website.",
+        "privacy": "We collect the minimum data needed to operate accounts, enrollments and progress tracking: your name, email address, hashed password and learning activity. We do not sell personal data. You can request export or deletion of your account data at any time using the contact form.",
+        "terms": "By using this platform you agree to use it lawfully, to keep your account credentials secure, and not to redistribute course material. Accounts may be suspended for abuse. Course content may be updated or withdrawn as the underlying technology changes.",
+        "refund": "Paid enrollments can be refunded within 14 days of purchase if you have completed less than 25% of the course. Request a refund through the contact form with your order reference. Refunds are returned to the original payment method.",
+        "cookies": "We use strictly necessary cookies for authentication and session handling. Analytics, if enabled, is configured to be privacy respecting and can be declined without losing functionality."
+      }
+    },
+    {
+      "key": "learning_path",
+      "is_public": true,
+      "description": "Stages shown in the homepage learning path section.",
+      "value": {
+        "steps": [
+          {
+            "title": "Discover",
+            "description": "Find the role or certification you are aiming at and see exactly what it requires."
+          },
+          {
+            "title": "Learn fundamentals",
+            "description": "Work through structured lessons that build the underlying concepts first."
+          },
+          {
+            "title": "Practice",
+            "description": "Use knowledge checks and practice resources to find the gaps early."
+          },
+          {
+            "title": "Build projects",
+            "description": "Apply the concepts to something real so the knowledge sticks."
+          },
+          {
+            "title": "Certification preparation",
+            "description": "Map what you know onto the published exam objectives and close the remainder."
+          },
+          {
+            "title": "Certification exam",
+            "description": "Book and sit the exam with the certification provider."
+          },
+          {
+            "title": "Career growth",
+            "description": "Turn the credential and the projects into interviews and better work."
+          }
+        ]
+      }
+    }
+  ]
+}
