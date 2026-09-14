@@ -26,7 +26,6 @@ import { siteConfig } from '@/config/brand'
 import { useAuth } from '@/hooks/useAuth'
 import { useSeo } from '@/hooks/useSeo'
 import { useSite } from '@/hooks/useSite'
-import { NOINDEX } from '@/lib/seo'
 import type { ExamCheckout as ExamCheckoutPayload } from '@/types/api'
 import { AnalyticsEvent, track } from '@/lib/analytics'
 import { queryKeys } from '@/lib/queryClient'
@@ -126,10 +125,10 @@ export default function ScheduleExamPage() {
   useSeo({
     title: 'Schedule a certification exam',
     description:
-      'Request a certification exam slot. Tell us the exam, your preferred date and how you want to sit it, and our team will confirm by email.',
-    // A request form has nothing to rank for and should not compete with the
-    // certification pages themselves.
-    robots: NOINDEX,
+      'Book your certification exam slot online. Choose the exam, your preferred date and whether you sit it online-proctored or at a test centre, and our team confirms by email.',
+    // Indexed deliberately: this is the booking page, and "schedule <exam>"
+    // is commercial-intent search. It carries its own pricing and FAQ content,
+    // so it complements the certification pages rather than competing.
   })
 
   const {
