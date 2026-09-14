@@ -24,7 +24,7 @@ os.environ.setdefault("ENVIRONMENT", "test")
 os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 
 from app.core.config import settings  # noqa: E402
-from app.core.deps import get_current_user  # noqa: E402
+from app.core.deps import get_current_user, get_optional_user  # noqa: E402
 from app.core.security import hash_password  # noqa: E402
 from app.db.base import Base  # noqa: E402
 from app.db.session import get_db  # noqa: E402
@@ -140,15 +140,22 @@ async def admin(db_session: AsyncSession) -> User:
 
 
 def auth_override(user: User):
-    """Bypass token issuance when a test only needs an authenticated identity."""
+    """Bypass token issuance when a test only needs an authenticated identity.
+
+    Both dependency flavours are overridden so endpoints that merely personalise
+    their output (`OptionalUser`) see the same signed-in identity as the ones
+    that require a session.
+    """
 
     async def _current_user() -> User:
         return user
 
     app.dependency_overrides[get_current_user] = _current_user
+    app.dependency_overrides[get_optional_user] = _current_user
 
 
 @pytest.fixture(autouse=True)
 def _clear_auth_override():
     yield
     app.dependency_overrides.pop(get_current_user, None)
+    app.dependency_overrides.pop(get_optional_user, None)

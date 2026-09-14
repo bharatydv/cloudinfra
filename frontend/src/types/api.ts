@@ -11,6 +11,14 @@ export type CertificationLevel =
 export type ContentStatus = 'draft' | 'scheduled' | 'published' | 'archived'
 export type EnrollmentStatus = 'active' | 'completed' | 'cancelled'
 export type ContactStatus = 'new' | 'read' | 'resolved'
+export type ExamBookingStatus =
+  | 'new'
+  | 'contacted'
+  | 'scheduled'
+  | 'completed'
+  | 'cancelled'
+export type ExamDeliveryMode = 'online_proctored' | 'test_center'
+export type ExamTimeSlot = 'morning' | 'afternoon' | 'evening'
 export type PaymentStatus = 'pending' | 'successful' | 'failed' | 'refunded'
 export type ResourceType =
   | 'guide'
@@ -499,6 +507,45 @@ export interface ContactMessage {
   created_at: string
 }
 
+export interface ExamBooking {
+  id: string
+  reference_code: string
+  user_id: string | null
+  full_name: string
+  email: string
+  phone: string
+  country: string
+  city: string | null
+  certification_id: string | null
+  certification_name: string
+  exam_code: string | null
+  preferred_date: string
+  alternate_date: string | null
+  preferred_time_slot: string
+  timezone: string
+  delivery_mode: ExamDeliveryMode
+  status: ExamBookingStatus
+  admin_notes: string | null
+  created_at: string
+}
+
+/** What the confirmation screen needs to route the applicant onwards. */
+export interface ExamBookingReceipt {
+  message: string
+  reference_code: string
+  certification_name: string
+  certification_url: string | null
+}
+
+/** Minimal certification record used to populate the scheduling form. */
+export interface CertificationOption {
+  id: string
+  name: string
+  exam_code: string | null
+  provider_name: string
+  url: string
+}
+
 export interface Payment {
   id: string
   course_id: string | null
@@ -514,6 +561,7 @@ export interface Payment {
 export interface AdminDashboard {
   stats: {
     users: number
+    active_users: number
     students: number
     courses: number
     published_courses: number
@@ -524,6 +572,8 @@ export interface AdminDashboard {
     active_enrollments: number
     contact_messages: number
     new_contact_messages: number
+    exam_bookings: number
+    new_exam_bookings: number
     revenue_total: string
     revenue_currency: string
   }
@@ -542,6 +592,15 @@ export interface AdminDashboard {
     enrolled_at: string
   }>
   recent_messages: ContactMessage[]
+  recent_exam_bookings: Array<{
+    id: string
+    reference_code: string
+    full_name: string
+    certification_name: string
+    preferred_date: string
+    status: string
+    created_at: string
+  }>
 }
 
 export interface ApiErrorBody {

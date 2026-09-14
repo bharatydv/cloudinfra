@@ -10,6 +10,7 @@ import type {
   Certificate,
   CertificationCard,
   CertificationDetail,
+  CertificationOption,
   CertificationResource,
   ContactMessage,
   CourseCard,
@@ -19,6 +20,8 @@ import type {
   CourseProgress,
   DashboardOverview,
   Enrollment,
+  ExamBooking,
+  ExamBookingReceipt,
   Faq,
   HomePayload,
   LearnCourse,
@@ -149,6 +152,31 @@ export const getPracticeResources = () =>
   api.get<CertificationResource[]>('/certification-resources/practice', { auth: false })
 
 /* -------------------------------------------------------------------------- */
+/* Exam scheduling                                                            */
+/* -------------------------------------------------------------------------- */
+export interface ExamBookingPayload {
+  full_name: string
+  email: string
+  phone: string
+  country: string
+  city?: string | null
+  certification_id: string
+  preferred_date: string
+  alternate_date?: string | null
+  preferred_time_slot: string
+  timezone: string
+  delivery_mode: string
+  /** Honeypot. Always submitted empty by real people. */
+  website?: string
+}
+
+export const getCertificationOptions = () =>
+  api.get<CertificationOption[]>('/exam-bookings/options', { auth: false })
+
+export const submitExamBooking = (payload: ExamBookingPayload) =>
+  api.post<ExamBookingReceipt>('/exam-bookings', payload)
+
+/* -------------------------------------------------------------------------- */
 /* Articles                                                                   */
 /* -------------------------------------------------------------------------- */
 export interface ArticleFilters {
@@ -257,7 +285,9 @@ export const trackEvent = (payload: {
 /* -------------------------------------------------------------------------- */
 export const getAdminDashboard = () => api.get<AdminDashboard>('/admin/dashboard')
 
-export const getAdminUsers = (query: { page?: number; q?: string; role?: string } = {}) =>
+export const getAdminUsers = (
+  query: { page?: number; q?: string; role?: string; is_active?: boolean } = {},
+) =>
   api.get<Page<User>>('/admin/users', { query })
 
 export const updateAdminUser = (
@@ -355,6 +385,17 @@ export const deleteTestimonial = (id: string) => api.delete(`/admin/testimonials
 
 export const getAdminEnrollments = (query: { page?: number } = {}) =>
   api.get<Page<Enrollment>>('/admin/enrollments', { query })
+
+export const getAdminExamBookings = (
+  query: { page?: number; q?: string; booking_status?: string } = {},
+) => api.get<Page<ExamBooking>>('/admin/exam-bookings', { query })
+
+export const updateExamBooking = (
+  id: string,
+  payload: { status?: string; admin_notes?: string },
+) => api.put<ExamBooking>(`/admin/exam-bookings/${id}`, payload)
+
+export const deleteExamBooking = (id: string) => api.delete(`/admin/exam-bookings/${id}`)
 
 export const getAdminPayments = (query: { page?: number } = {}) =>
   api.get<Page<Payment>>('/admin/payments', { query })

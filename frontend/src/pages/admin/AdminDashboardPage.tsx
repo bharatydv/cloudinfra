@@ -1,6 +1,14 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Award, BookOpen, DollarSign, FileText, Mail, Users } from 'lucide-react'
+import {
+  Award,
+  BookOpen,
+  CalendarCheck,
+  DollarSign,
+  FileText,
+  Mail,
+  Users,
+} from 'lucide-react'
 
 import { AdminPageHeader } from '@/components/admin/DataTable'
 import { StatsCard } from '@/components/cards/misc'
@@ -33,9 +41,16 @@ export default function AdminDashboardPage() {
             <StatsCard
               label="Total users"
               value={data.stats.users}
-              hint={`${data.stats.students} students`}
+              hint={`${data.stats.active_users} active · ${data.stats.students} students`}
               icon={<Users className="h-4 w-4" aria-hidden="true" />}
               tone="brand"
+            />
+            <StatsCard
+              label="Exam requests"
+              value={data.stats.exam_bookings}
+              hint={`${data.stats.new_exam_bookings} awaiting action`}
+              icon={<CalendarCheck className="h-4 w-4" aria-hidden="true" />}
+              tone={data.stats.new_exam_bookings > 0 ? 'brand' : undefined}
             />
             <StatsCard
               label="Courses"
@@ -67,6 +82,46 @@ export default function AdminDashboardPage() {
               icon={<DollarSign className="h-4 w-4" aria-hidden="true" />}
             />
           </div>
+
+          <Card className="p-5">
+            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-ink-500">
+              <CalendarCheck className="h-4 w-4" aria-hidden="true" />
+              Latest exam requests
+              {data.stats.new_exam_bookings > 0 && (
+                <Badge tone="warning">{data.stats.new_exam_bookings} new</Badge>
+              )}
+            </h2>
+            <ul className="mt-4 divide-y divide-ink-200">
+              {data.recent_exam_bookings.length === 0 && (
+                <li className="py-3 text-sm text-ink-500">No exam requests yet.</li>
+              )}
+              {data.recent_exam_bookings.map((booking) => (
+                <li
+                  key={booking.id}
+                  className="flex flex-wrap items-center justify-between gap-2 py-3"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-ink-900">
+                      {booking.certification_name}
+                    </p>
+                    <p className="truncate text-xs text-ink-500">
+                      {booking.reference_code} &middot; {booking.full_name} &middot; prefers{' '}
+                      {formatDate(booking.preferred_date)}
+                    </p>
+                  </div>
+                  <Badge tone={booking.status === 'new' ? 'warning' : 'neutral'}>
+                    {booking.status}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+            <Link
+              to="/admin/exam-bookings"
+              className="mt-4 inline-block text-sm font-semibold text-brand-700 hover:underline"
+            >
+              Manage exam requests
+            </Link>
+          </Card>
 
           <div className="grid gap-6 xl:grid-cols-3">
             <Card className="p-5">

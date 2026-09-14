@@ -17,6 +17,7 @@ import { CourseCard } from '@/components/cards/CourseCard'
 import { ResourceCard } from '@/components/cards/misc'
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
 import { CTASection } from '@/components/marketing/sections'
+import { ScheduleExamLink } from '@/components/scheduling/ScheduleExamCta'
 import { Accordion } from '@/components/ui/Accordion'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
@@ -31,6 +32,7 @@ import { AnalyticsEvent, track } from '@/lib/analytics'
 import { formatLevel } from '@/lib/format'
 import { Markdown } from '@/lib/markdown'
 import { queryKeys } from '@/lib/queryClient'
+import { scheduleExamPath } from '@/lib/scheduling'
 import type { CertificationResource } from '@/types/api'
 
 export default function CertificationDetailPage() {
@@ -139,8 +141,12 @@ export default function CertificationDetailPage() {
               </dl>
 
               <div className="mt-8 flex flex-wrap gap-3">
+                {/* The exam is known here, so the form opens already filled in. */}
+                <ScheduleExamLink certificationId={data.id} cta="cert_detail_schedule" />
                 <Button
                   size="lg"
+                  variant="outline"
+                  className="border-white/25 bg-transparent text-white hover:bg-white/10"
                   onClick={() => {
                     document
                       .getElementById('roadmap')
@@ -203,6 +209,15 @@ export default function CertificationDetailPage() {
                   </div>
                 )}
               </dl>
+
+              <ScheduleExamLink
+                certificationId={data.id}
+                size="md"
+                className="mt-5 w-full"
+                cta="cert_sidebar_schedule"
+              >
+                Schedule this exam
+              </ScheduleExamLink>
 
               {data.official_url && (
                 <a
@@ -454,10 +469,10 @@ export default function CertificationDetailPage() {
       )}
 
       <CTASection
-        title="Start preparing for this certification"
-        description="Work the roadmap, use the practice resources, then book the exam with the provider."
-        primary={{ label: 'Browse Courses', to: '/courses' }}
-        secondary={{ label: 'All Certifications', to: '/certifications' }}
+        title="Ready to sit this exam?"
+        description="Work the roadmap, use the practice resources, then tell us when you want to sit it."
+        primary={{ label: 'Schedule this exam', to: scheduleExamPath(data.id) }}
+        secondary={{ label: 'Browse Courses', to: '/courses' }}
       />
 
       <Modal

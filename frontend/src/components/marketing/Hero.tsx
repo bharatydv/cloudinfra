@@ -1,5 +1,6 @@
 import { ArrowRight, CheckCircle2, GraduationCap, Layers, Target } from 'lucide-react'
 
+import { ScheduleExamButton } from '@/components/scheduling/ScheduleExamCta'
 import { ButtonLink } from '@/components/ui/Button'
 import { Container } from '@/components/ui/primitives'
 import { AnalyticsEvent, track } from '@/lib/analytics'
@@ -60,9 +61,12 @@ export function Hero() {
             </ul>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              {/* No certification is in context here, so this asks which way to go. */}
+              <ScheduleExamButton />
               <ButtonLink
                 to="/certifications"
                 size="lg"
+                variant="outline"
                 trailingIcon={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
                 onClick={() =>
                   track(AnalyticsEvent.CtaClicked, { properties: { cta: 'hero_certifications' } })
@@ -73,7 +77,7 @@ export function Hero() {
               <ButtonLink
                 to="/courses"
                 size="lg"
-                variant="outline"
+                variant="ghost"
                 onClick={() =>
                   track(AnalyticsEvent.CtaClicked, { properties: { cta: 'hero_courses' } })
                 }

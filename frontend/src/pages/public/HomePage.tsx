@@ -192,7 +192,12 @@ export default function HomePage() {
         </>
       )}
 
-      <CTASection />
+      <CTASection
+        title="Ready to sit your certification exam?"
+        description="Tell us which exam you want and when suits you. Our team confirms your slot by email."
+        primary={{ label: 'Schedule an Exam', to: '/schedule-exam' }}
+        secondary={{ label: 'Explore Certifications', to: '/certifications' }}
+      />
     </>
   )
 }

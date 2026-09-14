@@ -10,8 +10,8 @@ from app.core.errors import NotFoundError, ValidationFailedError
 from app.core.pagination import Page, PageParams, page_params
 from app.models.commerce import Payment
 from app.models.content import Faq, Testimonial
-from app.models.enums import ContactStatus, PaymentStatus, UserRole
-from app.repositories import engagement_repo, misc_repo, user_repo
+from app.models.enums import ContactStatus, ExamBookingStatus, PaymentStatus, UserRole
+from app.repositories import engagement_repo, misc_repo, scheduling_repo, user_repo
 from app.schemas.auth import AdminUserUpdate, UserRead
 from app.schemas.common import Message
 from app.schemas.content import (
@@ -23,6 +23,7 @@ from app.schemas.content import (
     TestimonialWrite,
 )
 from app.schemas.engagement import EnrollmentRead
+from app.schemas.scheduling import ExamBookingRead, ExamBookingUpdate
 from app.schemas.system import (
     AdminDashboard,
     ContactRead,
@@ -31,7 +32,7 @@ from app.schemas.system import (
     SiteSettingRead,
     SiteSettingWrite,
 )
-from app.services import admin_service, contact_service
+from app.services import admin_service, contact_service, scheduling_service
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 Params = Annotated[PageParams, Depends(page_params)]
@@ -104,6 +105,44 @@ async def list_enrollments(
         total,
         params,
     )
+
+
+# --- Exam scheduling requests ----------------------------------------------
+@router.get("/exam-bookings", response_model=Page[ExamBookingRead])
+async def list_exam_bookings(
+    db: DbSession,
+    params: Params,
+    _: AdminUser,
+    q: str | None = None,
+    booking_status: ExamBookingStatus | None = None,
+    certification_id: uuid.UUID | None = None,
+) -> Page[ExamBookingRead]:
+    items, total = await scheduling_repo.list_bookings(
+        db,
+        params,
+        status=booking_status.value if booking_status else None,
+        search=q,
+        certification_id=certification_id,
+    )
+    return Page.create(
+        [ExamBookingRead.model_validate(item) for item in items], total, params
+    )
+
+
+@router.put("/exam-bookings/{booking_id}", response_model=ExamBookingRead)
+async def update_exam_booking(
+    booking_id: uuid.UUID, payload: ExamBookingUpdate, db: DbSession, _: AdminUser
+) -> ExamBookingRead:
+    booking = await scheduling_service.update_booking(db, booking_id, payload)
+    return ExamBookingRead.model_validate(booking)
+
+
+@router.delete("/exam-bookings/{booking_id}", response_model=Message)
+async def delete_exam_booking(
+    booking_id: uuid.UUID, db: DbSession, _: AdminUser
+) -> Message:
+    await scheduling_service.delete_booking(db, booking_id)
+    return Message(message="Exam request deleted.")
 
 
 # --- Payments --------------------------------------------------------------

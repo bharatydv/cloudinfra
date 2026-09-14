@@ -51,6 +51,7 @@ export const siteConfig = {
 export const navigation = [
   { label: 'Home', to: '/' },
   { label: 'Certifications', to: '/certifications' },
+  { label: 'Schedule Exam', to: '/schedule-exam' },
   { label: 'Courses', to: '/courses' },
   { label: 'Resources', to: '/resources' },
   { label: 'About', to: '/about' },
@@ -61,6 +62,7 @@ export const footerNavigation = {
   learn: [
     { label: 'All courses', to: '/courses' },
     { label: 'Certifications', to: '/certifications' },
+    { label: 'Schedule an exam', to: '/schedule-exam' },
     { label: 'Resources', to: '/resources' },
     { label: 'Search', to: '/search' },
   ],

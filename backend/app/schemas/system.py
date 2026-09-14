@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
@@ -120,6 +120,7 @@ class SiteSettingWrite(BaseModel):
 
 class AdminStatCounts(BaseModel):
     users: int
+    active_users: int
     students: int
     courses: int
     published_courses: int
@@ -130,6 +131,8 @@ class AdminStatCounts(BaseModel):
     active_enrollments: int
     contact_messages: int
     new_contact_messages: int
+    exam_bookings: int
+    new_exam_bookings: int
     revenue_total: Decimal
     revenue_currency: str
 
@@ -150,8 +153,19 @@ class AdminRecentEnrollment(BaseModel):
     enrolled_at: datetime
 
 
+class AdminRecentExamBooking(BaseModel):
+    id: uuid.UUID
+    reference_code: str
+    full_name: str
+    certification_name: str
+    preferred_date: date
+    status: str
+    created_at: datetime
+
+
 class AdminDashboard(BaseModel):
     stats: AdminStatCounts
     recent_users: list[AdminRecentUser] = []
     recent_enrollments: list[AdminRecentEnrollment] = []
     recent_messages: list[ContactRead] = []
+    recent_exam_bookings: list[AdminRecentExamBooking] = []

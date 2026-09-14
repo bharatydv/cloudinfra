@@ -24,6 +24,7 @@ from app.models.engagement import (
     LessonProgress,
     SavedCertification,
 )
+from app.models.scheduling import ExamBooking
 from app.models.system import AnalyticsEvent, ContactMessage, MediaAsset, SiteSetting
 from app.models.user import PasswordResetToken, RefreshToken, User
 
@@ -42,6 +43,7 @@ __all__ = [
     "CourseModule",
     "CourseReview",
     "Enrollment",
+    "ExamBooking",
     "Faq",
     "Lesson",
     "LessonProgress",

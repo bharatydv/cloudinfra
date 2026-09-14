@@ -51,6 +51,21 @@ class ContactStatus(StrEnum):
     RESOLVED = "resolved"
 
 
+class ExamBookingStatus(StrEnum):
+    """Lifecycle of an exam scheduling request submitted from the public site."""
+
+    NEW = "new"
+    CONTACTED = "contacted"
+    SCHEDULED = "scheduled"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
+class ExamDeliveryMode(StrEnum):
+    ONLINE_PROCTORED = "online_proctored"
+    TEST_CENTER = "test_center"
+
+
 class ResourceType(StrEnum):
     GUIDE = "guide"
     ROADMAP = "roadmap"

@@ -27,6 +27,7 @@ import {
 } from '@/api/endpoints'
 import { ApiError } from '@/api/client'
 import { useAuth } from '@/hooks/useAuth'
+import { useDebounce } from '@/hooks/useDebounce'
 import { useToast } from '@/hooks/useToast'
 import { formatDate, formatPrice } from '@/lib/format'
 import { queryKeys } from '@/lib/queryClient'
@@ -45,11 +46,19 @@ import type {
 /* -------------------------------------------------------------------------- */
 export function AdminUsersPage() {
   const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  // '' = everyone, 'true' = active only, 'false' = deactivated only.
+  const [activeFilter, setActiveFilter] = useState('')
   const queryClient = useQueryClient()
   const toast = useToast()
   const { user: currentUser } = useAuth()
+  const debouncedSearch = useDebounce(search, 300)
 
-  const query = { page }
+  const query = {
+    page,
+    q: debouncedSearch || undefined,
+    is_active: activeFilter === '' ? undefined : activeFilter === 'true',
+  }
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.adminUsers(query),
     queryFn: () => getAdminUsers(query),
@@ -124,7 +133,48 @@ export function AdminUsersPage() {
 
   return (
     <>
-      <AdminPageHeader title="Users" description="Manage roles and account status." />
+      <AdminPageHeader
+        title="Users"
+        description={
+          data
+            ? `${data.total} ${data.total === 1 ? 'account' : 'accounts'} matching this view.`
+            : 'Manage roles and account status.'
+        }
+      />
+
+      <Card className="mb-4 flex flex-col gap-3 p-4 sm:flex-row sm:items-end">
+        <div className="min-w-0 flex-1">
+          <Field label="Search" htmlFor="user-search">
+            <Input
+              id="user-search"
+              type="search"
+              placeholder="Name or email"
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value)
+                setPage(1)
+              }}
+            />
+          </Field>
+        </div>
+        <div className="sm:w-56">
+          <Field label="Account status" htmlFor="user-status">
+            <Select
+              id="user-status"
+              value={activeFilter}
+              onChange={(event) => {
+                setActiveFilter(event.target.value)
+                setPage(1)
+              }}
+            >
+              <option value="">All users</option>
+              <option value="true">Active only</option>
+              <option value="false">Deactivated only</option>
+            </Select>
+          </Field>
+        </div>
+      </Card>
+
       <DataTable
         caption="Users"
         columns={columns}
@@ -133,7 +183,10 @@ export function AdminUsersPage() {
         isLoading={isLoading}
         isError={isError}
         onRetry={() => void refetch()}
-        emptyTitle="No users yet"
+        emptyTitle={search || activeFilter ? 'No matching users' : 'No users yet'}
+        emptyDescription={
+          search || activeFilter ? 'Try a different search or status filter.' : undefined
+        }
         page={data?.page}
         totalPages={data?.total_pages}
         onPageChange={setPage}

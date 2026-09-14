@@ -47,6 +47,7 @@ This is a working full-stack application, not a UI prototype.
 | Course-player learning experience | Working |
 | Completion certificates issued on 100% progress | Working |
 | Contact form → database → admin inbox | Working |
+| Exam scheduling requests → database → admin queue | Working |
 | Admin dashboard and CRUD for all content types | Working |
 | Article CMS (draft/publish, Markdown, SEO fields) | Working |
 | Dynamic `sitemap.xml` and `robots.txt` | Working |
@@ -340,14 +341,18 @@ full CRUD for certifications, providers and resources (staff)
 
 **Contact & analytics** — `POST /api/contact` · `POST /api/events`
 
+**Exam scheduling** — `GET /api/exam-bookings/options` ·
+`POST /api/exam-bookings` (open to signed-out visitors; linked to the account
+when one is signed in)
+
 **Payments** — `POST /api/payments/create` · `GET /api/payments/{id}` ·
 `POST /api/payments/webhook` (signature-verified)
 
 **Site** — `GET /api/home` (homepage aggregate) · `/faqs` · `/testimonials` ·
 `/settings` · `/seo/page`
 
-**Admin** — `GET /api/admin/dashboard` · `/users` · `/enrollments` · `/payments` ·
-`/messages` · `/faqs` · `/testimonials` · `/settings`
+**Admin** — `GET /api/admin/dashboard` · `/users` · `/enrollments` ·
+`/exam-bookings` · `/payments` · `/messages` · `/faqs` · `/testimonials` · `/settings`
 
 **Crawlers** — `GET /robots.txt` · `GET /sitemap.xml` (site root, not under `/api`)
 

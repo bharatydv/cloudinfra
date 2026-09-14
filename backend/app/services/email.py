@@ -107,6 +107,18 @@ def contact_confirmation_email(name: str, subject: str) -> tuple[str, str]:
     )
 
 
+def exam_booking_email(
+    name: str, certification_name: str, reference_code: str, preferred_date: str
+) -> tuple[str, str]:
+    return (
+        f"We received your exam request ({reference_code})",
+        f"Hi {name},\n\nWe have your request to schedule the {certification_name} exam "
+        f"for {preferred_date}. Your reference is {reference_code}.\n\n"
+        "Our team will confirm the slot by email. Seats are booked with the certification "
+        "provider, so the final date and time are subject to their availability.\n",
+    )
+
+
 def payment_confirmation_email(name: str, course_title: str, amount: str) -> tuple[str, str]:
     return (
         "Payment confirmed",

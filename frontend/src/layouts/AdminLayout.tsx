@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import {
   Award,
   BookOpen,
+  CalendarCheck,
   CreditCard,
   FileText,
   FolderTree,
@@ -48,6 +49,7 @@ const SECTIONS = [
     links: [
       { to: '/admin/users', label: 'Users', icon: Users },
       { to: '/admin/enrollments', label: 'Enrollments', icon: BookOpen },
+      { to: '/admin/exam-bookings', label: 'Exam requests', icon: CalendarCheck },
       { to: '/admin/payments', label: 'Payments', icon: CreditCard },
       { to: '/admin/messages', label: 'Messages', icon: Mail },
       { to: '/admin/settings', label: 'Settings', icon: Settings },

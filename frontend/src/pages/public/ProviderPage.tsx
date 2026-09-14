@@ -176,9 +176,9 @@ export default function ProviderPage() {
 
       <CTASection
         title="Start preparing"
-        description="Pick a certification, follow the roadmap, and use the practice resources to find your gaps early."
-        primary={{ label: 'Explore Certifications', to: '/certifications' }}
-        secondary={{ label: 'Browse Courses', to: '/courses' }}
+        description="Pick a certification, follow the roadmap, and request your exam slot when you are ready."
+        primary={{ label: 'Schedule an Exam', to: '/schedule-exam' }}
+        secondary={{ label: 'Explore Certifications', to: '/certifications' }}
       />
     </>
   )
