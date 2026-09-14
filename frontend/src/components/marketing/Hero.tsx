@@ -1,6 +1,6 @@
 import { ArrowRight, CheckCircle2, GraduationCap, Layers, Target } from 'lucide-react'
 
-import { ScheduleExamButton } from '@/components/scheduling/ScheduleExamCta'
+import { ScheduleExamLink } from '@/components/scheduling/ScheduleExamCta'
 import { ButtonLink } from '@/components/ui/Button'
 import { Container } from '@/components/ui/primitives'
 import { AnalyticsEvent, track } from '@/lib/analytics'
@@ -61,8 +61,8 @@ export function Hero() {
             </ul>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              {/* No certification is in context here, so this asks which way to go. */}
-              <ScheduleExamButton />
+              {/* The form has its own certification picker, so go straight there. */}
+              <ScheduleExamLink cta="hero_schedule" />
               <ButtonLink
                 to="/certifications"
                 size="lg"

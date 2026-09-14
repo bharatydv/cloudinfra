@@ -1,16 +1,20 @@
-import { useState, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
-import { ArrowRight, CalendarCheck, ListChecks } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { CalendarCheck } from 'lucide-react'
 
-import { Button, ButtonLink, type ButtonSize, type ButtonVariant } from '@/components/ui/Button'
-import { Modal } from '@/components/ui/Modal'
+import { ButtonLink, type ButtonSize, type ButtonVariant } from '@/components/ui/Button'
+import { useSite } from '@/hooks/useSite'
 import { AnalyticsEvent, track } from '@/lib/analytics'
 import { scheduleExamPath } from '@/lib/scheduling'
 
 /**
- * Direct link to the form, optionally pre-filled.
+ * The single entry point to the scheduling form.
  *
- * Used wherever the certification is already known, so there is nothing to ask.
+ * Passing a certification id pre-fills it, which is what the certification
+ * pages do. Everywhere else the form's own picker handles the choice, so the
+ * button always goes straight there rather than asking first -- a step in
+ * front of a form only costs submissions.
+ *
+ * When an offer is running, its badge rides along on the label.
  */
 export function ScheduleExamLink({
   certificationId,
@@ -19,6 +23,7 @@ export function ScheduleExamLink({
   variant = 'primary',
   className,
   cta = 'schedule_exam',
+  showBadge = true,
 }: {
   certificationId?: string | null
   children?: ReactNode
@@ -26,7 +31,12 @@ export function ScheduleExamLink({
   variant?: ButtonVariant
   className?: string
   cta?: string
+  /** Set false where the surrounding copy already states the offer. */
+  showBadge?: boolean
 }) {
+  const { promotion } = useSite()
+  const badge = showBadge && promotion.enabled ? promotion.badge : ''
+
   return (
     <ButtonLink
       to={scheduleExamPath(certificationId)}
@@ -37,102 +47,11 @@ export function ScheduleExamLink({
       onClick={() => track(AnalyticsEvent.CtaClicked, { properties: { cta } })}
     >
       {children}
+      {badge && (
+        <span className="ml-1.5 rounded-md bg-white/20 px-1.5 py-0.5 text-xs font-bold">
+          {badge}
+        </span>
+      )}
     </ButtonLink>
-  )
-}
-
-/**
- * Two-way entry point for pages where no certification is in context.
- *
- * Someone who already knows which exam they want should not be forced through
- * the catalogue, and someone who does not should not be dropped onto a form
- * with an empty certification picker -- so the choice is made explicitly.
- */
-export function ScheduleExamButton({
-  size = 'lg',
-  variant = 'primary',
-  className,
-  label = 'Schedule Exam',
-}: {
-  size?: ButtonSize
-  variant?: ButtonVariant
-  className?: string
-  label?: string
-}) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <>
-      <Button
-        size={size}
-        variant={variant}
-        className={className}
-        leadingIcon={<CalendarCheck className="h-4 w-4" aria-hidden="true" />}
-        onClick={() => {
-          setOpen(true)
-          track(AnalyticsEvent.CtaClicked, { properties: { cta: 'schedule_exam_chooser' } })
-        }}
-      >
-        {label}
-      </Button>
-
-      <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-        title="Schedule your certification exam"
-        description="Pick the exam first, or go straight to the request form."
-      >
-        <div className="grid gap-3 sm:grid-cols-2">
-          <ChooserCard
-            to="/certifications"
-            icon={<ListChecks className="h-5 w-5" aria-hidden="true" />}
-            title="Browse certifications"
-            description="See every exam we support, then request a slot from its page with the details filled in for you."
-            onNavigate={() => setOpen(false)}
-          />
-          <ChooserCard
-            to="/schedule-exam"
-            icon={<CalendarCheck className="h-5 w-5" aria-hidden="true" />}
-            title="Go straight to the form"
-            description="Already know which exam you want? Choose it from the list and tell us when suits you."
-            onNavigate={() => setOpen(false)}
-          />
-        </div>
-      </Modal>
-    </>
-  )
-}
-
-function ChooserCard({
-  to,
-  icon,
-  title,
-  description,
-  onNavigate,
-}: {
-  to: string
-  icon: ReactNode
-  title: string
-  description: string
-  onNavigate: () => void
-}) {
-  return (
-    <Link
-      to={to}
-      onClick={onNavigate}
-      className="group flex flex-col rounded-xl border border-ink-200 p-4 text-left transition hover:border-brand-400 hover:bg-brand-50/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
-    >
-      <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
-        {icon}
-      </span>
-      <span className="mt-3 flex items-center gap-1.5 text-sm font-bold text-ink-900">
-        {title}
-        <ArrowRight
-          className="h-3.5 w-3.5 transition group-hover:translate-x-0.5"
-          aria-hidden="true"
-        />
-      </span>
-      <span className="mt-1.5 text-sm leading-relaxed text-ink-600">{description}</span>
-    </Link>
   )
 }

@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { CalendarCheck, CheckCircle2, Clock, Home, ShieldCheck } from 'lucide-react'
+import { CalendarCheck, CheckCircle2, Clock, Home, ShieldCheck, Tag } from 'lucide-react'
 import { z } from 'zod'
 
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -15,6 +15,7 @@ import { ApiError } from '@/api/client'
 import { siteConfig } from '@/config/brand'
 import { useAuth } from '@/hooks/useAuth'
 import { useSeo } from '@/hooks/useSeo'
+import { useSite } from '@/hooks/useSite'
 import { NOINDEX } from '@/lib/seo'
 import { AnalyticsEvent, track } from '@/lib/analytics'
 import { queryKeys } from '@/lib/queryClient'
@@ -101,6 +102,7 @@ type ScheduleForm = z.infer<typeof schema>
 export default function ScheduleExamPage() {
   const [params] = useSearchParams()
   const { user } = useAuth()
+  const { promotion } = useSite()
   // Carried in from a certification page so the exam is already chosen.
   const preselected = params.get('certification') ?? ''
 
@@ -535,6 +537,28 @@ export default function ScheduleExamPage() {
                   >
                     View the certification page
                   </Link>
+                </Card>
+              )}
+
+              {/* Restate the offer at the point of conversion, not just in the
+                  banner the visitor may already have dismissed. */}
+              {promotion.enabled && (
+                <Card className="border-brand-200 bg-brand-50/70 p-6">
+                  <h2 className="flex items-center gap-2 text-sm font-bold text-ink-900">
+                    <Tag className="h-4 w-4 text-brand-600" aria-hidden="true" />
+                    {promotion.badge || 'Current offer'}
+                  </h2>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-700">
+                    {promotion.message}
+                  </p>
+                  {promotion.endsOn && (
+                    <p className="mt-2 text-xs font-semibold text-brand-700">
+                      Ends {promotion.endsOn}.
+                    </p>
+                  )}
+                  <p className="mt-3 text-xs leading-relaxed text-ink-500">
+                    The discount is applied when our team confirms your slot.
+                  </p>
                 </Card>
               )}
 

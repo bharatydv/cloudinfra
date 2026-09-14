@@ -178,6 +178,19 @@
       }
     },
     {
+      "key": "promotion",
+      "is_public": true,
+      "description": "Site-wide promotional offer. Set enabled to false to hide the banner and the CTA badge everywhere without removing the copy.",
+      "value": {
+        "enabled": true,
+        "message": "Limited time: 20% off every certification exam booking.",
+        "badge": "Save 20%",
+        "linkLabel": "Schedule your exam",
+        "linkTo": "/schedule-exam",
+        "endsOn": ""
+      }
+    },
+    {
       "key": "contact",
       "is_public": true,
       "description": "Contact details shown on /contact and in the footer. Blank fields are hidden.",

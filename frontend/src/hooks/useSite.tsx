@@ -13,6 +13,27 @@ interface ContactDetails {
   responseTime: string | null
 }
 
+/** Site-wide marketing offer, edited from Admin > Settings. */
+export interface Promotion {
+  enabled: boolean
+  message: string
+  /** Short label shown on the scheduling CTA, e.g. "Save 20%". */
+  badge: string
+  linkLabel: string
+  linkTo: string
+  /** Free text; blank hides the deadline line. */
+  endsOn: string
+}
+
+const NO_PROMOTION: Promotion = {
+  enabled: false,
+  message: '',
+  badge: '',
+  linkLabel: '',
+  linkTo: '/schedule-exam',
+  endsOn: '',
+}
+
 interface LearningPathStep {
   title: string
   description: string
@@ -21,6 +42,7 @@ interface LearningPathStep {
 interface SiteContextValue {
   brand: Brand
   contact: ContactDetails
+  promotion: Promotion
   about: Record<string, unknown>
   legal: Record<string, string>
   learningPath: LearningPathStep[]
@@ -45,6 +67,7 @@ export function SiteProvider({ children }: { children: ReactNode }) {
     const brandSetting = settingValue(data, 'brand')
     const contactSetting = settingValue(data, 'contact')
     const pathSetting = settingValue(data, 'learning_path')
+    const promoSetting = settingValue(data, 'promotion') as Partial<Promotion>
 
     return {
       brand: { ...defaultBrand, ...(brandSetting as Partial<Brand>) },
@@ -54,6 +77,12 @@ export function SiteProvider({ children }: { children: ReactNode }) {
         address: (contactSetting.address as string) ?? null,
         responseTime: (contactSetting.responseTime as string) ?? null,
       },
+      // A promotion with no message is treated as switched off, so clearing the
+      // text in the admin is enough to take the banner down.
+      promotion:
+        promoSetting.enabled && promoSetting.message
+          ? { ...NO_PROMOTION, ...promoSetting }
+          : NO_PROMOTION,
       about: settingValue(data, 'about'),
       legal: settingValue(data, 'legal') as Record<string, string>,
       learningPath: (pathSetting.steps as LearningPathStep[]) ?? [],

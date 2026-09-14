@@ -7,7 +7,7 @@ import { CertificationCard } from '@/components/cards/CertificationCard'
 import { ProviderCard } from '@/components/cards/misc'
 import { FilterPanel, type FilterDefinition } from '@/components/forms/FilterPanel'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { ScheduleExamButton } from '@/components/scheduling/ScheduleExamCta'
+import { ScheduleExamLink } from '@/components/scheduling/ScheduleExamCta'
 import { SearchBar } from '@/components/layout/SearchBar'
 import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
@@ -156,7 +156,7 @@ export default function CertificationsPage() {
           { name: 'Home', url: '/' },
           { name: 'Certifications', url: '/certifications' },
         ]}
-        actions={<ScheduleExamButton size="md" />}
+        actions={<ScheduleExamLink size="md" cta="certifications_schedule" />}
       >
         <div className="mt-8 max-w-2xl">
           <SearchBar
