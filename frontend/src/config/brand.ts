@@ -43,6 +43,8 @@ export const defaultBrand: Brand = {
 export const siteConfig = {
   apiBaseUrl: (env.VITE_API_BASE_URL as string | undefined) ?? '/api',
   siteUrl: (env.VITE_SITE_URL as string | undefined) ?? window.location.origin,
+  /** Fallback social card for pages and records with no image of their own. */
+  defaultOgImage: '/og-default.png',
   /** Kept in sync with the backend disclaimer copy. */
   independenceNotice:
     'We are an independent learning platform. We are not affiliated with, endorsed by, or an authorised training partner of any certification provider, and we do not issue vendor certifications.',
