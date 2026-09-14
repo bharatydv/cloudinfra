@@ -33,6 +33,22 @@ const STATUS_TONES: Record<
   cancelled: 'danger',
 }
 
+const PAYMENT_TONES: Record<string, 'warning' | 'success' | 'neutral' | 'danger'> = {
+  unpaid: 'neutral',
+  pending: 'warning',
+  successful: 'success',
+  failed: 'danger',
+  refunded: 'neutral',
+}
+
+const PAYMENT_LABELS: Record<string, string> = {
+  unpaid: 'No payment',
+  pending: 'Awaiting payment',
+  successful: 'Paid',
+  failed: 'Payment failed',
+  refunded: 'Refunded',
+}
+
 const DELIVERY_LABELS: Record<string, string> = {
   online_proctored: 'Online proctored',
   test_center: 'Test centre',
@@ -141,6 +157,15 @@ export default function AdminExamBookingsPage() {
             {TIME_SLOT_LABELS[booking.preferred_time_slot] ?? booking.preferred_time_slot}
           </p>
         </div>
+      ),
+    },
+    {
+      key: 'payment',
+      header: 'Payment',
+      render: (booking) => (
+        <Badge tone={PAYMENT_TONES[booking.payment_status] ?? 'neutral'}>
+          {PAYMENT_LABELS[booking.payment_status] ?? booking.payment_status}
+        </Badge>
       ),
     },
     {
@@ -283,6 +308,9 @@ export default function AdminExamBookingsPage() {
                 {DELIVERY_LABELS[selected.delivery_mode] ?? selected.delivery_mode}
               </Badge>
               {selected.exam_code && <Badge tone="neutral">Exam {selected.exam_code}</Badge>}
+              <Badge tone={PAYMENT_TONES[selected.payment_status] ?? 'neutral'}>
+                {PAYMENT_LABELS[selected.payment_status] ?? selected.payment_status}
+              </Badge>
               {/* Anonymous requests are the norm; flag the ones tied to an account. */}
               {selected.user_id && <Badge tone="brand">Registered account</Badge>}
             </div>

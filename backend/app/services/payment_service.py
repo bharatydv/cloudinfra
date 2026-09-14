@@ -20,6 +20,7 @@ from app.core.config import settings
 from app.core.errors import ConflictError, NotFoundError, ValidationFailedError
 from app.models.commerce import Payment
 from app.models.enums import PaymentStatus
+from app.models.scheduling import ExamBooking
 from app.models.user import User
 from app.repositories import course_repo, engagement_repo
 from app.schemas.system import PaymentIntentResponse
@@ -82,7 +83,7 @@ async def get_payment(
     payment = await db.scalar(select(Payment).where(Payment.id == payment_id))
     if payment is None:
         raise NotFoundError("Payment not found.")
-    if payment.user_id != user.id and not user.is_admin:
+    if payment.user_id is None or (payment.user_id != user.id and not user.is_admin):
         raise NotFoundError("Payment not found.")
     return payment
 
@@ -110,17 +111,37 @@ async def handle_webhook(db: AsyncSession, payload: bytes, signature: str | None
     payment.transaction_id = result.transaction_id or payment.transaction_id
     payment.provider_metadata = result.raw or {}
 
+    # The booking mirrors the payment so the admin queue can filter on it. This
+    # webhook is the only writer of either.
+    booking = (
+        await db.get(ExamBooking, payment.exam_booking_id)
+        if payment.exam_booking_id
+        else None
+    )
+    if booking is not None:
+        booking.payment_status = result.status.value
+
     if result.status == PaymentStatus.SUCCESSFUL:
         payment.paid_at = datetime.now(UTC)
-        if payment.course_id:
+        if payment.course_id and payment.user_id:
             await enrollment_service.grant_enrollment(db, payment.user_id, payment.course_id)
         await db.commit()
 
-        user = await db.get(User, payment.user_id)
+        amount = f"{payment.amount} {payment.currency}"
+        if booking is not None:
+            # Booking payments are open to guests, so the receipt goes to the
+            # address on the booking rather than to an account.
+            subject, body = email_service.exam_payment_confirmation_email(
+                booking.full_name, booking.certification_name, amount, booking.reference_code
+            )
+            await email_service.send_email(booking.email, subject, body)
+            return "booking_paid"
+
+        user = await db.get(User, payment.user_id) if payment.user_id else None
         course = await course_repo.get_by_id(db, payment.course_id) if payment.course_id else None
         if user and course:
             subject, body = email_service.payment_confirmation_email(
-                user.name, course.title, f"{payment.amount} {payment.currency}"
+                user.name, course.title, amount
             )
             await email_service.send_email(user.email, subject, body)
         return "granted"

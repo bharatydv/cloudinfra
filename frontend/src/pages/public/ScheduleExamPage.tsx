@@ -1,9 +1,17 @@
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { CalendarCheck, CheckCircle2, Clock, Home, ShieldCheck, Tag } from 'lucide-react'
+import {
+  CalendarCheck,
+  CheckCircle2,
+  Clock,
+  CreditCard,
+  Home,
+  ShieldCheck,
+  Tag,
+} from 'lucide-react'
 import { z } from 'zod'
 
 import { ExamPricePanel } from '@/components/cards/ExamPrice'
@@ -13,13 +21,19 @@ import { Card, Container, Field, Input, Section, Select } from '@/components/ui/
 import { ErrorState } from '@/components/ui/states'
 import { getCertificationOptions, submitExamBooking } from '@/api/endpoints'
 import { ApiError } from '@/api/client'
+import { formatPrice } from '@/lib/format'
 import { siteConfig } from '@/config/brand'
 import { useAuth } from '@/hooks/useAuth'
 import { useSeo } from '@/hooks/useSeo'
 import { useSite } from '@/hooks/useSite'
 import { NOINDEX } from '@/lib/seo'
+import type { ExamCheckout as ExamCheckoutPayload } from '@/types/api'
 import { AnalyticsEvent, track } from '@/lib/analytics'
 import { queryKeys } from '@/lib/queryClient'
+import { openRazorpayCheckout, toMinorUnits } from '@/lib/razorpay'
+
+/** What the browser knows about the payment. Never authoritative. */
+type PaymentState = 'idle' | 'opening' | 'abandoned' | 'submitted' | 'unavailable'
 
 const TIME_SLOTS = [
   { value: 'morning', label: 'Morning (9am - 12pm)' },
@@ -103,7 +117,9 @@ type ScheduleForm = z.infer<typeof schema>
 export default function ScheduleExamPage() {
   const [params] = useSearchParams()
   const { user } = useAuth()
-  const { promotion } = useSite()
+  const { promotion, brand } = useSite()
+  // Tracks only what the browser can see about payment, never the truth of it.
+  const [paymentState, setPaymentState] = useState<PaymentState>('idle')
   // Carried in from a certification page so the exam is already chosen.
   const preselected = params.get('certification') ?? ''
 
@@ -185,6 +201,44 @@ export default function ScheduleExamPage() {
   const selectedId = watch('certification_id')
   const selected = options?.find((option) => option.id === selectedId)
 
+  /**
+   * Opens the provider's modal. `paid` only records that the payer got
+   * through the form -- the booking is confirmed by the signed webhook, which
+   * is why the wording below never claims the money has landed.
+   */
+  const startCheckout = useCallback(
+    async (checkout: ExamCheckoutPayload) => {
+      if (!checkout.public_key || !checkout.order_id) {
+        setPaymentState('unavailable')
+        return
+      }
+      setPaymentState('opening')
+      const opened = await openRazorpayCheckout({
+        publicKey: checkout.public_key,
+        orderId: checkout.order_id,
+        amountMinor: toMinorUnits(checkout.amount, checkout.currency),
+        currency: checkout.currency,
+        name: brand.brandName,
+        description: checkout.description,
+        prefill: {
+          name: checkout.prefill_name,
+          email: checkout.prefill_email,
+          contact: checkout.prefill_contact,
+        },
+        onDismiss: () => setPaymentState('abandoned'),
+        onComplete: () => setPaymentState('submitted'),
+      })
+      if (!opened) setPaymentState('unavailable')
+    },
+    [brand.brandName],
+  )
+
+  // Take the payer straight to checkout rather than making them click again.
+  useEffect(() => {
+    const checkout = mutation.data?.checkout
+    if (checkout && paymentState === 'idle') void startCheckout(checkout)
+  }, [mutation.data, paymentState, startCheckout])
+
   /* ---------------------------------------------------------------------- */
   /* Confirmation                                                            */
   /* ---------------------------------------------------------------------- */
@@ -197,8 +251,41 @@ export default function ScheduleExamPage() {
             <span className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
               <CheckCircle2 className="h-7 w-7" aria-hidden="true" />
             </span>
-            <h1 className="mt-5 text-heading-lg text-ink-900">Request received</h1>
-            <p className="mt-3 text-base leading-relaxed text-ink-600">{receipt.message}</p>
+            <h1 className="mt-5 text-heading-lg text-ink-900">
+              {receipt.checkout && paymentState !== 'submitted'
+                ? 'Request saved'
+                : 'Request received'}
+            </h1>
+            <p className="mt-3 text-base leading-relaxed text-ink-600">
+              {paymentState === 'submitted'
+                ? 'Thanks — your payment is being confirmed. We will email you once it clears and your slot is booked.'
+                : receipt.message}
+            </p>
+
+            {/* Payment is optional to complete: the request is already saved,
+                so an abandoned checkout is a follow-up, not a lost lead. */}
+            {receipt.checkout && paymentState !== 'submitted' && (
+              <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-left">
+                <p className="text-sm font-semibold text-amber-900">
+                  {paymentState === 'unavailable'
+                    ? 'We could not open the payment window.'
+                    : 'Payment not completed yet.'}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-amber-900/90">
+                  Your request is saved under {receipt.reference_code}. You can pay now to
+                  confirm the booking, or leave it with us and our team will follow up by
+                  email.
+                </p>
+                <Button
+                  className="mt-3"
+                  loading={paymentState === 'opening'}
+                  leadingIcon={<CreditCard className="h-4 w-4" aria-hidden="true" />}
+                  onClick={() => void startCheckout(receipt.checkout!)}
+                >
+                  Pay {formatPrice(receipt.checkout.amount, receipt.checkout.currency)}
+                </Button>
+              </div>
+            )}
 
             <dl className="mx-auto mt-6 max-w-sm space-y-2 rounded-xl border border-ink-200 bg-ink-50/60 p-4 text-sm">
               <div className="flex justify-between gap-4">

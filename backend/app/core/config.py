@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     # --- Optional infrastructure ---------------------------------------
     redis_url: str | None = None
 
-    payment_provider: Literal["noop", "stripe"] = "noop"
+    payment_provider: Literal["noop", "stripe", "razorpay"] = "noop"
     payment_provider_key: str | None = None
     payment_provider_secret: str | None = None
     payment_webhook_secret: str | None = None

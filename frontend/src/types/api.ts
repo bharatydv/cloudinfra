@@ -548,6 +548,7 @@ export interface ContactMessage {
 export interface ExamBooking {
   id: string
   reference_code: string
+  payment_status: string
   user_id: string | null
   full_name: string
   email: string
@@ -568,11 +569,27 @@ export interface ExamBooking {
 }
 
 /** What the confirmation screen needs to route the applicant onwards. */
+export interface ExamCheckout {
+  provider: string
+  payment_id: string
+  amount: string
+  currency: string
+  order_id: string | null
+  checkout_url: string | null
+  public_key: string | null
+  prefill_name: string
+  prefill_email: string
+  prefill_contact: string
+  description: string
+}
+
 export interface ExamBookingReceipt {
   message: string
   reference_code: string
   certification_name: string
   certification_url: string | null
+  /** Null when the exam is unpriced or payments are switched off. */
+  checkout: ExamCheckout | null
 }
 
 /** Minimal certification record used to populate the scheduling form. */

@@ -33,11 +33,19 @@ class Payment(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         CheckConstraint("amount >= 0", name="amount_non_negative"),
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="RESTRICT"), index=True, nullable=False
+    # Nullable: exam bookings are open to signed-out visitors, so a payment can
+    # belong to a booking rather than an account. RESTRICT still protects rows
+    # that do belong to a user.
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), index=True
     )
     course_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("courses.id", ondelete="SET NULL"), index=True
+    )
+    # SET NULL rather than CASCADE: a financial record outlives the request it
+    # paid for.
+    exam_booking_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("exam_bookings.id", ondelete="SET NULL"), index=True
     )
     amount: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), default="USD", nullable=False)
@@ -50,5 +58,5 @@ class Payment(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     provider_metadata: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
     paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    user: Mapped[User] = relationship(back_populates="payments")
+    user: Mapped[User | None] = relationship(back_populates="payments")
     course: Mapped[Course | None] = relationship()

@@ -32,6 +32,11 @@ class ExamBooking(Base, UUIDPrimaryKeyMixin, TimestampMixin):
             "delivery_mode IN ('online_proctored', 'test_center')",
             name="delivery_mode_valid",
         ),
+        CheckConstraint(
+            "payment_status IN "
+            "('unpaid', 'pending', 'successful', 'failed', 'refunded')",
+            name="payment_status_valid",
+        ),
         Index("ix_exam_bookings_status_created", "status", "created_at"),
     )
 
@@ -68,6 +73,12 @@ class ExamBooking(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
     status: Mapped[str] = mapped_column(
         String(20), default=ExamBookingStatus.NEW.value, nullable=False, index=True
+    )
+    # Denormalised from the linked Payment so the admin queue can be filtered
+    # and sorted without a join. The payment webhook is its only writer, and
+    # the Payment row remains the source of truth.
+    payment_status: Mapped[str] = mapped_column(
+        String(20), default="unpaid", nullable=False, index=True
     )
     admin_notes: Mapped[str | None] = mapped_column(Text)
     source_ip: Mapped[str | None] = mapped_column(String(64))
