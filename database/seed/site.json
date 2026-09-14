@@ -162,11 +162,11 @@
       "is_public": true,
       "description": "Brand identity. Change here to rebrand without touching code.",
       "value": {
-        "brandName": "LearnBase",
+        "brandName": "Inferacloud",
         "brandTagline": "Learn. Get Certified. Build Your Future.",
         "brandDescription": "Structured courses and independent certification preparation resources for cloud, AI, data and DevOps careers.",
         "logo": null,
-        "logoMark": "LB",
+        "logoMark": "IC",
         "primaryDomain": "example.com",
         "supportEmail": "support@example.com",
         "socialLinks": {
@@ -222,7 +222,7 @@
       "description": "Legal page copy rendered at /privacy, /terms, /refund-policy, /disclaimer, /cookie-policy.",
       "value": {
         "lastUpdated": "2026-09-08",
-        "companyName": "LearnBase",
+        "companyName": "Inferacloud",
         "disclaimer": "This platform is independent. It is not affiliated with, endorsed by, sponsored by, or an authorised training partner of any certification provider. Product and certification names are the trademarks of their respective owners and are used only to describe the subject matter of our preparation material. We do not issue vendor certifications and we do not guarantee exam results, employment or salary outcomes. Always confirm exam details on the certification provider's official website.",
         "privacy": "We collect the minimum data needed to operate accounts, enrollments and progress tracking: your name, email address, hashed password and learning activity. We do not sell personal data. You can request export or deletion of your account data at any time using the contact form.",
         "terms": "By using this platform you agree to use it lawfully, to keep your account credentials secure, and not to redistribute course material. Accounts may be suspended for abuse. Course content may be updated or withdrawn as the underlying technology changes.",

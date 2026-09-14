@@ -39,6 +39,9 @@ services:
       - "${BACKEND_HOST_PORT:-8000}:8000"
     volumes:
       - media_data:/app/uploads
+      # app/seed/run.py resolves its JSON at /database/seed, which lives outside
+      # the backend build context -- mount it so seeding works in the container.
+      - ./database/seed:/database/seed:ro
     command: >
       sh -c "alembic upgrade head &&
              uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers"

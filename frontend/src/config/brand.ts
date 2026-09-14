@@ -29,12 +29,12 @@ export interface Brand {
 const env = import.meta.env
 
 export const defaultBrand: Brand = {
-  brandName: 'LearnBase',
+  brandName: 'Inferacloud',
   brandTagline: 'Learn. Get Certified. Build Your Future.',
   brandDescription:
     'Structured courses and independent certification preparation resources for cloud, AI, data and DevOps careers.',
   logo: null,
-  logoMark: 'LB',
+  logoMark: 'IC',
   primaryDomain: 'example.com',
   supportEmail: 'support@example.com',
   socialLinks: {},

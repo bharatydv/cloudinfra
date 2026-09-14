@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     environment: Literal["development", "test", "staging", "production"] = "development"
     debug: bool = False
     log_level: str = "INFO"
-    project_name: str = "LearnBase API"
+    project_name: str = "Inferacloud API"
     api_v1_prefix: str = "/api"
 
     # --- Database -------------------------------------------------------
@@ -70,7 +70,7 @@ class Settings(BaseSettings):
     email_provider: Literal["console", "smtp", "resend"] = "console"
     email_provider_key: str | None = None
     email_from_address: str = "no-reply@example.com"
-    email_from_name: str = "LearnBase"
+    email_from_name: str = "Inferacloud"
 
     storage_provider: Literal["local", "s3"] = "local"
     storage_endpoint_url: str | None = None

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Provision LearnBase on a single Azure VM running the Docker stack.
+# Provision Inferacloud on a single Azure VM running the Docker stack.
 #
 # Why a VM rather than Container Apps: this app is stateful. It needs
 # PostgreSQL, and a managed Postgres instance costs more per month than the
@@ -174,7 +174,7 @@ PAYMENT_PROVIDER=noop
 PAYMENT_CURRENCY=USD
 EMAIL_PROVIDER=console
 EMAIL_FROM_ADDRESS=no-reply@${FQDN}
-EMAIL_FROM_NAME=LearnBase
+EMAIL_FROM_NAME=Inferacloud
 
 # Media is stored on the VM disk in the media_data docker volume. Move to
 # object storage before you outgrow a single machine.

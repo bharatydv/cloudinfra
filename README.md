@@ -1,4 +1,4 @@
-# LearnBase — Course & Certification Preparation Platform
+# Inferacloud — Course & Certification Preparation Platform
 
 A production-oriented foundation for an online learning and professional
 certification preparation platform.
@@ -115,7 +115,7 @@ JWT (python-jose), Argon2 password hashing (bcrypt fallback), SlowAPI rate limit
 Requirements: Docker Desktop (or Docker Engine + Compose v2).
 
 ```bash
-git clone <your-repo> learnbase && cd learnbase
+git clone <your-repo> inferacloud && cd inferacloud
 
 # 1. Configure
 cp .env.example .env

@@ -1,4 +1,4 @@
-# Deploying LearnBase to Azure
+# Deploying Inferacloud to Azure
 
 ```bash
 az login
@@ -10,7 +10,7 @@ setting (all overridable from the environment), `deploy.sh` provisions, and
 `redeploy.sh` ships code to something already provisioned.
 
 Unlike the Container Apps projects, this one runs on **a single VM**, because
-LearnBase is stateful. It needs PostgreSQL, and a managed Postgres instance
+Inferacloud is stateful. It needs PostgreSQL, and a managed Postgres instance
 costs more per month than the entire VM — while a Postgres container on the VM
 costs nothing beyond the disk it already has. Media uploads want a persistent
 filesystem for the same reason.

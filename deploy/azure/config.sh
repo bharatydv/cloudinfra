@@ -92,10 +92,25 @@ require_account() {
 }
 
 # The VM's public hostname, or empty if the VM does not exist yet.
+#
+# Two sources, because `az vm list-ip-addresses` dropped the fqdn field from
+# its publicIpAddresses objects in newer CLI versions -- it returns the address
+# but not the name. The public IP resource still carries dnsSettings.fqdn, so
+# fall back to that rather than failing on a VM that is perfectly fine.
 vm_fqdn() {
-  az_ vm list-ip-addresses -g "$RESOURCE_GROUP" -n "$VM_NAME" \
+  local fqdn
+  fqdn="$(az_ vm list-ip-addresses -g "$RESOURCE_GROUP" -n "$VM_NAME" \
     --query "[0].virtualMachine.network.publicIpAddresses[0].fqdn" \
-    -o tsv 2>/dev/null | tr -d '\r'
+    -o tsv 2>/dev/null | tr -d '\r')"
+
+  if [ -z "$fqdn" ] || [ "$fqdn" = "None" ]; then
+    fqdn="$(az_ network public-ip list -g "$RESOURCE_GROUP" \
+      --query "[?starts_with(name, '${VM_NAME}')].dnsSettings.fqdn | [0]" \
+      -o tsv 2>/dev/null | tr -d '\r')"
+  fi
+
+  [ "$fqdn" = "None" ] && fqdn=""
+  printf '%s' "$fqdn"
 }
 
 # URL-safe random string. openssl is used when present because reading
