@@ -219,7 +219,7 @@ async def seed_certifications(session: AsyncSession):
                 "official_url": row.get("official_url"),
                 "exam_fee_amount": row.get("exam_fee_amount"),
                 "exam_fee_currency": row.get("exam_fee_currency", "USD"),
-                "offer_price_amount": row.get("offer_price_amount"),
+                "discount_percentage": row.get("discount_percentage"),
                 "is_published": True,
                 "is_featured": row.get("is_featured", False),
                 "position": row.get("position", 0),

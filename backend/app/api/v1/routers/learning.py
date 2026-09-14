@@ -20,7 +20,7 @@ from app.schemas.engagement import (
     LearnCourseView,
     SaveCertificationRequest,
 )
-from app.services import enrollment_service, serializers
+from app.services import enrollment_service, pricing, serializers
 
 router = APIRouter(tags=["Learning"])
 
@@ -95,13 +95,16 @@ async def my_saved_certifications(
     user: CurrentUser, db: DbSession
 ) -> list[SavedCertificationRead]:
     rows = await engagement_repo.list_saved_certifications(db, user.id)
+    pricing_config = await pricing.load_config(db)
     return [
         SavedCertificationRead(
             id=row.id,
             created_at=row.created_at,
             notes=row.notes,
             certification=serializers.certification_card(
-                row.certification, saved_ids={row.certification_id}
+                row.certification,
+                saved_ids={row.certification_id},
+                pricing_config=pricing_config,
             ),
         )
         for row in rows

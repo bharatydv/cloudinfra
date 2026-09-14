@@ -32,7 +32,7 @@ from app.schemas.system import (
     SiteSettingRead,
     SiteSettingWrite,
 )
-from app.services import admin_service, contact_service, scheduling_service
+from app.services import admin_service, contact_service, pricing, scheduling_service
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 Params = Annotated[PageParams, Depends(page_params)]
@@ -296,6 +296,10 @@ async def upsert_setting(
         is_public=payload.is_public,
     )
     await db.commit()
+    if key == pricing.SETTING_KEY:
+        # Prices are served from a short-lived cache; drop it so an edit to the
+        # discount or tax rate is visible immediately rather than within the TTL.
+        pricing.reset_cache()
     return SiteSettingRead.model_validate(setting)
 
 

@@ -17,7 +17,7 @@ from app.schemas.content import (
     ArticleUpdate,
     ArticleWrite,
 )
-from app.services import seo_service, serializers
+from app.services import pricing, seo_service, serializers
 from app.utils.text import build_excerpt, extract_headings, reading_minutes, slugify, unique_slug
 
 
@@ -39,6 +39,7 @@ async def build_article_detail(db: AsyncSession, article: Article) -> ArticleDet
         )
     breadcrumbs.append(Breadcrumb(name=article.title, url=f"/resources/{article.slug}"))
 
+    pricing_config = await pricing.load_config(db)
     faq = [FaqItem(**item) for item in (article.faq or [])]
     faq_dicts = [item.model_dump() for item in faq]
 
@@ -54,7 +55,8 @@ async def build_article_detail(db: AsyncSession, article: Article) -> ArticleDet
         related_articles=[serializers.article_card(item) for item in related_articles],
         related_courses=[serializers.course_card(item) for item in related_courses],
         related_certifications=[
-            serializers.certification_card(item) for item in related_certifications
+            serializers.certification_card(item, pricing_config=pricing_config)
+            for item in related_certifications
         ],
         seo=seo_service.build_meta(
             title=article.meta_title or article.title,

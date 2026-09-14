@@ -27,12 +27,13 @@ from app.schemas.certification import (
     CertificationResourceWrite,
     CertificationUpdate,
     CertificationWrite,
+    ExamPricingInput,
     ProviderDetail,
     ProviderUpdate,
     ProviderWrite,
 )
 from app.schemas.common import Breadcrumb
-from app.services import seo_service, serializers
+from app.services import pricing, seo_service, serializers
 from app.utils.text import slugify, unique_slug
 
 
@@ -75,6 +76,7 @@ async def build_provider_detail(
         Breadcrumb(name="Certifications", url="/certifications"),
         Breadcrumb(name=provider.name, url=f"/certifications/{provider.slug}"),
     ]
+    pricing_config = await pricing.load_config(db)
     faq_dicts = [{"question": item.question, "answer": item.answer} for item in faqs]
 
     return ProviderDetail(
@@ -88,7 +90,10 @@ async def build_provider_detail(
         description=provider.description,
         website_url=provider.website_url,
         is_official_partner=provider.is_official_partner,
-        certifications=[serializers.certification_card(item) for item in cert_list],
+        certifications=[
+            serializers.certification_card(item, pricing_config=pricing_config)
+            for item in cert_list
+        ],
         related_courses=[serializers.course_card(item) for item in course_rows.unique()],
         related_articles=[serializers.article_card_ref(item) for item in articles],
         faqs=serializers.faq_items(faqs),
@@ -112,7 +117,10 @@ async def build_certification_detail(
     saved_ids = (
         await engagement_repo.saved_certification_ids(db, viewer_id) if viewer_id else set()
     )
-    card = serializers.certification_card(certification, saved_ids=saved_ids)
+    pricing_config = await pricing.load_config(db)
+    card = serializers.certification_card(
+        certification, saved_ids=saved_ids, pricing_config=pricing_config
+    )
 
     resources = await certification_repo.list_resources(db, certification.id)
     practice = [
@@ -145,6 +153,12 @@ async def build_certification_detail(
     return CertificationDetail(
         **card.model_dump(),
         description=certification.description,
+        pricing_input=ExamPricingInput(
+            exam_fee_amount=certification.exam_fee_amount,
+            exam_fee_currency=certification.exam_fee_currency,
+            exam_fee_checked_on=certification.exam_fee_checked_on,
+            discount_percentage=certification.discount_percentage,
+        ),
         audience=certification.audience,
         recommended_experience=certification.recommended_experience,
         exam_topics=certification.exam_topics or [],
@@ -159,7 +173,10 @@ async def build_certification_detail(
         practice_resources=[serializers.resource_card(item) for item in practice],
         related_courses=[serializers.course_card(item) for item in courses],
         related_certifications=[
-            serializers.certification_card(item, saved_ids=saved_ids) for item in related
+            serializers.certification_card(
+                item, saved_ids=saved_ids, pricing_config=pricing_config
+            )
+            for item in related
         ],
         faqs=serializers.faq_items(faqs),
         seo=seo_service.build_meta(

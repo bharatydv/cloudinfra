@@ -210,6 +210,40 @@ export interface ProviderCard {
   certification_count: number
 }
 
+/**
+ * A full price breakdown, computed server-side.
+ *
+ * Every step is sent rather than just the total, and the amounts are already
+ * rounded, so the parts add up exactly as displayed.
+ */
+/**
+ * The raw pricing columns, for the admin editor to round-trip.
+ *
+ * `discount_percentage` is null when the certification inherits the site-wide
+ * default -- which 0 cannot express, since 0 means "excluded from the sale".
+ */
+export interface ExamPricingInput {
+  exam_fee_amount: string | null
+  exam_fee_currency: string
+  exam_fee_checked_on: string | null
+  discount_percentage: string | null
+}
+
+export interface ExamPricing {
+  currency: string
+  /** The vendor's published fee -- what the discount comes off. */
+  exam_fee_amount: string
+  fee_checked_on: string | null
+  discount_percentage: string
+  discount_amount: string
+  net_price_amount: string
+  tax_label: string
+  tax_rate: string
+  tax_amount: string
+  total_price_amount: string
+  savings_percentage: number | null
+}
+
 export interface CertificationCard {
   id: string
   name: string
@@ -225,15 +259,8 @@ export interface CertificationCard {
   provider_logo: string | null
   course_count: number
   is_saved: boolean
-  /** The vendor's own published fee. Null when we have not quoted one. */
-  exam_fee_amount: string | null
-  exam_fee_currency: string
-  /** When an operator last verified the vendor fee. */
-  exam_fee_checked_on: string | null
-  /** What we charge. Null hides the comparison entirely. */
-  offer_price_amount: string | null
-  /** Derived server-side from the two prices, so it can never contradict them. */
-  savings_percentage: number | null
+  /** Null when nobody has priced this exam; the UI then shows no pricing. */
+  pricing: ExamPricing | null
 }
 
 export interface CertificationResource {
@@ -264,6 +291,8 @@ export interface RoadmapStep {
 
 export interface CertificationDetail extends CertificationCard {
   description: string
+  /** What is stored on the row, as opposed to the computed `pricing` block. */
+  pricing_input: ExamPricingInput
   audience: string | null
   recommended_experience: string | null
   exam_topics: ExamTopic[]
@@ -553,11 +582,7 @@ export interface CertificationOption {
   exam_code: string | null
   provider_name: string
   url: string
-  exam_fee_amount: string | null
-  exam_fee_currency: string
-  exam_fee_checked_on: string | null
-  offer_price_amount: string | null
-  savings_percentage: number | null
+  pricing: ExamPricing | null
 }
 
 export interface Payment {

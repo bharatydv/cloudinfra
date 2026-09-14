@@ -13,7 +13,7 @@ from app.schemas.certification import CertificationCard, ProviderCard
 from app.schemas.common import SeoMeta
 from app.schemas.content import ArticleCard, FaqRead, TestimonialRead
 from app.schemas.system import SiteSettingRead
-from app.services import seo_service, serializers
+from app.services import pricing, seo_service, serializers
 
 router = APIRouter(tags=["Site"])
 
@@ -38,6 +38,7 @@ async def homepage(db: DbSession) -> HomePayload:
     providers = await certification_repo.list_providers(db)
     articles = await article_repo.latest(db, limit=3)
     testimonials = await misc_repo.list_testimonials(db, limit=6)
+    pricing_config = await pricing.load_config(db)
     faqs = await misc_repo.list_faqs(db, category="home")
 
     seo = seo_service.build_meta(
@@ -71,7 +72,8 @@ async def homepage(db: DbSession) -> HomePayload:
         ],
         featured_courses=[serializers.course_card(item) for item in courses],
         featured_certifications=[
-            serializers.certification_card(item) for item in certifications
+            serializers.certification_card(item, pricing_config=pricing_config)
+            for item in certifications
         ],
         providers=[
             serializers.provider_card(provider, count) for provider, count in providers

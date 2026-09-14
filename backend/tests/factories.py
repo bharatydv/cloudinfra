@@ -78,7 +78,7 @@ async def make_certification(
     name: str = "Example Architect",
     published: bool = True,
     exam_fee: str | None = None,
-    offer_price: str | None = None,
+    discount_percentage: str | None = None,
 ) -> Certification:
     certification = Certification(
         provider_id=provider.id,
@@ -91,7 +91,9 @@ async def make_certification(
         skills=["Networking"],
         is_published=published,
         exam_fee_amount=Decimal(exam_fee) if exam_fee is not None else None,
-        offer_price_amount=Decimal(offer_price) if offer_price is not None else None,
+        discount_percentage=(
+            Decimal(discount_percentage) if discount_percentage is not None else None
+        ),
     )
     db.add(certification)
     await db.commit()

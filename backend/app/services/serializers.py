@@ -32,6 +32,8 @@ from app.schemas.certification import (
 )
 from app.schemas.common import FaqItem
 from app.schemas.content import ArticleCard
+from app.services import pricing
+from app.services.pricing import PricingConfig
 
 
 def course_card(course: Course) -> CourseCard:
@@ -90,8 +92,13 @@ def course_review(review: CourseReview) -> CourseReviewRead:
 
 
 def certification_card(
-    certification: Certification, *, saved_ids: set[uuid.UUID] | None = None
+    certification: Certification,
+    *,
+    saved_ids: set[uuid.UUID] | None = None,
+    pricing_config: PricingConfig | None = None,
 ) -> CertificationCard:
+    """Build a card. Without `pricing_config` the card carries no pricing --
+    callers that show prices must pass one, loaded via pricing.load_config."""
     provider = certification.provider
     return CertificationCard(
         id=certification.id,
@@ -108,10 +115,17 @@ def certification_card(
         provider_logo=provider.logo if provider else None,
         course_count=len(certification.courses) if certification.courses is not None else 0,
         is_saved=bool(saved_ids and certification.id in saved_ids),
-        exam_fee_amount=certification.exam_fee_amount,
-        exam_fee_currency=certification.exam_fee_currency,
-        exam_fee_checked_on=certification.exam_fee_checked_on,
-        offer_price_amount=certification.offer_price_amount,
+        pricing=(
+            pricing.compute(
+                exam_fee_amount=certification.exam_fee_amount,
+                currency=certification.exam_fee_currency,
+                fee_checked_on=certification.exam_fee_checked_on,
+                discount_override=certification.discount_percentage,
+                config=pricing_config,
+            )
+            if pricing_config is not None
+            else None
+        ),
     )
 
 

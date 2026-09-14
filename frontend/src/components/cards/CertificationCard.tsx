@@ -92,7 +92,7 @@ export function CertificationCard({
       </div>
 
       {/* Renders nothing when the certification has no quoted price. */}
-      <ExamPriceComparison pricing={certification} size="sm" className="mt-4" />
+      <ExamPriceComparison pricing={certification.pricing} size="sm" className="mt-4" />
 
       <div className="mt-auto flex items-center justify-between gap-3 pt-5">
         <span className="text-xs text-ink-500">

@@ -113,6 +113,52 @@ class CertificationResourceUpdate(BaseModel):
 # --------------------------------------------------------------------------
 # Certifications
 # --------------------------------------------------------------------------
+class ExamPricingInput(BaseModel):
+    """The raw pricing columns, for the admin editor to round-trip.
+
+    Kept separate from the computed `ExamPricing` because the editor has to
+    tell "inherits the site-wide discount" (None) apart from "pinned to the
+    number that default happens to be today".
+    """
+
+    exam_fee_amount: Decimal | None = None
+    exam_fee_currency: str = "USD"
+    exam_fee_checked_on: date | None = None
+    discount_percentage: Decimal | None = None
+
+
+class ExamPricing(BaseModel):
+    """A full price breakdown for one certification exam.
+
+    Every step is sent rather than just the total, so the page can show what is
+    being charged and what it is compared against. All amounts are already
+    rounded, so the parts add up to the total exactly as displayed.
+    """
+
+    currency: str = "USD"
+    # The vendor's own published fee -- the figure the discount comes off.
+    exam_fee_amount: Decimal
+    fee_checked_on: date | None = None
+
+    discount_percentage: Decimal
+    discount_amount: Decimal
+    net_price_amount: Decimal
+
+    tax_label: str = "GST"
+    tax_rate: Decimal
+    tax_amount: Decimal
+
+    total_price_amount: Decimal
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def savings_percentage(self) -> int | None:
+        """Whole-percent badge value, derived so it cannot contradict the amounts."""
+        if self.discount_amount <= 0 or self.exam_fee_amount <= 0:
+            return None
+        return int(round(self.discount_amount / self.exam_fee_amount * 100))
+
+
 class CertificationCard(ORMModel):
     id: uuid.UUID
     name: str
@@ -128,21 +174,9 @@ class CertificationCard(ORMModel):
     provider_logo: str | None = None
     course_count: int = 0
     is_saved: bool = False
-    # Vendor's published fee vs ours. Both nullable: absent means "not quoted",
-    # and the UI hides the comparison rather than showing a partial one.
-    exam_fee_amount: Decimal | None = None
-    exam_fee_currency: str = "USD"
-    exam_fee_checked_on: date | None = None
-    offer_price_amount: Decimal | None = None
-
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def savings_percentage(self) -> int | None:
-        """Whole-percent saving, derived so the badge can never contradict the prices."""
-        fee, offer = self.exam_fee_amount, self.offer_price_amount
-        if fee is None or offer is None or fee <= 0 or offer >= fee:
-            return None
-        return int(round((fee - offer) / fee * 100))
+    # None when nobody has priced this exam; every surface then hides pricing
+    # rather than rendering a partial breakdown.
+    pricing: ExamPricing | None = None
 
 
 class ExamTopic(BaseModel):
@@ -160,6 +194,9 @@ class RoadmapStep(BaseModel):
 
 class CertificationDetail(CertificationCard):
     description: str
+    # What is actually stored on the row, as opposed to the computed `pricing`
+    # block. The admin editor must round-trip these exactly.
+    pricing_input: ExamPricingInput
     audience: str | None = None
     recommended_experience: str | None = None
     exam_topics: list[ExamTopic] = []
@@ -195,8 +232,9 @@ class CertificationWrite(BaseModel):
     exam_fee_amount: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)
     exam_fee_currency: str = Field(default="USD", min_length=3, max_length=3)
     exam_fee_checked_on: date | None = None
-    offer_price_amount: Decimal | None = Field(
-        default=None, ge=0, max_digits=10, decimal_places=2
+    # Null falls back to the site-wide discount; 0 excludes this exam from it.
+    discount_percentage: Decimal | None = Field(
+        default=None, ge=0, le=100, max_digits=5, decimal_places=2
     )
     exam_duration_minutes: int | None = Field(default=None, ge=0)
     exam_format: str | None = Field(default=None, max_length=160)
@@ -226,8 +264,8 @@ class CertificationUpdate(BaseModel):
     exam_fee_amount: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)
     exam_fee_currency: str | None = Field(default=None, min_length=3, max_length=3)
     exam_fee_checked_on: date | None = None
-    offer_price_amount: Decimal | None = Field(
-        default=None, ge=0, max_digits=10, decimal_places=2
+    discount_percentage: Decimal | None = Field(
+        default=None, ge=0, le=100, max_digits=5, decimal_places=2
     )
     exam_duration_minutes: int | None = Field(default=None, ge=0)
     exam_format: str | None = Field(default=None, max_length=160)

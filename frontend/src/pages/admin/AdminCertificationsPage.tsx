@@ -209,7 +209,7 @@ const certificationSchema = z.object({
   exam_fee_amount: z.coerce.number().min(0).optional(),
   exam_fee_currency: z.string().length(3, 'Use a 3-letter code, e.g. USD.').optional(),
   exam_fee_checked_on: z.string().optional().or(z.literal('')),
-  offer_price_amount: z.coerce.number().min(0).optional(),
+  discount_percentage: z.string().optional(),
   is_published: z.boolean().optional(),
   is_featured: z.boolean().optional(),
 })
@@ -260,10 +260,16 @@ export function AdminCertificationEditorPage() {
       exam_duration_minutes: certification.exam_duration_minutes ?? 0,
       exam_format: certification.exam_format ?? '',
       official_url: certification.official_url ?? '',
-      exam_fee_amount: Number(certification.exam_fee_amount ?? 0),
-      exam_fee_currency: certification.exam_fee_currency || 'USD',
-      exam_fee_checked_on: certification.exam_fee_checked_on ?? '',
-      offer_price_amount: Number(certification.offer_price_amount ?? 0),
+      exam_fee_amount: Number(certification.pricing_input.exam_fee_amount ?? 0),
+      exam_fee_currency: certification.pricing_input.exam_fee_currency || 'USD',
+      exam_fee_checked_on: certification.pricing_input.exam_fee_checked_on ?? '',
+      // Blank means "inherit the site-wide discount", which 0 cannot express.
+      // Read the stored value, never the effective rate in `pricing` --
+      // otherwise opening and saving an inheriting exam would silently pin it.
+      discount_percentage:
+        certification.pricing_input.discount_percentage === null
+          ? ''
+          : String(Number(certification.pricing_input.discount_percentage)),
     })
     setCourseIds(certification.related_courses.map((course) => course.id))
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -292,7 +298,10 @@ export function AdminCertificationEditorPage() {
         exam_fee_amount: values.exam_fee_amount || null,
         exam_fee_currency: values.exam_fee_currency || 'USD',
         exam_fee_checked_on: values.exam_fee_checked_on || null,
-        offer_price_amount: values.offer_price_amount || null,
+        discount_percentage:
+          values.discount_percentage?.trim() === ''
+            ? null
+            : Number(values.discount_percentage),
         is_published: values.is_published ?? true,
         is_featured: values.is_featured ?? false,
         course_ids: courseIds,
@@ -446,8 +455,8 @@ export function AdminCertificationEditorPage() {
                   Exam pricing
                 </p>
                 <p className="text-xs leading-relaxed text-ink-500">
-                  Both figures are needed for the price comparison to appear on the site.
-                  Leave either at 0 to hide it.
+                  A provider fee is required for pricing to appear at all. Set it to 0 to
+                  hide pricing for this certification.
                 </p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field
@@ -464,16 +473,18 @@ export function AdminCertificationEditorPage() {
                     />
                   </Field>
                   <Field
-                    label="Your price"
-                    htmlFor="cert-offer"
-                    hint="What you charge. The saving is worked out from these two."
+                    label="Discount %"
+                    htmlFor="cert-discount"
+                    hint="Leave blank to use the site-wide discount. Enter 0 to exclude this exam from it."
                   >
                     <Input
-                      id="cert-offer"
+                      id="cert-discount"
                       type="number"
                       min="0"
+                      max="100"
                       step="0.01"
-                      {...form.register('offer_price_amount')}
+                      placeholder="Site default"
+                      {...form.register('discount_percentage')}
                     />
                   </Field>
                   <Field

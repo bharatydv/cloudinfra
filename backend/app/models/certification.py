@@ -89,8 +89,9 @@ class Certification(Base, UUIDPrimaryKeyMixin, TimestampMixin):
             name="exam_fee_non_negative",
         ),
         CheckConstraint(
-            "offer_price_amount IS NULL OR offer_price_amount >= 0",
-            name="offer_price_non_negative",
+            "discount_percentage IS NULL "
+            "OR (discount_percentage >= 0 AND discount_percentage <= 100)",
+            name="discount_percentage_valid",
         ),
     )
 
@@ -123,9 +124,10 @@ class Certification(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     exam_fee_amount: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     exam_fee_currency: Mapped[str] = mapped_column(String(3), default="USD", nullable=False)
     exam_fee_checked_on: Mapped[date | None] = mapped_column(Date)
-    # What we charge. Null means we are not quoting a price for this exam, and
-    # the comparison block is hidden entirely.
-    offer_price_amount: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
+    # Per-certification discount override. NULL falls back to the site-wide
+    # default in the `pricing` setting; an explicit 0 excludes this exam from a
+    # sale, which NULL cannot express.
+    discount_percentage: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
 
     exam_duration_minutes: Mapped[int | None] = mapped_column(Integer)
     exam_format: Mapped[str | None] = mapped_column(String(160))

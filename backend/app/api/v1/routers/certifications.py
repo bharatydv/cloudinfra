@@ -25,7 +25,7 @@ from app.schemas.certification import (
     ProviderWrite,
 )
 from app.schemas.common import Message
-from app.services import certification_service, serializers
+from app.services import certification_service, pricing, serializers
 
 router = APIRouter(tags=["Certifications"])
 Params = Annotated[PageParams, Depends(page_params)]
@@ -65,11 +65,17 @@ async def list_certifications(
         category=category,
         sort=sort,
     )
+    pricing_config = await pricing.load_config(db)
     saved_ids = (
         await engagement_repo.saved_certification_ids(db, viewer.id) if viewer else set()
     )
     return Page.create(
-        [serializers.certification_card(item, saved_ids=saved_ids) for item in items],
+        [
+            serializers.certification_card(
+                item, saved_ids=saved_ids, pricing_config=pricing_config
+            )
+            for item in items
+        ],
         total,
         params,
     )
@@ -132,8 +138,14 @@ async def admin_list_certifications(
     items, total = await certification_repo.list_certifications(
         db, params, search=q, is_published=is_published, sort="newest"
     )
+    pricing_config = await pricing.load_config(db)
     return Page.create(
-        [serializers.certification_card(item) for item in items], total, params
+        [
+            serializers.certification_card(item, pricing_config=pricing_config)
+            for item in items
+        ],
+        total,
+        params,
     )
 
 

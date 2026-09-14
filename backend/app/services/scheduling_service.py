@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import secrets
 import uuid
-from decimal import Decimal
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,6 +21,7 @@ from app.schemas.scheduling import (
     ExamBookingUpdate,
 )
 from app.services import email as email_service
+from app.services import pricing
 
 # No vowels and no 0/1/I/O: a code is read out over the phone as often as it is
 # copied, so ambiguous glyphs cost support time.
@@ -37,19 +37,13 @@ async def _unique_reference_code(db: AsyncSession) -> str:
     raise ValidationFailedError("Could not allocate a reference code. Please try again.")
 
 
-def _savings_percentage(fee: Decimal | None, offer: Decimal | None) -> int | None:
-    """Mirrors CertificationCard.savings_percentage so both surfaces agree."""
-    if fee is None or offer is None or fee <= 0 or offer >= fee:
-        return None
-    return int(round((fee - offer) / fee * 100))
-
-
 def certification_url(certification: Certification) -> str:
     return f"/certifications/{certification.provider.slug}/{certification.slug}"
 
 
 async def list_options(db: AsyncSession) -> list[CertificationOption]:
     """Published certifications, for the scheduling form's picker."""
+    config = await pricing.load_config(db)
     rows = await db.scalars(
         select(Certification)
         .options(selectinload(Certification.provider))
@@ -63,12 +57,12 @@ async def list_options(db: AsyncSession) -> list[CertificationOption]:
             exam_code=row.exam_code,
             provider_name=row.provider.name,
             url=certification_url(row),
-            exam_fee_amount=row.exam_fee_amount,
-            exam_fee_currency=row.exam_fee_currency,
-            exam_fee_checked_on=row.exam_fee_checked_on,
-            offer_price_amount=row.offer_price_amount,
-            savings_percentage=_savings_percentage(
-                row.exam_fee_amount, row.offer_price_amount
+            pricing=pricing.compute(
+                exam_fee_amount=row.exam_fee_amount,
+                currency=row.exam_fee_currency,
+                fee_checked_on=row.exam_fee_checked_on,
+                discount_override=row.discount_percentage,
+                config=config,
             ),
         )
         for row in rows

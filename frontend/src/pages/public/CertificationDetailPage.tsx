@@ -142,7 +142,7 @@ export default function CertificationDetailPage() {
               </dl>
 
               <ExamPriceComparison
-                pricing={data}
+                pricing={data.pricing}
                 className="mt-7 rounded-xl border border-white/15 bg-white/5 px-4 py-3 [&_s]:text-ink-400 [&>span:first-child]:text-white"
               />
 
@@ -216,7 +216,7 @@ export default function CertificationDetailPage() {
                 )}
               </dl>
 
-              <ExamPricePanel pricing={data} />
+              <ExamPricePanel pricing={data.pricing} />
 
               <ScheduleExamLink
                 certificationId={data.id}

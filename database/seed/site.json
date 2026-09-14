@@ -191,6 +191,17 @@
       }
     },
     {
+      "key": "pricing",
+      "is_public": true,
+      "description": "Site-wide exam pricing rules. discountPercentage applies to every certification that does not set its own. Set taxEnabled to false to hide the tax line entirely.",
+      "value": {
+        "discountPercentage": 20,
+        "taxEnabled": true,
+        "taxRate": 18,
+        "taxLabel": "GST"
+      }
+    },
+    {
       "key": "contact",
       "is_public": true,
       "description": "Contact details shown on /contact and in the footer. Blank fields are hidden.",
