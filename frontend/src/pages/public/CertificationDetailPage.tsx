@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -13,12 +13,14 @@ import {
 } from 'lucide-react'
 
 import { CertificationCard } from '@/components/cards/CertificationCard'
-import { ExamPriceComparison, ExamPricePanel } from '@/components/cards/ExamPrice'
+import { ExamOfferCard } from '@/components/cards/ExamOfferCard'
+import { ExamPriceComparison } from '@/components/cards/ExamPrice'
 import { CourseCard } from '@/components/cards/CourseCard'
 import { ResourceCard } from '@/components/cards/misc'
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
 import { CTASection } from '@/components/marketing/sections'
 import { ScheduleExamLink } from '@/components/scheduling/ScheduleExamCta'
+import { StickyExamCta } from '@/components/scheduling/StickyExamCta'
 import { Accordion } from '@/components/ui/Accordion'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
@@ -43,6 +45,8 @@ export default function CertificationDetailPage() {
   const { isAuthenticated } = useAuth()
   const toast = useToast()
   const [openResource, setOpenResource] = useState<CertificationResource | null>(null)
+  // Watched so the sticky bar appears only once the offer scrolls away.
+  const offerRef = useRef<HTMLDivElement>(null)
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.certification(provider, slug),
@@ -189,7 +193,12 @@ export default function CertificationDetailPage() {
               </div>
             </div>
 
-            <Card className="h-fit p-6">
+            <div ref={offerRef} className="h-fit space-y-5">
+              {data.pricing && (
+                <ExamOfferCard pricing={data.pricing} certificationId={data.id} />
+              )}
+
+              <Card className="p-6">
               <h2 className="text-sm font-bold uppercase tracking-wider text-ink-500">
                 Exam information
               </h2>
@@ -216,16 +225,17 @@ export default function CertificationDetailPage() {
                 )}
               </dl>
 
-              <ExamPricePanel pricing={data.pricing} />
-
-              <ScheduleExamLink
-                certificationId={data.id}
-                size="md"
-                className="mt-5 w-full"
-                cta="cert_sidebar_schedule"
-              >
-                Schedule this exam
-              </ScheduleExamLink>
+              {/* Unpriced certifications still need a way through to the form. */}
+              {!data.pricing && (
+                <ScheduleExamLink
+                  certificationId={data.id}
+                  size="md"
+                  className="mt-5 w-full"
+                  cta="cert_sidebar_schedule"
+                >
+                  Schedule this exam
+                </ScheduleExamLink>
+              )}
 
               {data.official_url && (
                 <a
@@ -243,7 +253,8 @@ export default function CertificationDetailPage() {
                 {siteConfig.independenceNotice} Always confirm cost, format and scheduling on the
                 provider&rsquo;s official page.
               </p>
-            </Card>
+              </Card>
+            </div>
           </div>
         </Container>
       </section>
@@ -481,6 +492,13 @@ export default function CertificationDetailPage() {
         description="Work the roadmap, use the practice resources, then tell us when you want to sit it."
         primary={{ label: 'Schedule this exam', to: scheduleExamPath(data.id) }}
         secondary={{ label: 'Browse Courses', to: '/courses' }}
+      />
+
+      <StickyExamCta
+        pricing={data.pricing}
+        certificationId={data.id}
+        certificationName={data.name}
+        watchRef={offerRef}
       />
 
       <Modal

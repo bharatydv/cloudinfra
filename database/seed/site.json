@@ -180,14 +180,20 @@
     {
       "key": "promotion",
       "is_public": true,
-      "description": "Site-wide promotional offer. Set enabled to false to hide the banner and the CTA badge everywhere without removing the copy.",
+      "description": "Site-wide offer plus the value points shown beside the exam price. Set enabled to false to hide the banner and CTA badge; benefits and reassurance are shown whenever a certification has a price.",
       "value": {
         "enabled": true,
         "message": "Limited time: 20% off every certification exam booking.",
         "badge": "Save 20%",
         "linkLabel": "Schedule your exam",
         "linkTo": "/schedule-exam",
-        "endsOn": ""
+        "endsOn": "",
+        "benefits": [
+          "Structured preparation path mapped to this exam's objectives",
+          "Practice resources to find your gaps before exam day",
+          "We handle the booking and confirm your slot by email"
+        ],
+        "reassurance": "No payment now — we confirm your slot before anything is charged."
       }
     },
     {

@@ -23,6 +23,10 @@ export interface Promotion {
   linkTo: string
   /** Free text; blank hides the deadline line. */
   endsOn: string
+  /** Value points shown beside an exam price. Operator-owned copy. */
+  benefits: string[]
+  /** One line under the booking CTA, e.g. when payment is taken. */
+  reassurance: string
 }
 
 const NO_PROMOTION: Promotion = {
@@ -32,6 +36,8 @@ const NO_PROMOTION: Promotion = {
   linkLabel: '',
   linkTo: '/schedule-exam',
   endsOn: '',
+  benefits: [],
+  reassurance: '',
 }
 
 interface LearningPathStep {
@@ -79,10 +85,14 @@ export function SiteProvider({ children }: { children: ReactNode }) {
       },
       // A promotion with no message is treated as switched off, so clearing the
       // text in the admin is enough to take the banner down.
-      promotion:
-        promoSetting.enabled && promoSetting.message
-          ? { ...NO_PROMOTION, ...promoSetting }
-          : NO_PROMOTION,
+      promotion: {
+        ...NO_PROMOTION,
+        benefits: Array.isArray(promoSetting.benefits) ? promoSetting.benefits : [],
+        reassurance: promoSetting.reassurance ?? '',
+        // The offer itself is separate: an empty message means no offer, but
+        // the value points still belong beside the price.
+        ...(promoSetting.enabled && promoSetting.message ? promoSetting : {}),
+      },
       about: settingValue(data, 'about'),
       legal: settingValue(data, 'legal') as Record<string, string>,
       learningPath: (pathSetting.steps as LearningPathStep[]) ?? [],

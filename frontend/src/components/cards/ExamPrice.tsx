@@ -49,8 +49,12 @@ export function ExamPriceComparison({
         </span>
       )}
 
-      {pricing.savings_percentage !== null && (
-        <Badge tone="success">Save {pricing.savings_percentage}%</Badge>
+      {/* Money first: "Save $25" is more concrete than "20% off", and both fit. */}
+      {discounted && (
+        <Badge tone="success">
+          Save {formatPrice(pricing.discount_amount, currency)}
+          {pricing.savings_percentage !== null && ` · ${pricing.savings_percentage}%`}
+        </Badge>
       )}
     </div>
   )
