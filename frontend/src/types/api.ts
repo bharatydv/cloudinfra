@@ -225,6 +225,15 @@ export interface CertificationCard {
   provider_logo: string | null
   course_count: number
   is_saved: boolean
+  /** The vendor's own published fee. Null when we have not quoted one. */
+  exam_fee_amount: string | null
+  exam_fee_currency: string
+  /** When an operator last verified the vendor fee. */
+  exam_fee_checked_on: string | null
+  /** What we charge. Null hides the comparison entirely. */
+  offer_price_amount: string | null
+  /** Derived server-side from the two prices, so it can never contradict them. */
+  savings_percentage: number | null
 }
 
 export interface CertificationResource {
@@ -544,6 +553,11 @@ export interface CertificationOption {
   exam_code: string | null
   provider_name: string
   url: string
+  exam_fee_amount: string | null
+  exam_fee_currency: string
+  exam_fee_checked_on: string | null
+  offer_price_amount: string | null
+  savings_percentage: number | null
 }
 
 export interface Payment {

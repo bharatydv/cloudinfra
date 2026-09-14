@@ -108,6 +108,10 @@ def certification_card(
         provider_logo=provider.logo if provider else None,
         course_count=len(certification.courses) if certification.courses is not None else 0,
         is_saved=bool(saved_ids and certification.id in saved_ids),
+        exam_fee_amount=certification.exam_fee_amount,
+        exam_fee_currency=certification.exam_fee_currency,
+        exam_fee_checked_on=certification.exam_fee_checked_on,
+        offer_price_amount=certification.offer_price_amount,
     )
 
 

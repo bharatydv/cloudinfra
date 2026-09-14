@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import secrets
 import uuid
+from decimal import Decimal
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,6 +37,13 @@ async def _unique_reference_code(db: AsyncSession) -> str:
     raise ValidationFailedError("Could not allocate a reference code. Please try again.")
 
 
+def _savings_percentage(fee: Decimal | None, offer: Decimal | None) -> int | None:
+    """Mirrors CertificationCard.savings_percentage so both surfaces agree."""
+    if fee is None or offer is None or fee <= 0 or offer >= fee:
+        return None
+    return int(round((fee - offer) / fee * 100))
+
+
 def certification_url(certification: Certification) -> str:
     return f"/certifications/{certification.provider.slug}/{certification.slug}"
 
@@ -55,6 +63,13 @@ async def list_options(db: AsyncSession) -> list[CertificationOption]:
             exam_code=row.exam_code,
             provider_name=row.provider.name,
             url=certification_url(row),
+            exam_fee_amount=row.exam_fee_amount,
+            exam_fee_currency=row.exam_fee_currency,
+            exam_fee_checked_on=row.exam_fee_checked_on,
+            offer_price_amount=row.offer_price_amount,
+            savings_percentage=_savings_percentage(
+                row.exam_fee_amount, row.offer_price_amount
+            ),
         )
         for row in rows
     ]

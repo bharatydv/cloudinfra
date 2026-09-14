@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, date, datetime
+from decimal import Decimal
 
 from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
@@ -104,3 +105,10 @@ class CertificationOption(BaseModel):
     exam_code: str | None = None
     provider_name: str
     url: str
+    # Carried so the form can price the exam the moment one is picked, without
+    # a second request per selection.
+    exam_fee_amount: Decimal | None = None
+    exam_fee_currency: str = "USD"
+    exam_fee_checked_on: date | None = None
+    offer_price_amount: Decimal | None = None
+    savings_percentage: int | None = None

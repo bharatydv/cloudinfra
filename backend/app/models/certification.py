@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import uuid
+from datetime import date
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
     Column,
+    Date,
     ForeignKey,
     Index,
     Integer,
+    Numeric,
     String,
     Table,
     Text,
@@ -80,6 +84,14 @@ class Certification(Base, UUIDPrimaryKeyMixin, TimestampMixin):
             name="level_valid",
         ),
         Index("ix_certifications_published_provider", "is_published", "provider_id"),
+        CheckConstraint(
+            "exam_fee_amount IS NULL OR exam_fee_amount >= 0",
+            name="exam_fee_non_negative",
+        ),
+        CheckConstraint(
+            "offer_price_amount IS NULL OR offer_price_amount >= 0",
+            name="offer_price_non_negative",
+        ),
     )
 
     provider_id: Mapped[uuid.UUID] = mapped_column(
@@ -103,6 +115,18 @@ class Certification(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     preparation_roadmap: Mapped[list[dict]] = mapped_column(
         JSONB, default=list, nullable=False
     )
+    # --- Pricing -----------------------------------------------------------
+    # The vendor's own published exam fee, quoted for comparison only. It is
+    # nullable because we do not invent a number we have not verified, and
+    # `exam_fee_checked_on` records when a human last confirmed it -- vendor
+    # pricing changes and varies by region, so a stale quote is a liability.
+    exam_fee_amount: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
+    exam_fee_currency: Mapped[str] = mapped_column(String(3), default="USD", nullable=False)
+    exam_fee_checked_on: Mapped[date | None] = mapped_column(Date)
+    # What we charge. Null means we are not quoting a price for this exam, and
+    # the comparison block is hidden entirely.
+    offer_price_amount: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
+
     exam_duration_minutes: Mapped[int | None] = mapped_column(Integer)
     exam_format: Mapped[str | None] = mapped_column(String(160))
     # Link to the vendor's own page. Rendered as an outbound reference only.

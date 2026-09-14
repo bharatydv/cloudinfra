@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 
 import { CertificationCard } from '@/components/cards/CertificationCard'
+import { ExamPriceComparison, ExamPricePanel } from '@/components/cards/ExamPrice'
 import { CourseCard } from '@/components/cards/CourseCard'
 import { ResourceCard } from '@/components/cards/misc'
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
@@ -140,7 +141,12 @@ export default function CertificationDetailPage() {
                 </div>
               </dl>
 
-              <div className="mt-8 flex flex-wrap gap-3">
+              <ExamPriceComparison
+                pricing={data}
+                className="mt-7 rounded-xl border border-white/15 bg-white/5 px-4 py-3 [&_s]:text-ink-400 [&>span:first-child]:text-white"
+              />
+
+              <div className="mt-6 flex flex-wrap gap-3">
                 {/* The exam is known here, so the form opens already filled in. */}
                 <ScheduleExamLink certificationId={data.id} cta="cert_detail_schedule" />
                 <Button
@@ -209,6 +215,8 @@ export default function CertificationDetailPage() {
                   </div>
                 )}
               </dl>
+
+              <ExamPricePanel pricing={data} />
 
               <ScheduleExamLink
                 certificationId={data.id}

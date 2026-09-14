@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
+from decimal import Decimal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 from app.models.enums import CertificationLevel, ContentStatus, ResourceType
 from app.schemas.catalog import CourseCard
@@ -127,6 +128,21 @@ class CertificationCard(ORMModel):
     provider_logo: str | None = None
     course_count: int = 0
     is_saved: bool = False
+    # Vendor's published fee vs ours. Both nullable: absent means "not quoted",
+    # and the UI hides the comparison rather than showing a partial one.
+    exam_fee_amount: Decimal | None = None
+    exam_fee_currency: str = "USD"
+    exam_fee_checked_on: date | None = None
+    offer_price_amount: Decimal | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def savings_percentage(self) -> int | None:
+        """Whole-percent saving, derived so the badge can never contradict the prices."""
+        fee, offer = self.exam_fee_amount, self.offer_price_amount
+        if fee is None or offer is None or fee <= 0 or offer >= fee:
+            return None
+        return int(round((fee - offer) / fee * 100))
 
 
 class ExamTopic(BaseModel):
@@ -176,6 +192,12 @@ class CertificationWrite(BaseModel):
     audience: str | None = None
     recommended_experience: str | None = None
     preparation_roadmap: list[RoadmapStep] = []
+    exam_fee_amount: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)
+    exam_fee_currency: str = Field(default="USD", min_length=3, max_length=3)
+    exam_fee_checked_on: date | None = None
+    offer_price_amount: Decimal | None = Field(
+        default=None, ge=0, max_digits=10, decimal_places=2
+    )
     exam_duration_minutes: int | None = Field(default=None, ge=0)
     exam_format: str | None = Field(default=None, max_length=160)
     official_url: str | None = Field(default=None, max_length=500)
@@ -201,6 +223,12 @@ class CertificationUpdate(BaseModel):
     audience: str | None = None
     recommended_experience: str | None = None
     preparation_roadmap: list[RoadmapStep] | None = None
+    exam_fee_amount: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)
+    exam_fee_currency: str | None = Field(default=None, min_length=3, max_length=3)
+    exam_fee_checked_on: date | None = None
+    offer_price_amount: Decimal | None = Field(
+        default=None, ge=0, max_digits=10, decimal_places=2
+    )
     exam_duration_minutes: int | None = Field(default=None, ge=0)
     exam_format: str | None = Field(default=None, max_length=160)
     official_url: str | None = Field(default=None, max_length=500)

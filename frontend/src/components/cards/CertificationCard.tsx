@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Bookmark, BookmarkCheck, GraduationCap } from 'lucide-react'
 
+import { ExamPriceComparison } from '@/components/cards/ExamPrice'
 import { Badge, Card } from '@/components/ui/primitives'
 import { formatLevel, pluralize } from '@/lib/format'
 import { cn } from '@/lib/cn'
@@ -89,6 +90,9 @@ export function CertificationCard({
           <Badge tone="outline">+{certification.skills.length - 2}</Badge>
         )}
       </div>
+
+      {/* Renders nothing when the certification has no quoted price. */}
+      <ExamPriceComparison pricing={certification} size="sm" className="mt-4" />
 
       <div className="mt-auto flex items-center justify-between gap-3 pt-5">
         <span className="text-xs text-ink-500">

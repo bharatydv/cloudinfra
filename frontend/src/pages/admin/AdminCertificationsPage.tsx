@@ -206,6 +206,10 @@ const certificationSchema = z.object({
   exam_duration_minutes: z.coerce.number().min(0).optional(),
   exam_format: z.string().max(160).optional(),
   official_url: z.string().url('Enter a valid URL.').optional().or(z.literal('')),
+  exam_fee_amount: z.coerce.number().min(0).optional(),
+  exam_fee_currency: z.string().length(3, 'Use a 3-letter code, e.g. USD.').optional(),
+  exam_fee_checked_on: z.string().optional().or(z.literal('')),
+  offer_price_amount: z.coerce.number().min(0).optional(),
   is_published: z.boolean().optional(),
   is_featured: z.boolean().optional(),
 })
@@ -256,6 +260,10 @@ export function AdminCertificationEditorPage() {
       exam_duration_minutes: certification.exam_duration_minutes ?? 0,
       exam_format: certification.exam_format ?? '',
       official_url: certification.official_url ?? '',
+      exam_fee_amount: Number(certification.exam_fee_amount ?? 0),
+      exam_fee_currency: certification.exam_fee_currency || 'USD',
+      exam_fee_checked_on: certification.exam_fee_checked_on ?? '',
+      offer_price_amount: Number(certification.offer_price_amount ?? 0),
     })
     setCourseIds(certification.related_courses.map((course) => course.id))
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -281,6 +289,10 @@ export function AdminCertificationEditorPage() {
         exam_duration_minutes: values.exam_duration_minutes || null,
         exam_format: values.exam_format || null,
         official_url: values.official_url || null,
+        exam_fee_amount: values.exam_fee_amount || null,
+        exam_fee_currency: values.exam_fee_currency || 'USD',
+        exam_fee_checked_on: values.exam_fee_checked_on || null,
+        offer_price_amount: values.offer_price_amount || null,
         is_published: values.is_published ?? true,
         is_featured: values.is_featured ?? false,
         course_ids: courseIds,
@@ -428,6 +440,62 @@ export function AdminCertificationEditorPage() {
               >
                 <Input id="cert-url" {...form.register('official_url')} />
               </Field>
+
+              <div className="space-y-4 border-t border-ink-200 pt-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-ink-500">
+                  Exam pricing
+                </p>
+                <p className="text-xs leading-relaxed text-ink-500">
+                  Both figures are needed for the price comparison to appear on the site.
+                  Leave either at 0 to hide it.
+                </p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field
+                    label="Provider's exam fee"
+                    htmlFor="cert-fee"
+                    hint="The vendor's own published price."
+                  >
+                    <Input
+                      id="cert-fee"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      {...form.register('exam_fee_amount')}
+                    />
+                  </Field>
+                  <Field
+                    label="Your price"
+                    htmlFor="cert-offer"
+                    hint="What you charge. The saving is worked out from these two."
+                  >
+                    <Input
+                      id="cert-offer"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      {...form.register('offer_price_amount')}
+                    />
+                  </Field>
+                  <Field
+                    label="Currency"
+                    htmlFor="cert-currency"
+                    error={form.formState.errors.exam_fee_currency?.message}
+                  >
+                    <Input id="cert-currency" maxLength={3} {...form.register('exam_fee_currency')} />
+                  </Field>
+                  <Field
+                    label="Provider fee last checked"
+                    htmlFor="cert-fee-checked"
+                    hint="Shown to visitors so a stale quote is visibly stale."
+                  >
+                    <Input
+                      id="cert-fee-checked"
+                      type="date"
+                      {...form.register('exam_fee_checked_on')}
+                    />
+                  </Field>
+                </div>
+              </div>
 
               <div className="space-y-2.5 border-t border-ink-200 pt-4">
                 <label className="flex items-center gap-2.5 text-sm text-ink-700">

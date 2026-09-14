@@ -162,7 +162,10 @@
           "description": "Six scenario questions on RTO/RPO trade-offs, with worked reasoning.",
           "content": "## How to use these\n\nRead the scenario, commit to an answer in writing, then read the reasoning. Changing your answer after reading the explanation teaches you nothing.\n\n### Scenario 1\nA reporting system can lose up to one hour of data but must be serving again within fifteen minutes of a regional failure. Which pairing of replication and failover strategy fits, and which is over-engineered for the stated requirement?\n\n**Reasoning.** An RPO of one hour permits asynchronous replication; the fifteen-minute RTO is what forces a warm standby rather than a restore-from-backup approach. Candidates commonly over-buy synchronous replication here, which satisfies the requirement but fails the implicit cost constraint.\n\n### Scenario 2\nA transactional system states an RPO of zero. What does that immediately rule out, and what cost does it impose on write latency?\n\n**Reasoning.** Zero RPO rules out any asynchronous path. Synchronous replication across regions adds round-trip latency to every commit, which is the trade-off the exam wants you to name explicitly."
         }
-      ]
+      ],
+      "exam_fee_amount": 200.0,
+      "exam_fee_currency": "USD",
+      "offer_price_amount": 160.0
     },
     {
       "provider": "google-cloud",
@@ -282,7 +285,10 @@
           "description": "Twenty tasks to perform from the command line without documentation.",
           "content": "## Rules\n\nNo documentation on the first attempt. If you need to look something up, mark the task and repeat it two days later.\n\n1. Create a project and set it as the active configuration.\n2. Create a service account and grant it a narrowly scoped role.\n3. Launch a VM with a startup script that installs a web server.\n4. Create a firewall rule allowing only health-check traffic.\n5. Create a managed instance group with autoscaling based on CPU.\n6. Deploy a container image to a managed Kubernetes cluster and expose it.\n7. Create a storage bucket with a lifecycle rule moving objects to a colder class after 30 days.\n8. Grant a user read-only access to one bucket without granting project-wide read access.\n\nRepeat the full list until you can complete it end to end in under an hour."
         }
-      ]
+      ],
+      "exam_fee_amount": 125.0,
+      "exam_fee_currency": "USD",
+      "offer_price_amount": 100.0
     },
     {
       "provider": "google-cloud",
@@ -393,7 +399,10 @@
           "description": "How to choose between batch and streaming from stated requirements.",
           "content": "## Start with the requirement, not the technology\n\nThe question that decides the architecture is: *how stale is the data allowed to be when a decision is made from it?*\n\n### Choose batch when\n- Freshness requirements are measured in hours.\n- Correctness matters more than latency and reprocessing is acceptable.\n- The cost of continuous compute is not justified by the freshness gain.\n\n### Choose streaming when\n- Decisions are made in seconds or minutes.\n- Data arrives continuously and buffering it changes its value.\n- You can accept the operational complexity of windowing and late data.\n\n### The trap\nStreaming pipelines fail differently from batch pipelines. A late-arriving record in a batch job is simply included in the next run; in a streaming job it may fall outside its window and be silently dropped. If the exam scenario mentions out-of-order or delayed events, the correct answer almost always involves explicit windowing and watermark handling."
         }
-      ]
+      ],
+      "exam_fee_amount": 200.0,
+      "exam_fee_currency": "USD",
+      "offer_price_amount": 160.0
     },
     {
       "provider": "aws",
@@ -511,7 +520,10 @@
           "description": "Scenario drills that train you to find the deciding detail in the question.",
           "content": "## Method\n\nFor each scenario, write down the single constraint that eliminates most options before you evaluate any option.\n\n### Scenario 1\nA batch job runs nightly for about forty minutes and must not be interrupted. Which compute model is wrong regardless of cost, and why?\n\n**Answer.** Serverless functions with a fifteen-minute execution ceiling are eliminated by the runtime alone. Cost never enters the decision.\n\n### Scenario 2\nAn application must survive the loss of an entire availability zone with no data loss and under a minute of downtime. Which detail forces synchronous replication?\n\n**Answer.** *No data loss* -- that is an RPO of zero, which asynchronous replication cannot satisfy at any downtime target.\n\n### Scenario 3\nAudit logs must be retained for seven years and are read perhaps twice a year. Which constraint decides the storage class?\n\n**Answer.** Access frequency, not durability. All the candidate classes are equally durable; retrieval cost and minimum storage duration decide it."
         }
-      ]
+      ],
+      "exam_fee_amount": 150.0,
+      "exam_fee_currency": "USD",
+      "offer_price_amount": 120.0
     },
     {
       "provider": "aws",
@@ -607,7 +619,10 @@
           "description": "The terms the foundational exam assumes you already know.",
           "content": "## Infrastructure\n- **Region** - a geographic area containing multiple isolated data centre groups.\n- **Availability zone** - one or more discrete data centres with independent power and networking within a region.\n- **Edge location** - a caching endpoint closer to users than the region.\n\n## Economics\n- **Capital versus operating expenditure** - cloud converts up-front hardware purchases into ongoing usage charges.\n- **Elasticity** - capacity follows demand in both directions.\n- **Economies of scale** - unit costs fall as the provider's aggregate scale grows.\n\n## Responsibility\n- **Shared responsibility model** - the provider secures the infrastructure *of* the cloud; the customer secures what they put *in* it. Nearly every security question on the foundational exam reduces to which side of that line a task falls on."
         }
-      ]
+      ],
+      "exam_fee_amount": 100.0,
+      "exam_fee_currency": "USD",
+      "offer_price_amount": 80.0
     },
     {
       "provider": "aws",
@@ -728,7 +743,10 @@
           "description": "When rolling, blue/green and canary deployments are each the right answer.",
           "content": "## Rolling\nReplaces instances gradually in place. Cheapest in infrastructure, but both versions serve traffic simultaneously, so it requires backward-compatible changes. Rollback is slow because it is another rolling operation.\n\n## Blue/green\nStands up a complete parallel environment and switches traffic at once. Rollback is a traffic switch, so it is close to instantaneous -- which is why exam scenarios that demand *immediate* rollback point here. The cost is running two full environments during the cutover.\n\n## Canary\nSends a small percentage of traffic to the new version and promotes it based on observed metrics. This is the only strategy that catches failures that appear solely under real production traffic, and it is what scenarios describing *gradual exposure with automated rollback on error rate* are asking for.\n\n## The database question\nNone of these strategies solves incompatible schema changes. If a scenario mentions a schema migration alongside a deployment strategy, the answer almost always involves expanding the schema first, deploying, then contracting -- not the deployment strategy itself."
         }
-      ]
+      ],
+      "exam_fee_amount": 300.0,
+      "exam_fee_currency": "USD",
+      "offer_price_amount": 240.0
     },
     {
       "provider": "microsoft",
@@ -815,7 +833,10 @@
           "description": "A compressed plan for candidates with some IT background.",
           "content": "## Evening 1 - concepts\nService models, deployment models, capital versus operating expenditure, elasticity. Write the definitions in your own words.\n\n## Evening 2 - services\nOne paragraph per core service family: what it is, and the single situation you would choose it for.\n\n## Evening 3 - governance and cost\nThis is the largest scored area. Cover policies, resource locks, tags, cost analysis and budgets, and know which tool answers which question.\n\n## Evening 4 - practice\nA full practice round, then re-read only the objectives you missed.\n\nIf you have no IT background, double each stage rather than skipping the practice."
         }
-      ]
+      ],
+      "exam_fee_amount": 99.0,
+      "exam_fee_currency": "USD",
+      "offer_price_amount": 79.0
     },
     {
       "provider": "microsoft",
@@ -935,7 +956,10 @@
           "description": "Practice choosing the narrowest scope that satisfies a stated requirement.",
           "content": "## The principle being tested\n\nAlways choose the narrowest scope that satisfies the requirement, and the least privileged built-in role that covers the listed actions.\n\n### Drill 1\nA contractor must restart virtual machines in one resource group and nothing else. What scope and role?\n\n**Answer.** The role that permits restart on virtual machines, assigned at that resource group. A subscription-level assignment satisfies the task but violates least privilege, which is what the question is testing.\n\n### Drill 2\nAn auditor must read every resource across three subscriptions and change nothing. What is the efficient answer?\n\n**Answer.** A reader role assigned once at the management group containing those subscriptions, rather than three separate assignments.\n\n### Drill 3\nA team needs to manage access for their own resources without gaining data access. Which role family applies?\n\n**Answer.** The administrator role that grants permission management without data-plane rights -- the exam consistently separates control-plane from data-plane permissions."
         }
-      ]
+      ],
+      "exam_fee_amount": 165.0,
+      "exam_fee_currency": "USD",
+      "offer_price_amount": 132.0
     },
     {
       "provider": "microsoft",
@@ -1038,7 +1062,10 @@
           "description": "A repeatable method for long architecture scenarios.",
           "content": "## The method\n\n1. **Read the questions first.** You are looking for specific constraints, not general comprehension.\n2. **Underline every number.** Recovery objectives, retention periods, user counts and budget ceilings are almost always the discriminators.\n3. **Separate stated from implied requirements.** *Must comply with data residency rules* is stated; *therefore cross-region replication to another geography is unacceptable* is implied, and the implied version is what eliminates options.\n4. **Eliminate before selecting.** Most options fail on exactly one constraint. Find that constraint rather than arguing for a favourite.\n5. **Prefer managed over self-managed** when requirements are otherwise equally met -- reduced operational overhead is a stated design goal in most scenarios.\n\n## Common trap\nAn option that satisfies every technical requirement but ignores a stated cost or complexity limit is still wrong. The exam treats those limits as hard constraints."
         }
-      ]
+      ],
+      "exam_fee_amount": 165.0,
+      "exam_fee_currency": "USD",
+      "offer_price_amount": 132.0
     }
   ]
 }

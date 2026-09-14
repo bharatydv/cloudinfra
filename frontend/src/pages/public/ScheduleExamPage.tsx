@@ -6,6 +6,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { CalendarCheck, CheckCircle2, Clock, Home, ShieldCheck, Tag } from 'lucide-react'
 import { z } from 'zod'
 
+import { ExamPricePanel } from '@/components/cards/ExamPrice'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Card, Container, Field, Input, Section, Select } from '@/components/ui/primitives'
@@ -18,6 +19,7 @@ import { useSeo } from '@/hooks/useSeo'
 import { useSite } from '@/hooks/useSite'
 import { NOINDEX } from '@/lib/seo'
 import { AnalyticsEvent, track } from '@/lib/analytics'
+import { hasPricing } from '@/lib/pricing'
 import { queryKeys } from '@/lib/queryClient'
 
 const TIME_SLOTS = [
@@ -531,6 +533,8 @@ export default function ScheduleExamPage() {
                     {selected.provider_name}
                     {selected.exam_code ? ` · Exam ${selected.exam_code}` : ''}
                   </p>
+                  <ExamPricePanel pricing={selected} />
+
                   <Link
                     to={selected.url}
                     className="mt-4 inline-block text-sm font-semibold text-brand-700 hover:underline"
@@ -542,7 +546,7 @@ export default function ScheduleExamPage() {
 
               {/* Restate the offer at the point of conversion, not just in the
                   banner the visitor may already have dismissed. */}
-              {promotion.enabled && (
+              {promotion.enabled && !(selected && hasPricing(selected)) && (
                 <Card className="border-brand-200 bg-brand-50/70 p-6">
                   <h2 className="flex items-center gap-2 text-sm font-bold text-ink-900">
                     <Tag className="h-4 w-4 text-brand-600" aria-hidden="true" />
