@@ -25,6 +25,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.security import hash_password
 from app.db.session import SessionLocal
+from app.models.campaign import ChallengeQuestion
 from app.models.catalog import Course, CourseCategory, CourseModule, Lesson
 from app.models.certification import (
     Certification,
@@ -386,6 +387,51 @@ async def seed_articles(
 # ---------------------------------------------------------------------------
 # FAQs, testimonials, settings
 # ---------------------------------------------------------------------------
+async def seed_challenge(session: AsyncSession, certifications: dict[str, Certification]):
+    """Load the challenge question bank.
+
+    Matched on `reference` so re-running edits a question in place: an attempt
+    stores question ids, and re-creating rows would orphan every past result's
+    review. A question naming a certification the catalogue does not have is
+    skipped rather than silently demoted into the shared pool, where it would
+    start appearing in papers for unrelated exams.
+    """
+    data = load("challenge.json")
+    loaded = skipped = 0
+
+    for row in data["questions"]:
+        slug = row.get("certification")
+        certification = certifications.get(slug) if slug else None
+        if slug and certification is None:
+            logger.warning(
+                "challenge: skipping %s, no certification %r in the catalogue",
+                row["reference"],
+                slug,
+            )
+            skipped += 1
+            continue
+
+        await get_or_create(
+            session,
+            ChallengeQuestion,
+            match={"reference": row["reference"]},
+            defaults={
+                "provider_slug": row.get("provider", "google-cloud"),
+                "certification_id": certification.id if certification else None,
+                "prompt": row["prompt"],
+                "options": row["options"],
+                "correct_option": row["correct_option"],
+                "explanation": row.get("explanation"),
+                "topic": row.get("topic"),
+                "difficulty": row.get("difficulty", "medium"),
+                "is_active": row.get("is_active", True),
+            },
+        )
+        loaded += 1
+
+    logger.info("challenge: %d questions (%d skipped)", loaded, skipped)
+
+
 async def seed_site(session: AsyncSession):
     data = load("site.json")
 
@@ -447,6 +493,7 @@ async def reset(session: AsyncSession) -> None:
         CourseModule,
         Course,
         CourseCategory,
+        ChallengeQuestion,
         CertificationResource,
         Certification,
         CertificationProvider,
@@ -481,6 +528,7 @@ async def main(do_reset: bool) -> None:
             tags,
             users.get(UserRole.INSTRUCTOR.value) or users[UserRole.ADMIN.value],
         )
+        await seed_challenge(session, certifications)
         await seed_site(session)
         await session.commit()
 

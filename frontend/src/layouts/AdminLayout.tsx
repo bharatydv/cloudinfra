@@ -14,6 +14,7 @@ import {
   MessageSquareQuote,
   Settings,
   Building2,
+  Trophy,
   Users,
   X,
 } from 'lucide-react'
@@ -50,6 +51,7 @@ const SECTIONS = [
       { to: '/admin/users', label: 'Users', icon: Users },
       { to: '/admin/enrollments', label: 'Enrollments', icon: BookOpen },
       { to: '/admin/exam-bookings', label: 'Exam requests', icon: CalendarCheck },
+      { to: '/admin/challenge-leads', label: 'Challenge leads', icon: Trophy },
       { to: '/admin/payments', label: 'Payments', icon: CreditCard },
       { to: '/admin/messages', label: 'Messages', icon: Mail },
       { to: '/admin/settings', label: 'Settings', icon: Settings },

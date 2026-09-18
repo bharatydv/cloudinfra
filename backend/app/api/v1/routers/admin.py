@@ -10,9 +10,22 @@ from app.core.errors import NotFoundError, ValidationFailedError
 from app.core.pagination import Page, PageParams, page_params
 from app.models.commerce import Payment
 from app.models.content import Faq, Testimonial
-from app.models.enums import ContactStatus, ExamBookingStatus, PaymentStatus, UserRole
-from app.repositories import engagement_repo, misc_repo, scheduling_repo, user_repo
+from app.models.enums import (
+    ChallengeLeadStatus,
+    ContactStatus,
+    ExamBookingStatus,
+    PaymentStatus,
+    UserRole,
+)
+from app.repositories import (
+    campaign_repo,
+    engagement_repo,
+    misc_repo,
+    scheduling_repo,
+    user_repo,
+)
 from app.schemas.auth import AdminUserUpdate, UserRead
+from app.schemas.campaign import ChallengeAttemptRead, ChallengeAttemptUpdate
 from app.schemas.common import Message
 from app.schemas.content import (
     FaqRead,
@@ -32,7 +45,13 @@ from app.schemas.system import (
     SiteSettingRead,
     SiteSettingWrite,
 )
-from app.services import admin_service, contact_service, pricing, scheduling_service
+from app.services import (
+    admin_service,
+    challenge_service,
+    contact_service,
+    pricing,
+    scheduling_service,
+)
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 Params = Annotated[PageParams, Depends(page_params)]
@@ -143,6 +162,54 @@ async def delete_exam_booking(
 ) -> Message:
     await scheduling_service.delete_booking(db, booking_id)
     return Message(message="Exam request deleted.")
+
+
+# --- Certification challenge leads ------------------------------------------
+@router.get("/challenge-attempts", response_model=Page[ChallengeAttemptRead])
+async def list_challenge_attempts(
+    db: DbSession,
+    params: Params,
+    _: AdminUser,
+    q: str | None = None,
+    lead_status: ChallengeLeadStatus | None = None,
+    passed: bool | None = None,
+    certification_id: uuid.UUID | None = None,
+) -> Page[ChallengeAttemptRead]:
+    """The callback queue: who took the test, how they did, and what is owed.
+
+    Defaults to newest first because the promise on the result page is a call
+    within a fixed number of hours -- the top of this list is the work.
+    """
+    items, total = await campaign_repo.list_attempts(
+        db,
+        params,
+        lead_status=lead_status.value if lead_status else None,
+        passed=passed,
+        certification_id=certification_id,
+        search=q,
+    )
+    return Page.create(
+        [ChallengeAttemptRead.model_validate(item) for item in items], total, params
+    )
+
+
+@router.put("/challenge-attempts/{attempt_id}", response_model=ChallengeAttemptRead)
+async def update_challenge_attempt(
+    attempt_id: uuid.UUID,
+    payload: ChallengeAttemptUpdate,
+    db: DbSession,
+    _: AdminUser,
+) -> ChallengeAttemptRead:
+    attempt = await challenge_service.update_attempt(db, attempt_id, payload)
+    return ChallengeAttemptRead.model_validate(attempt)
+
+
+@router.delete("/challenge-attempts/{attempt_id}", response_model=Message)
+async def delete_challenge_attempt(
+    attempt_id: uuid.UUID, db: DbSession, _: AdminUser
+) -> Message:
+    await challenge_service.delete_attempt(db, attempt_id)
+    return Message(message="Test attempt deleted.")
 
 
 # --- Payments --------------------------------------------------------------
@@ -300,6 +367,8 @@ async def upsert_setting(
         # Prices are served from a short-lived cache; drop it so an edit to the
         # discount or tax rate is visible immediately rather than within the TTL.
         pricing.reset_cache()
+    if key == challenge_service.SETTING_KEY:
+        challenge_service.reset_cache()
     return SiteSettingRead.model_validate(setting)
 
 

@@ -80,3 +80,37 @@ class SearchEntity(StrEnum):
     CERTIFICATION = "certification"
     ARTICLE = "article"
     RESOURCE = "resource"
+
+
+class ChallengeAttemptStatus(StrEnum):
+    """Lifecycle of a sitting of the certification challenge."""
+
+    IN_PROGRESS = "in_progress"
+    SUBMITTED = "submitted"
+    EXPIRED = "expired"
+
+
+class ChallengeLeadStatus(StrEnum):
+    """Follow-up state of the lead a completed challenge creates.
+
+    The reward is granted by a human on a call, not by a coupon at checkout,
+    so the sales queue -- not the payment flow -- is what tracks it.
+    """
+
+    NEW = "new"
+    CONTACTED = "contacted"
+    SCHEDULED = "scheduled"
+    CONVERTED = "converted"
+    LOST = "lost"
+
+
+class ChallengeViolationKind(StrEnum):
+    """Proctoring events the browser reports while a test is open."""
+
+    TAB_HIDDEN = "tab_hidden"
+    WINDOW_BLUR = "window_blur"
+    FULLSCREEN_EXIT = "fullscreen_exit"
+    COPY = "copy"
+    CUT = "cut"
+    PASTE = "paste"
+    CONTEXT_MENU = "context_menu"

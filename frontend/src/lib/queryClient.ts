@@ -32,6 +32,7 @@ export const queryKeys = {
   certificationCategories: ['certification-categories'] as const,
   practiceResources: ['practice-resources'] as const,
   certificationOptions: ['certification-options'] as const,
+  challengeIntro: ['challenge', 'intro'] as const,
   articles: (filters: unknown) => ['articles', filters] as const,
   article: (slug: string) => ['article', slug] as const,
   articleCategories: ['article-categories'] as const,
@@ -58,5 +59,6 @@ export const queryKeys = {
   adminPayments: (query: unknown) => ['admin', 'payments', query] as const,
   adminMessages: (query: unknown) => ['admin', 'messages', query] as const,
   adminExamBookings: (query: unknown) => ['admin', 'exam-bookings', query] as const,
+  adminChallengeAttempts: (query: unknown) => ['admin', 'challenge-attempts', query] as const,
   adminSettings: ['admin', 'settings'] as const,
 }

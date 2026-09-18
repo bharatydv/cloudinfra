@@ -1,0 +1,1679 @@
+{
+  "_note": "Question bank for the Google Cloud certification challenge. Written from the vendor's published exam objectives; these are study questions, not real exam items, and are not supplied by Google. `certification` is a certification slug, or null to keep the question in the provider-wide pool that every paper can draw from. `reference` is the natural key the seeder matches on -- change the text freely, never the reference.",
+  "questions": [
+    {
+      "reference": "gcp-core-001",
+      "certification": null,
+      "topic": "Resource hierarchy",
+      "difficulty": "easy",
+      "prompt": "What is the correct order of the Google Cloud resource hierarchy, from the top down?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Organization > Folder > Project > Resource"
+        },
+        {
+          "key": "b",
+          "text": "Project > Organization > Folder > Resource"
+        },
+        {
+          "key": "c",
+          "text": "Organization > Project > Folder > Resource"
+        },
+        {
+          "key": "d",
+          "text": "Folder > Organization > Project > Resource"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "The hierarchy runs Organization > Folder > Project > Resource. IAM policies set at a higher level are inherited by everything beneath them, which is why folders are the usual place to apply a policy that should cover a whole department."
+    },
+    {
+      "reference": "gcp-core-002",
+      "certification": null,
+      "topic": "IAM",
+      "difficulty": "medium",
+      "prompt": "A team needs to read objects from one Cloud Storage bucket and nothing else. Which approach best follows the principle of least privilege?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Grant the basic Viewer role at the project level"
+        },
+        {
+          "key": "b",
+          "text": "Grant the predefined Storage Object Viewer role on that bucket"
+        },
+        {
+          "key": "c",
+          "text": "Grant the basic Editor role at the project level"
+        },
+        {
+          "key": "d",
+          "text": "Grant the Owner role on the project containing the bucket"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "Predefined roles bound to the specific resource give exactly the access needed. The basic roles (Owner, Editor, Viewer) are project-wide and far broader than reading one bucket."
+    },
+    {
+      "reference": "gcp-core-003",
+      "certification": null,
+      "topic": "Networking",
+      "difficulty": "medium",
+      "prompt": "In Google Cloud, what is the scope of a VPC network and of the subnets inside it?",
+      "options": [
+        {
+          "key": "a",
+          "text": "The VPC is regional and its subnets are zonal"
+        },
+        {
+          "key": "b",
+          "text": "Both the VPC and its subnets are global"
+        },
+        {
+          "key": "c",
+          "text": "The VPC is global and its subnets are regional"
+        },
+        {
+          "key": "d",
+          "text": "Both the VPC and its subnets are zonal"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "A VPC network is a global resource; subnets within it are regional and span the zones of that region. This is why instances in different regions can share one VPC without any peering."
+    },
+    {
+      "reference": "gcp-core-004",
+      "certification": null,
+      "topic": "Cloud Storage",
+      "difficulty": "easy",
+      "prompt": "Which Cloud Storage class is the most cost-effective for data that must be retained for years but is expected to be read less than once a year?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Standard"
+        },
+        {
+          "key": "b",
+          "text": "Nearline"
+        },
+        {
+          "key": "c",
+          "text": "Coldline"
+        },
+        {
+          "key": "d",
+          "text": "Archive"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "Archive has the lowest storage price and the highest retrieval cost, with a 365-day minimum storage duration. Nearline suits roughly monthly access and Coldline roughly quarterly."
+    },
+    {
+      "reference": "gcp-core-005",
+      "certification": null,
+      "topic": "Compute",
+      "difficulty": "medium",
+      "prompt": "Which statement about Spot VMs on Compute Engine is correct?",
+      "options": [
+        {
+          "key": "a",
+          "text": "They are heavily discounted and can be reclaimed by Compute Engine at any time"
+        },
+        {
+          "key": "b",
+          "text": "They cost the same as standard VMs but start faster"
+        },
+        {
+          "key": "c",
+          "text": "They are guaranteed to run uninterrupted for 24 hours"
+        },
+        {
+          "key": "d",
+          "text": "They can only be used with Google Kubernetes Engine"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Spot VMs offer a large discount in exchange for availability: Compute Engine can preempt them whenever it needs the capacity. They suit fault-tolerant, restartable work such as batch processing."
+    },
+    {
+      "reference": "gcp-core-006",
+      "certification": null,
+      "topic": "Databases",
+      "difficulty": "medium",
+      "prompt": "An application needs a relational database with strong consistency and horizontal scale across multiple regions. Which service fits best?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Spanner"
+        },
+        {
+          "key": "c",
+          "text": "Firestore"
+        },
+        {
+          "key": "d",
+          "text": "Bigtable"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "Spanner is the managed relational database built for horizontal scale with strong consistency across regions. Cloud SQL is regional and scales vertically; Firestore and Bigtable are not relational."
+    },
+    {
+      "reference": "gcp-core-007",
+      "certification": null,
+      "topic": "Databases",
+      "difficulty": "medium",
+      "prompt": "Which database is designed for very high throughput reads and writes of wide-column data, such as time-series or IoT telemetry?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "b",
+          "text": "BigQuery"
+        },
+        {
+          "key": "c",
+          "text": "Bigtable"
+        },
+        {
+          "key": "d",
+          "text": "Memorystore"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "Bigtable is a wide-column NoSQL store built for low-latency, high-throughput workloads at scale, which makes it a common choice for time-series and telemetry data."
+    },
+    {
+      "reference": "gcp-core-008",
+      "certification": null,
+      "topic": "Serverless",
+      "difficulty": "easy",
+      "prompt": "Which service runs a stateless container, scales to zero when idle, and bills only while a request is being handled?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Compute Engine"
+        },
+        {
+          "key": "b",
+          "text": "Google Kubernetes Engine Standard"
+        },
+        {
+          "key": "c",
+          "text": "Bare Metal Solution"
+        },
+        {
+          "key": "d",
+          "text": "Cloud Run"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "Cloud Run runs containers as a fully managed service, scaling to zero between requests. GKE Standard keeps nodes running, and Compute Engine bills for the VM whether or not it is serving traffic."
+    },
+    {
+      "reference": "gcp-core-009",
+      "certification": null,
+      "topic": "Billing",
+      "difficulty": "medium",
+      "prompt": "Which discount is applied automatically, with no upfront commitment, when an instance runs for a large part of a billing month?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Sustained use discount"
+        },
+        {
+          "key": "b",
+          "text": "Committed use discount"
+        },
+        {
+          "key": "c",
+          "text": "Spot pricing"
+        },
+        {
+          "key": "d",
+          "text": "Free tier credit"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Sustained use discounts are applied automatically as an eligible instance runs for more of the month. Committed use discounts require an explicit one- or three-year commitment."
+    },
+    {
+      "reference": "gcp-core-010",
+      "certification": null,
+      "topic": "Security",
+      "difficulty": "medium",
+      "prompt": "What is a service account most appropriately used for?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Giving a human administrator a second login"
+        },
+        {
+          "key": "b",
+          "text": "Providing an identity for an application or workload to call Google Cloud APIs"
+        },
+        {
+          "key": "c",
+          "text": "Storing the billing details for a project"
+        },
+        {
+          "key": "d",
+          "text": "Grouping users so a role can be granted once"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "A service account is a non-human identity used by workloads. Grouping users for a single role grant is what Google Groups are for."
+    },
+    {
+      "reference": "gcp-core-011",
+      "certification": null,
+      "topic": "Networking",
+      "difficulty": "medium",
+      "prompt": "Which Google Cloud service protects a web application against DDoS attacks and common web exploits at the edge?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud NAT"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Interconnect"
+        },
+        {
+          "key": "c",
+          "text": "Cloud Armor"
+        },
+        {
+          "key": "d",
+          "text": "VPC Service Controls"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "Cloud Armor provides DDoS protection and WAF rules in front of external load balancers. VPC Service Controls addresses data exfiltration between services, not inbound web attacks."
+    },
+    {
+      "reference": "gcp-core-012",
+      "certification": null,
+      "topic": "Regions and zones",
+      "difficulty": "easy",
+      "prompt": "To keep a service running when a single data centre fails, what is the minimum sensible deployment?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Two instances in the same zone"
+        },
+        {
+          "key": "b",
+          "text": "One instance with a larger machine type"
+        },
+        {
+          "key": "c",
+          "text": "One instance with a snapshot schedule"
+        },
+        {
+          "key": "d",
+          "text": "Two instances in different zones of the same region"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "A zone is the failure domain, so spreading instances across zones survives the loss of one. Snapshots help you recover but do not keep the service up."
+    },
+    {
+      "reference": "gcp-core-013",
+      "certification": null,
+      "topic": "Messaging",
+      "difficulty": "easy",
+      "prompt": "Which service decouples producers from consumers by delivering messages asynchronously at global scale?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Pub/Sub"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Tasks"
+        },
+        {
+          "key": "c",
+          "text": "Cloud Scheduler"
+        },
+        {
+          "key": "d",
+          "text": "Cloud Build"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Pub/Sub is the managed publish/subscribe messaging service. Cloud Scheduler triggers jobs on a cron schedule and Cloud Tasks manages per-task dispatch rate to a specific handler."
+    },
+    {
+      "reference": "gcp-core-014",
+      "certification": null,
+      "topic": "Analytics",
+      "difficulty": "easy",
+      "prompt": "Which service is a serverless data warehouse that runs SQL over very large datasets without any cluster to manage?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Dataproc"
+        },
+        {
+          "key": "b",
+          "text": "BigQuery"
+        },
+        {
+          "key": "c",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "d",
+          "text": "Dataflow"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "BigQuery is the serverless analytics warehouse. Dataproc runs managed Hadoop and Spark clusters, and Dataflow runs Apache Beam pipelines."
+    },
+    {
+      "reference": "gcp-core-015",
+      "certification": null,
+      "topic": "Networking",
+      "difficulty": "hard",
+      "prompt": "An organisation wants several projects to share one central VPC, with network administration kept in a single host project. Which feature does this?",
+      "options": [
+        {
+          "key": "a",
+          "text": "VPC Network Peering"
+        },
+        {
+          "key": "b",
+          "text": "Cloud VPN"
+        },
+        {
+          "key": "c",
+          "text": "Shared VPC"
+        },
+        {
+          "key": "d",
+          "text": "Private Service Connect"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "Shared VPC lets a host project own the network while service projects attach workloads to it, keeping network administration central. Peering connects two separately administered VPCs instead."
+    },
+    {
+      "reference": "gcp-core-016",
+      "certification": null,
+      "topic": "Cloud Storage",
+      "difficulty": "easy",
+      "prompt": "Which statement about Cloud Storage bucket names is true?",
+      "options": [
+        {
+          "key": "a",
+          "text": "They must be unique only within the project"
+        },
+        {
+          "key": "b",
+          "text": "They must be unique within the region"
+        },
+        {
+          "key": "c",
+          "text": "They are generated automatically and cannot be chosen"
+        },
+        {
+          "key": "d",
+          "text": "They must be globally unique across all of Cloud Storage"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "Bucket names share a single global namespace, so a name in use by any other customer cannot be reused."
+    },
+    {
+      "reference": "gcp-core-017",
+      "certification": null,
+      "topic": "Operations",
+      "difficulty": "medium",
+      "prompt": "Where would you go first to search application logs written by a workload running on Google Cloud?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud Logging"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Trace"
+        },
+        {
+          "key": "c",
+          "text": "Cloud Profiler"
+        },
+        {
+          "key": "d",
+          "text": "Error Reporting"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Cloud Logging stores and searches log entries. Trace covers request latency, Profiler covers CPU and memory usage, and Error Reporting aggregates crashes."
+    },
+    {
+      "reference": "gcp-core-018",
+      "certification": null,
+      "topic": "Networking",
+      "difficulty": "medium",
+      "prompt": "What is the default behaviour of a new VPC network for ingress traffic, before you add any rules of your own?",
+      "options": [
+        {
+          "key": "a",
+          "text": "All ingress is allowed"
+        },
+        {
+          "key": "b",
+          "text": "All ingress is denied"
+        },
+        {
+          "key": "c",
+          "text": "Ingress is allowed only from other Google services"
+        },
+        {
+          "key": "d",
+          "text": "Ingress is allowed only on port 443"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "The implied firewall rules deny all ingress and allow all egress. Traffic reaches an instance only because a higher-priority rule explicitly permits it."
+    },
+    {
+      "reference": "gcp-core-019",
+      "certification": null,
+      "topic": "Encryption",
+      "difficulty": "hard",
+      "prompt": "A policy requires that the organisation controls the rotation schedule of the keys encrypting its data at rest, while still using a Google-managed key service. Which option meets this?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Google-managed encryption keys (the default)"
+        },
+        {
+          "key": "b",
+          "text": "Customer-supplied encryption keys (CSEK)"
+        },
+        {
+          "key": "c",
+          "text": "Customer-managed encryption keys (CMEK) in Cloud KMS"
+        },
+        {
+          "key": "d",
+          "text": "Disabling encryption at rest"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "CMEK keeps the keys in Cloud KMS but under the customer's control, including rotation. CSEK means supplying raw keys on every request and managing them entirely yourself, and encryption at rest cannot be disabled."
+    },
+    {
+      "reference": "gcp-core-020",
+      "certification": null,
+      "topic": "Load balancing",
+      "difficulty": "medium",
+      "prompt": "Which load balancer would you choose to serve one global anycast IP address for an HTTPS web application with backends in several regions?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Internal passthrough Network Load Balancer"
+        },
+        {
+          "key": "b",
+          "text": "Regional external proxy Network Load Balancer"
+        },
+        {
+          "key": "c",
+          "text": "Internal Application Load Balancer"
+        },
+        {
+          "key": "d",
+          "text": "Global external Application Load Balancer"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "The global external Application Load Balancer gives a single anycast IP that routes users to the nearest healthy backend region. The other options are regional or internal."
+    },
+    {
+      "reference": "gcp-core-021",
+      "certification": null,
+      "topic": "Governance",
+      "difficulty": "hard",
+      "prompt": "An organisation must prevent anyone from creating resources outside the EU, across every current and future project. What is the right control?",
+      "options": [
+        {
+          "key": "a",
+          "text": "An organization policy constraint on resource locations, set at the organization node"
+        },
+        {
+          "key": "b",
+          "text": "An IAM deny policy on each project"
+        },
+        {
+          "key": "c",
+          "text": "A firewall rule in each VPC"
+        },
+        {
+          "key": "d",
+          "text": "A budget alert on each billing account"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "The resource location constraint is an organization policy; applied at the organization node it is inherited by every project, including ones created later. IAM controls who may act, not where resources may live."
+    },
+    {
+      "reference": "gcp-core-022",
+      "certification": null,
+      "topic": "Billing",
+      "difficulty": "easy",
+      "prompt": "How many billing accounts can a single Google Cloud project be linked to at one time?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Up to three"
+        },
+        {
+          "key": "b",
+          "text": "Exactly one"
+        },
+        {
+          "key": "c",
+          "text": "One per region in use"
+        },
+        {
+          "key": "d",
+          "text": "Unlimited"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "A project is linked to exactly one billing account at a time, though a single billing account can pay for many projects."
+    },
+    {
+      "reference": "gcp-core-023",
+      "certification": null,
+      "topic": "Kubernetes",
+      "difficulty": "medium",
+      "prompt": "In Google Kubernetes Engine, which mode removes node management by provisioning and scaling nodes for you and billing per pod resource request?",
+      "options": [
+        {
+          "key": "a",
+          "text": "GKE Standard"
+        },
+        {
+          "key": "b",
+          "text": "GKE on-premises"
+        },
+        {
+          "key": "c",
+          "text": "GKE Autopilot"
+        },
+        {
+          "key": "d",
+          "text": "Managed instance groups"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "Autopilot manages the nodes and bills for the resources your pods request. Standard leaves node pools, sizing and upgrades under your control."
+    },
+    {
+      "reference": "gcp-core-024",
+      "certification": null,
+      "topic": "Hybrid connectivity",
+      "difficulty": "hard",
+      "prompt": "A company needs a private, high-bandwidth connection between its own data centre and Google Cloud, without traffic traversing the public internet. Which option is appropriate?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud VPN over the public internet"
+        },
+        {
+          "key": "b",
+          "text": "Cloud NAT"
+        },
+        {
+          "key": "c",
+          "text": "External IP addresses with firewall rules"
+        },
+        {
+          "key": "d",
+          "text": "Dedicated Interconnect"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "Dedicated Interconnect provides a direct physical connection into Google's network. Cloud VPN is encrypted but still travels over the public internet, and typically offers lower bandwidth."
+    },
+    {
+      "reference": "gcp-ace-001",
+      "certification": "associate-cloud-engineer",
+      "topic": "gcloud CLI",
+      "difficulty": "easy",
+      "prompt": "Which command sets the active project for subsequent gcloud commands?",
+      "options": [
+        {
+          "key": "a",
+          "text": "gcloud config set project PROJECT_ID"
+        },
+        {
+          "key": "b",
+          "text": "gcloud projects set PROJECT_ID"
+        },
+        {
+          "key": "c",
+          "text": "gcloud init project PROJECT_ID"
+        },
+        {
+          "key": "d",
+          "text": "gcloud auth set-project PROJECT_ID"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Active project, region and zone are properties of the current gcloud configuration, set with `gcloud config set`."
+    },
+    {
+      "reference": "gcp-ace-002",
+      "certification": "associate-cloud-engineer",
+      "topic": "Compute Engine",
+      "difficulty": "medium",
+      "prompt": "You need a group of identical VMs that heals failed instances automatically and scales with load. What should you use?",
+      "options": [
+        {
+          "key": "a",
+          "text": "An unmanaged instance group"
+        },
+        {
+          "key": "b",
+          "text": "A managed instance group built from an instance template"
+        },
+        {
+          "key": "c",
+          "text": "Several individually created VMs behind a load balancer"
+        },
+        {
+          "key": "d",
+          "text": "A sole-tenant node group"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "Managed instance groups provide autohealing, autoscaling and rolling updates, all driven from an instance template. Unmanaged groups are just a collection of existing, possibly dissimilar, VMs."
+    },
+    {
+      "reference": "gcp-ace-003",
+      "certification": "associate-cloud-engineer",
+      "topic": "Kubernetes",
+      "difficulty": "medium",
+      "prompt": "Which kubectl command changes a running Deployment to five replicas?",
+      "options": [
+        {
+          "key": "a",
+          "text": "kubectl resize deployment my-app --count=5"
+        },
+        {
+          "key": "b",
+          "text": "kubectl set replicas my-app 5"
+        },
+        {
+          "key": "c",
+          "text": "kubectl scale deployment my-app --replicas=5"
+        },
+        {
+          "key": "d",
+          "text": "kubectl autoscale deployment my-app --replicas=5"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "`kubectl scale` sets the replica count directly. `kubectl autoscale` creates a HorizontalPodAutoscaler with a min and max instead of a fixed number."
+    },
+    {
+      "reference": "gcp-ace-004",
+      "certification": "associate-cloud-engineer",
+      "topic": "IAM",
+      "difficulty": "medium",
+      "prompt": "A predefined role grants slightly more permissions than a team should have. What is the recommended next step?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Grant the role anyway and monitor usage"
+        },
+        {
+          "key": "b",
+          "text": "Grant the basic Viewer role instead"
+        },
+        {
+          "key": "c",
+          "text": "Share a service account key with the team"
+        },
+        {
+          "key": "d",
+          "text": "Create a custom role containing only the permissions required"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "Custom roles exist precisely for the case where no predefined role matches the required permission set. Sharing service account keys is a security anti-pattern."
+    },
+    {
+      "reference": "gcp-ace-005",
+      "certification": "associate-cloud-engineer",
+      "topic": "Cloud Storage",
+      "difficulty": "medium",
+      "prompt": "Objects in a bucket should move to Coldline after 30 days and be deleted after a year, with no manual intervention. How do you configure this?",
+      "options": [
+        {
+          "key": "a",
+          "text": "An Object Lifecycle Management policy on the bucket"
+        },
+        {
+          "key": "b",
+          "text": "A Cloud Scheduler job that runs a deletion script"
+        },
+        {
+          "key": "c",
+          "text": "A retention policy on the bucket"
+        },
+        {
+          "key": "d",
+          "text": "Object versioning with a soft delete window"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Lifecycle rules apply SetStorageClass and Delete actions based on object age. A retention policy does the opposite: it prevents deletion before a minimum age."
+    },
+    {
+      "reference": "gcp-ace-006",
+      "certification": "associate-cloud-engineer",
+      "topic": "Billing",
+      "difficulty": "medium",
+      "prompt": "Finance wants to analyse detailed cost data with SQL and build dashboards on it. What should you configure?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A budget with alert thresholds"
+        },
+        {
+          "key": "b",
+          "text": "Billing export to BigQuery"
+        },
+        {
+          "key": "c",
+          "text": "Downloading the monthly PDF invoice"
+        },
+        {
+          "key": "d",
+          "text": "Cloud Monitoring custom metrics"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "Billing export writes detailed usage and cost rows into BigQuery, where they can be queried and visualised. Budgets only raise alerts against a threshold."
+    },
+    {
+      "reference": "gcp-ace-007",
+      "certification": "associate-cloud-engineer",
+      "topic": "Compute Engine",
+      "difficulty": "medium",
+      "prompt": "What is the recommended way to take a backup of a persistent disk attached to a running VM?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Copy the disk files with gcloud compute scp"
+        },
+        {
+          "key": "b",
+          "text": "Stop the VM and download the disk image"
+        },
+        {
+          "key": "c",
+          "text": "Create a persistent disk snapshot"
+        },
+        {
+          "key": "d",
+          "text": "Enable object versioning on the disk"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "Snapshots are incremental, can be taken while the VM runs, and can be scheduled. Object versioning applies to Cloud Storage objects, not persistent disks."
+    },
+    {
+      "reference": "gcp-ace-008",
+      "certification": "associate-cloud-engineer",
+      "topic": "Networking",
+      "difficulty": "medium",
+      "prompt": "Instances without external IP addresses need to reach the public internet to download OS updates. What should you configure?",
+      "options": [
+        {
+          "key": "a",
+          "text": "An external IP address on each instance"
+        },
+        {
+          "key": "b",
+          "text": "A firewall rule allowing egress to 0.0.0.0/0"
+        },
+        {
+          "key": "c",
+          "text": "Private Google Access only"
+        },
+        {
+          "key": "d",
+          "text": "Cloud NAT on the subnet's region"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "Cloud NAT provides outbound-only internet access for instances with no external IP. Private Google Access covers Google APIs, not the wider internet, and a firewall rule alone gives no route out."
+    },
+    {
+      "reference": "gcp-ace-009",
+      "certification": "associate-cloud-engineer",
+      "topic": "IAM",
+      "difficulty": "hard",
+      "prompt": "A user is granted the Storage Admin role at the folder level. What access do they have on a project inside that folder?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Storage Admin, because IAM policies are inherited downwards"
+        },
+        {
+          "key": "b",
+          "text": "None, because roles do not cross levels"
+        },
+        {
+          "key": "c",
+          "text": "Storage Admin only if it is re-granted on the project"
+        },
+        {
+          "key": "d",
+          "text": "Viewer, a reduced form of the role"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "IAM policies are inherited down the hierarchy, and the effective policy on a resource is the union of its own bindings and every ancestor's."
+    },
+    {
+      "reference": "gcp-ace-010",
+      "certification": "associate-cloud-engineer",
+      "topic": "Deployment",
+      "difficulty": "medium",
+      "prompt": "Which tool would you use to define Google Cloud infrastructure declaratively and version it alongside application code?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A shell script of gcloud commands"
+        },
+        {
+          "key": "b",
+          "text": "Terraform"
+        },
+        {
+          "key": "c",
+          "text": "The Cloud Console"
+        },
+        {
+          "key": "d",
+          "text": "Cloud Shell"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "Terraform describes desired state declaratively and is the common choice for infrastructure as code on Google Cloud. A script of imperative commands is neither idempotent nor a description of state."
+    },
+    {
+      "reference": "gcp-ace-011",
+      "certification": "associate-cloud-engineer",
+      "topic": "Operations",
+      "difficulty": "medium",
+      "prompt": "You want to be paged when a VM's CPU stays above 90% for ten minutes. What do you create?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A log sink to BigQuery"
+        },
+        {
+          "key": "b",
+          "text": "A Cloud Scheduler job that checks the metric"
+        },
+        {
+          "key": "c",
+          "text": "A Cloud Monitoring alerting policy with a notification channel"
+        },
+        {
+          "key": "d",
+          "text": "An uptime check"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "Alerting policies evaluate a metric against a condition over a duration and notify through configured channels. Uptime checks probe endpoint availability rather than resource metrics."
+    },
+    {
+      "reference": "gcp-ace-012",
+      "certification": "associate-cloud-engineer",
+      "topic": "Cloud SQL",
+      "difficulty": "medium",
+      "prompt": "What does enabling high availability on a Cloud SQL instance provide?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A read replica in another region for reporting queries"
+        },
+        {
+          "key": "b",
+          "text": "Automatic sharding of the database across zones"
+        },
+        {
+          "key": "c",
+          "text": "Daily backups retained for a year"
+        },
+        {
+          "key": "d",
+          "text": "A standby instance in another zone that takes over automatically on failure"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "HA provisions a standby in a second zone of the same region and fails over automatically. Read replicas are a separate feature aimed at scaling reads, not availability."
+    },
+    {
+      "reference": "gcp-ace-013",
+      "certification": "associate-cloud-engineer",
+      "topic": "Cloud Storage",
+      "difficulty": "easy",
+      "prompt": "Which command copies a local directory recursively into a Cloud Storage bucket using the current gcloud CLI?",
+      "options": [
+        {
+          "key": "a",
+          "text": "gcloud storage cp --recursive ./data gs://my-bucket/data"
+        },
+        {
+          "key": "b",
+          "text": "gcloud storage move ./data gs://my-bucket/data"
+        },
+        {
+          "key": "c",
+          "text": "gcloud compute copy-files ./data gs://my-bucket/data"
+        },
+        {
+          "key": "d",
+          "text": "gcloud buckets upload ./data my-bucket"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "`gcloud storage cp --recursive` is the current CLI for bulk object copies, and is the successor to `gsutil cp -r`."
+    },
+    {
+      "reference": "gcp-ace-014",
+      "certification": "associate-cloud-engineer",
+      "topic": "Projects",
+      "difficulty": "easy",
+      "prompt": "Which project identifier is immutable once the project is created?",
+      "options": [
+        {
+          "key": "a",
+          "text": "The project name"
+        },
+        {
+          "key": "b",
+          "text": "The project ID"
+        },
+        {
+          "key": "c",
+          "text": "The billing account name"
+        },
+        {
+          "key": "d",
+          "text": "The project labels"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "The project ID is globally unique and fixed for the life of the project. The display name and labels can be changed at any time."
+    },
+    {
+      "reference": "gcp-pca-001",
+      "certification": "professional-cloud-architect",
+      "topic": "Disaster recovery",
+      "difficulty": "hard",
+      "prompt": "A business states an RPO of 15 minutes and an RTO of 4 hours. What does the RPO of 15 minutes commit you to?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Service must be restored within 15 minutes of an outage"
+        },
+        {
+          "key": "b",
+          "text": "Backups must complete in under 15 minutes"
+        },
+        {
+          "key": "c",
+          "text": "No more than 15 minutes of data may be lost"
+        },
+        {
+          "key": "d",
+          "text": "Failover must be tested every 15 minutes"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "RPO bounds acceptable data loss and therefore drives replication or backup frequency. RTO bounds how long restoration may take."
+    },
+    {
+      "reference": "gcp-pca-002",
+      "certification": "professional-cloud-architect",
+      "topic": "Migration",
+      "difficulty": "medium",
+      "prompt": "A company wants to move VMs from on-premises VMware to Google Cloud quickly, with minimal changes to the applications. Which approach fits?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Rewrite each application as Cloud Run services"
+        },
+        {
+          "key": "b",
+          "text": "Refactor everything onto GKE before migrating"
+        },
+        {
+          "key": "c",
+          "text": "Replace the applications with SaaS equivalents"
+        },
+        {
+          "key": "d",
+          "text": "Lift and shift to Compute Engine using Migrate to Virtual Machines"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "Lift and shift is the fastest path with the least application change, and is a common first step before later modernisation."
+    },
+    {
+      "reference": "gcp-pca-003",
+      "certification": "professional-cloud-architect",
+      "topic": "Security",
+      "difficulty": "hard",
+      "prompt": "An architect must stop data in a BigQuery dataset from being copied to projects outside a defined trust boundary, even by users who hold valid IAM permissions. What should be used?",
+      "options": [
+        {
+          "key": "a",
+          "text": "VPC Service Controls with a service perimeter"
+        },
+        {
+          "key": "b",
+          "text": "Stricter IAM roles"
+        },
+        {
+          "key": "c",
+          "text": "Cloud Armor policies"
+        },
+        {
+          "key": "d",
+          "text": "Firewall rules on the VPC"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "VPC Service Controls draws a perimeter around services to prevent data exfiltration, which is exactly the case IAM alone cannot cover once a user legitimately holds permissions."
+    },
+    {
+      "reference": "gcp-pca-004",
+      "certification": "professional-cloud-architect",
+      "topic": "Cost optimisation",
+      "difficulty": "medium",
+      "prompt": "A batch workload is fault tolerant, restartable, and runs nightly for several hours. Which choice reduces cost the most?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Commit to three-year committed use discounts"
+        },
+        {
+          "key": "b",
+          "text": "Run it on Spot VMs"
+        },
+        {
+          "key": "c",
+          "text": "Move it to a larger machine type"
+        },
+        {
+          "key": "d",
+          "text": "Reserve capacity in two regions"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "Spot VMs are the deepest discount available and their interruption risk is acceptable precisely because the workload is restartable. Committed use suits steady, always-on demand instead."
+    },
+    {
+      "reference": "gcp-pca-005",
+      "certification": "professional-cloud-architect",
+      "topic": "Deployment strategy",
+      "difficulty": "medium",
+      "prompt": "Which release strategy sends a small percentage of live traffic to a new version so its error rate can be compared against the current one?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Blue/green deployment"
+        },
+        {
+          "key": "b",
+          "text": "Recreate deployment"
+        },
+        {
+          "key": "c",
+          "text": "Canary deployment"
+        },
+        {
+          "key": "d",
+          "text": "Rolling back"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "A canary exposes a small slice of real traffic to the new version first. Blue/green switches all traffic between two complete environments at once."
+    },
+    {
+      "reference": "gcp-pca-006",
+      "certification": "professional-cloud-architect",
+      "topic": "Compliance",
+      "difficulty": "hard",
+      "prompt": "A regulator requires that personal data of EU citizens is stored only in EU regions. Which combination best enforces this?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Documented guidance for engineers plus periodic audits"
+        },
+        {
+          "key": "b",
+          "text": "Multi-region buckets with versioning enabled"
+        },
+        {
+          "key": "c",
+          "text": "IAM conditions based on the caller's IP address"
+        },
+        {
+          "key": "d",
+          "text": "An organization policy restricting resource locations, plus regional service selection"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "The location constraint is enforced by the platform rather than by process, and choosing regional rather than multi-region resources keeps data inside the required boundary."
+    },
+    {
+      "reference": "gcp-pca-007",
+      "certification": "professional-cloud-architect",
+      "topic": "Scalability",
+      "difficulty": "medium",
+      "prompt": "A stateless web tier experiences sharp, unpredictable traffic spikes. Which design responds best?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A managed instance group with autoscaling behind a global load balancer"
+        },
+        {
+          "key": "b",
+          "text": "A fixed fleet sized for the historical peak"
+        },
+        {
+          "key": "c",
+          "text": "A single large VM with vertical scaling scripts"
+        },
+        {
+          "key": "d",
+          "text": "Manual capacity changes based on a daily report"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Autoscaling adds and removes instances in response to load, and a global load balancer distributes to healthy backends. Sizing permanently for peak pays for idle capacity the rest of the time."
+    },
+    {
+      "reference": "gcp-pca-008",
+      "certification": "professional-cloud-architect",
+      "topic": "Hybrid",
+      "difficulty": "hard",
+      "prompt": "A company must run the same Kubernetes-based platform in Google Cloud and in its own data centre, managed consistently. Which product addresses this?",
+      "options": [
+        {
+          "key": "a",
+          "text": "GKE Autopilot only"
+        },
+        {
+          "key": "b",
+          "text": "Google Distributed Cloud / Anthos-style fleet management"
+        },
+        {
+          "key": "c",
+          "text": "Cloud Run for Anthos only in the cloud"
+        },
+        {
+          "key": "d",
+          "text": "Compute Engine with a custom Kubernetes install"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "Fleet management across Google Cloud and on-premises clusters is what the Anthos / Google Distributed Cloud family exists to provide, giving consistent configuration and policy in both places."
+    },
+    {
+      "reference": "gcp-pca-009",
+      "certification": "professional-cloud-architect",
+      "topic": "Data design",
+      "difficulty": "hard",
+      "prompt": "An existing application uses PostgreSQL and needs to move to Google Cloud with minimal code change, staying in one region. Which service is the natural target?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud Spanner"
+        },
+        {
+          "key": "b",
+          "text": "Firestore"
+        },
+        {
+          "key": "c",
+          "text": "Cloud SQL for PostgreSQL"
+        },
+        {
+          "key": "d",
+          "text": "Bigtable"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "Cloud SQL runs the PostgreSQL engine itself, so existing queries and drivers keep working. Spanner would be justified by a global scale or availability requirement the question does not state."
+    },
+    {
+      "reference": "gcp-pca-010",
+      "certification": "professional-cloud-architect",
+      "topic": "Reliability",
+      "difficulty": "medium",
+      "prompt": "What is the main reason to define an error budget alongside an SLO?",
+      "options": [
+        {
+          "key": "a",
+          "text": "To calculate the monthly bill for the service"
+        },
+        {
+          "key": "b",
+          "text": "To decide which machine type to run on"
+        },
+        {
+          "key": "c",
+          "text": "To replace incident postmortems"
+        },
+        {
+          "key": "d",
+          "text": "To quantify how much unreliability is acceptable, and use it to pace releases"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "The error budget is the permitted shortfall against the SLO. Spending it slowly leaves room to ship; exhausting it is the signal to prioritise reliability work over new features."
+    },
+    {
+      "reference": "gcp-pca-011",
+      "certification": "professional-cloud-architect",
+      "topic": "Identity",
+      "difficulty": "hard",
+      "prompt": "An application on GKE needs to call Google Cloud APIs without any long-lived credential stored in the cluster. What should the architect specify?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Workload Identity Federation binding the Kubernetes service account to an IAM service account"
+        },
+        {
+          "key": "b",
+          "text": "A service account JSON key mounted as a Kubernetes Secret"
+        },
+        {
+          "key": "c",
+          "text": "The default Compute Engine service account with Editor"
+        },
+        {
+          "key": "d",
+          "text": "An API key stored in a ConfigMap"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Workload Identity lets a pod obtain short-lived credentials for an IAM service account, removing the exported key entirely. Mounted keys are long-lived and are the credential most often leaked."
+    },
+    {
+      "reference": "gcp-pca-012",
+      "certification": "professional-cloud-architect",
+      "topic": "Business requirements",
+      "difficulty": "medium",
+      "prompt": "A stakeholder says the system must be 'fast'. What is the architect's correct next step?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Choose the largest machine type available"
+        },
+        {
+          "key": "b",
+          "text": "Agree a measurable target, such as a p95 latency figure at a stated load"
+        },
+        {
+          "key": "c",
+          "text": "Enable Cloud CDN and move on"
+        },
+        {
+          "key": "d",
+          "text": "Defer the question until after launch"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "An unquantified requirement cannot be designed against or verified. Turning it into a measurable objective is what makes the rest of the design decisions defensible."
+    },
+    {
+      "reference": "gcp-pde-001",
+      "certification": "professional-data-engineer",
+      "topic": "Dataflow",
+      "difficulty": "medium",
+      "prompt": "Which service runs Apache Beam pipelines as a managed service, handling both batch and streaming with the same code?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Dataproc"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Composer"
+        },
+        {
+          "key": "c",
+          "text": "Dataflow"
+        },
+        {
+          "key": "d",
+          "text": "Data Fusion"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "Dataflow is the managed Beam runner. Dataproc runs Hadoop and Spark, and Composer is managed Apache Airflow for orchestration."
+    },
+    {
+      "reference": "gcp-pde-002",
+      "certification": "professional-data-engineer",
+      "topic": "BigQuery",
+      "difficulty": "hard",
+      "prompt": "Queries filter a very large BigQuery table by event date and then by customer id. Which design most reduces bytes scanned?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cluster by event date and partition by customer id"
+        },
+        {
+          "key": "b",
+          "text": "Create a view that applies the filters"
+        },
+        {
+          "key": "c",
+          "text": "Add an index on both columns"
+        },
+        {
+          "key": "d",
+          "text": "Partition by event date and cluster by customer id"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "Partitioning prunes whole date partitions first, then clustering orders data within them so the customer filter reads fewer blocks. BigQuery has no conventional secondary indexes, and a view does not change what is scanned."
+    },
+    {
+      "reference": "gcp-pde-003",
+      "certification": "professional-data-engineer",
+      "topic": "Bigtable",
+      "difficulty": "hard",
+      "prompt": "A Bigtable table uses a monotonically increasing timestamp as the row key prefix and writes are slow. What is the most likely cause?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Hotspotting, because sequential keys concentrate writes on one tablet"
+        },
+        {
+          "key": "b",
+          "text": "Too few column families"
+        },
+        {
+          "key": "c",
+          "text": "Garbage collection policies are disabled"
+        },
+        {
+          "key": "d",
+          "text": "The table needs a secondary index"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Sequential row keys send all new writes to the same tablet server. Adding a high-cardinality prefix, such as a hashed identifier, spreads the load across the cluster."
+    },
+    {
+      "reference": "gcp-pde-004",
+      "certification": "professional-data-engineer",
+      "topic": "Orchestration",
+      "difficulty": "medium",
+      "prompt": "Which service would you use to schedule and monitor a dependency graph of daily data pipeline tasks?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud Scheduler"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Composer"
+        },
+        {
+          "key": "c",
+          "text": "Pub/Sub"
+        },
+        {
+          "key": "d",
+          "text": "Cloud Functions"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "Cloud Composer is managed Apache Airflow, built for DAGs with dependencies, retries and backfills. Cloud Scheduler fires single jobs on a cron schedule with no dependency graph."
+    },
+    {
+      "reference": "gcp-pde-005",
+      "certification": "professional-data-engineer",
+      "topic": "Streaming",
+      "difficulty": "hard",
+      "prompt": "In a streaming pipeline, events can arrive after their window has closed. Which Beam concept decides how long to wait and what to do with stragglers?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Partitioning"
+        },
+        {
+          "key": "b",
+          "text": "Sharding"
+        },
+        {
+          "key": "c",
+          "text": "Watermarks with triggers and allowed lateness"
+        },
+        {
+          "key": "d",
+          "text": "Autoscaling"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "The watermark estimates event-time progress, triggers decide when to emit results, and allowed lateness governs how long late data can still update a window."
+    },
+    {
+      "reference": "gcp-pde-006",
+      "certification": "professional-data-engineer",
+      "topic": "BigQuery",
+      "difficulty": "medium",
+      "prompt": "Analysts run unpredictable ad-hoc queries and the business wants predictable monthly spend for them. Which BigQuery pricing model suits this?",
+      "options": [
+        {
+          "key": "a",
+          "text": "On-demand, priced per bytes scanned"
+        },
+        {
+          "key": "b",
+          "text": "Flat storage pricing only"
+        },
+        {
+          "key": "c",
+          "text": "Per-row streaming insert pricing"
+        },
+        {
+          "key": "d",
+          "text": "Capacity-based pricing with reserved slots"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "Reserved slot capacity gives a fixed compute cost regardless of how much the analysts query, which is what makes the spend predictable. On-demand cost rises with bytes scanned."
+    },
+    {
+      "reference": "gcp-pde-007",
+      "certification": "professional-data-engineer",
+      "topic": "Migration",
+      "difficulty": "medium",
+      "prompt": "An existing Spark job must move to Google Cloud with minimal rewriting. Which service is the most direct target?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Dataproc"
+        },
+        {
+          "key": "b",
+          "text": "Dataflow"
+        },
+        {
+          "key": "c",
+          "text": "BigQuery"
+        },
+        {
+          "key": "d",
+          "text": "Cloud Run"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Dataproc runs managed Spark and Hadoop clusters, so existing jobs generally run as they are. Moving to Dataflow would mean rewriting the job in Apache Beam."
+    },
+    {
+      "reference": "gcp-pde-008",
+      "certification": "professional-data-engineer",
+      "topic": "Pub/Sub",
+      "difficulty": "hard",
+      "prompt": "What delivery guarantee should a subscriber to a standard Pub/Sub subscription be designed around?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Exactly once, so no deduplication is needed"
+        },
+        {
+          "key": "b",
+          "text": "At least once, so handlers should be idempotent"
+        },
+        {
+          "key": "c",
+          "text": "At most once, so some messages may never arrive"
+        },
+        {
+          "key": "d",
+          "text": "Ordered delivery across all publishers by default"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "Pub/Sub delivers at least once by default, so a message can be redelivered and consumers must tolerate duplicates. Ordering is only provided when an ordering key is used."
+    },
+    {
+      "reference": "gcp-pde-009",
+      "certification": "professional-data-engineer",
+      "topic": "Governance",
+      "difficulty": "medium",
+      "prompt": "Which capability helps discover datasets across an organisation and attach business metadata and classifications to them?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud Logging"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Monitoring"
+        },
+        {
+          "key": "c",
+          "text": "Dataplex / Data Catalog"
+        },
+        {
+          "key": "d",
+          "text": "Cloud DNS"
+        }
+      ],
+      "correct_option": "c",
+      "explanation": "Data Catalog, now part of Dataplex, provides metadata management, search and tagging across data assets."
+    },
+    {
+      "reference": "gcp-pde-010",
+      "certification": "professional-data-engineer",
+      "topic": "Machine learning",
+      "difficulty": "medium",
+      "prompt": "An analyst who knows SQL but not Python wants to train a simple model on data already in BigQuery. What is the lowest-friction option?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Export the data and train locally with scikit-learn"
+        },
+        {
+          "key": "b",
+          "text": "Build a custom container on Vertex AI"
+        },
+        {
+          "key": "c",
+          "text": "Stream the data into Dataflow"
+        },
+        {
+          "key": "d",
+          "text": "Use BigQuery ML with CREATE MODEL"
+        }
+      ],
+      "correct_option": "d",
+      "explanation": "BigQuery ML trains and serves models using SQL against data already in place, with no export and no Python."
+    },
+    {
+      "reference": "gcp-pde-011",
+      "certification": "professional-data-engineer",
+      "topic": "Data quality",
+      "difficulty": "medium",
+      "prompt": "A batch pipeline must not fail when a handful of malformed records appear. What is the usual pattern?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Route bad records to a dead-letter sink and continue processing"
+        },
+        {
+          "key": "b",
+          "text": "Stop the pipeline and alert on the first bad record"
+        },
+        {
+          "key": "c",
+          "text": "Silently drop records that fail to parse"
+        },
+        {
+          "key": "d",
+          "text": "Retry the whole pipeline until it succeeds"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A dead-letter destination keeps the pipeline running while preserving the failed records for inspection and reprocessing. Dropping them silently loses evidence of a data problem."
+    },
+    {
+      "reference": "gcp-pde-012",
+      "certification": "professional-data-engineer",
+      "topic": "Storage choice",
+      "difficulty": "medium",
+      "prompt": "Raw files land continuously and must be kept cheaply before transformation into BigQuery. Which landing zone is most appropriate?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Storage"
+        },
+        {
+          "key": "c",
+          "text": "Memorystore"
+        },
+        {
+          "key": "d",
+          "text": "Persistent disks on a VM"
+        }
+      ],
+      "correct_option": "b",
+      "explanation": "Cloud Storage is the standard data lake landing zone: cheap, durable, and readable directly by BigQuery, Dataflow and Dataproc."
+    }
+  ]
+}

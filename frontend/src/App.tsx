@@ -13,6 +13,7 @@ const CertificationsPage = lazy(() => import('@/pages/public/CertificationsPage'
 const ProviderPage = lazy(() => import('@/pages/public/ProviderPage'))
 const CertificationDetailPage = lazy(() => import('@/pages/public/CertificationDetailPage'))
 const ScheduleExamPage = lazy(() => import('@/pages/public/ScheduleExamPage'))
+const ChallengePage = lazy(() => import('@/pages/public/ChallengePage'))
 const ResourcesPage = lazy(() => import('@/pages/public/ResourcesPage'))
 const ArticlePage = lazy(() => import('@/pages/public/ArticlePage'))
 const SearchPage = lazy(() => import('@/pages/public/SearchPage'))
@@ -85,6 +86,7 @@ const AdminEnrollmentsPage = lazy(() =>
   import('@/pages/admin/AdminOpsPages').then((m) => ({ default: m.AdminEnrollmentsPage })),
 )
 const AdminExamBookingsPage = lazy(() => import('@/pages/admin/AdminExamBookingsPage'))
+const AdminChallengePage = lazy(() => import('@/pages/admin/AdminChallengePage'))
 const AdminPaymentsPage = lazy(() =>
   import('@/pages/admin/AdminOpsPages').then((m) => ({ default: m.AdminPaymentsPage })),
 )
@@ -126,6 +128,7 @@ export default function App() {
           <Route path="certifications/:provider" element={<ProviderPage />} />
           <Route path="certifications/:provider/:slug" element={<CertificationDetailPage />} />
           <Route path="schedule-exam" element={<ScheduleExamPage />} />
+          <Route path="challenge" element={<ChallengePage />} />
           <Route path="resources" element={<ResourcesPage />} />
           <Route path="resources/:slug" element={<ArticlePage />} />
           <Route path="search" element={<SearchPage />} />
@@ -182,6 +185,7 @@ export default function App() {
             <Route path="users" element={<AdminUsersPage />} />
             <Route path="enrollments" element={<AdminEnrollmentsPage />} />
             <Route path="exam-bookings" element={<AdminExamBookingsPage />} />
+            <Route path="challenge-leads" element={<AdminChallengePage />} />
             <Route path="payments" element={<AdminPaymentsPage />} />
             <Route path="messages" element={<AdminMessagesPage />} />
             <Route path="settings" element={<AdminSettingsPage />} />

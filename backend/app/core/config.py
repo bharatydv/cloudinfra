@@ -71,6 +71,10 @@ class Settings(BaseSettings):
     email_provider_key: str | None = None
     email_from_address: str = "no-reply@example.com"
     email_from_name: str = "Inferacloud"
+    # Where a qualified challenge lead is announced so somebody calls it back
+    # inside the window the result page promises. Unset means the admin
+    # console queue is the only place a lead surfaces.
+    sales_notification_email: str | None = None
 
     storage_provider: Literal["local", "s3"] = "local"
     storage_endpoint_url: str | None = None

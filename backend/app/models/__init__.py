@@ -1,6 +1,7 @@
 """SQLAlchemy models. Importing this package registers every table on Base."""
 
 from app.db.base import Base
+from app.models.campaign import ChallengeAttempt, ChallengeQuestion
 from app.models.catalog import Course, CourseCategory, CourseModule, Lesson
 from app.models.certification import (
     Certification,
@@ -37,6 +38,8 @@ __all__ = [
     "Certification",
     "CertificationProvider",
     "CertificationResource",
+    "ChallengeAttempt",
+    "ChallengeQuestion",
     "ContactMessage",
     "Course",
     "CourseCategory",
