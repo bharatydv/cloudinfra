@@ -68,6 +68,11 @@ export interface SeoInput {
   siteName?: string
 }
 
+function absoluteUrl(url: string): string {
+  if (/^https?:\/\//.test(url)) return url
+  return `${siteConfig.siteUrl.replace(/\/$/, '')}${url.startsWith('/') ? url : `/${url}`}`
+}
+
 export function applySeo(input: SeoInput): void {
   const title = input.title
   document.title = title
@@ -82,13 +87,16 @@ export function applySeo(input: SeoInput): void {
   upsertMeta('property', 'og:description', input.description ?? null)
   upsertMeta('property', 'og:type', input.type ?? 'website')
   upsertMeta('property', 'og:url', canonical)
-  upsertMeta('property', 'og:image', input.ogImage ?? null)
+  // Social crawlers reject relative URLs and skip the card entirely when the
+  // image is missing, so always resolve to an absolute one.
+  const ogImage = absoluteUrl(input.ogImage ?? siteConfig.defaultOgImage)
+  upsertMeta('property', 'og:image', ogImage)
   upsertMeta('property', 'og:site_name', input.siteName ?? null)
 
-  upsertMeta('name', 'twitter:card', input.ogImage ? 'summary_large_image' : 'summary')
+  upsertMeta('name', 'twitter:card', 'summary_large_image')
   upsertMeta('name', 'twitter:title', title)
   upsertMeta('name', 'twitter:description', input.description ?? null)
-  upsertMeta('name', 'twitter:image', input.ogImage ?? null)
+  upsertMeta('name', 'twitter:image', ogImage)
 
   setStructuredData(input.structuredData ?? [])
 }
@@ -109,4 +117,6 @@ export function applyServerSeo(meta: SeoMeta | null | undefined, fallbackTitle: 
   })
 }
 
-export const NOINDEX = 'noindex,nofollow'
+// "follow" rather than "nofollow": these pages stay out of the index, but
+// the links on them still point at pages that should be crawled.
+export const NOINDEX = 'noindex,follow'

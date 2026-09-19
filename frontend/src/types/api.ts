@@ -79,6 +79,7 @@ export interface User {
   id: string
   name: string
   email: string
+  phone: string
   role: UserRole
   profile_image: string | null
   headline: string | null
@@ -657,6 +658,145 @@ export interface AdminDashboard {
     status: string
     created_at: string
   }>
+}
+
+/* -------------------------------------------------------------------------- */
+/* Certification challenge                                                    */
+/* -------------------------------------------------------------------------- */
+export type ChallengeLeadStatus = 'new' | 'contacted' | 'scheduled' | 'converted' | 'lost'
+
+/** Proctoring events the page reports. Mirrors the backend's enum exactly. */
+export type ChallengeViolationKind =
+  | 'tab_hidden'
+  | 'window_blur'
+  | 'fullscreen_exit'
+  | 'copy'
+  | 'cut'
+  | 'paste'
+  | 'context_menu'
+
+export interface ChallengeTerms {
+  enabled: boolean
+  question_count: number
+  duration_minutes: number
+  pass_mark: string
+  reward_discount_percentage: string
+  max_warnings: number
+  retake_after_days: number
+  response_hours: number
+}
+
+export interface ChallengeCertificationOption {
+  id: string
+  name: string
+  exam_code: string | null
+  level: CertificationLevel
+  url: string
+  question_count: number
+  pricing: ExamPricing | null
+}
+
+export interface ChallengeIntro {
+  terms: ChallengeTerms
+  provider_name: string
+  options: ChallengeCertificationOption[]
+}
+
+export interface ChallengeOptionChoice {
+  key: string
+  text: string
+}
+
+/** A question while the paper is open. Carries no answer, by design. */
+export interface ChallengeQuestion {
+  id: string
+  position: number
+  prompt: string
+  topic: string | null
+  options: ChallengeOptionChoice[]
+}
+
+export interface ChallengeSession {
+  attempt_id: string
+  token: string
+  reference_code: string
+  certification_name: string
+  exam_code: string | null
+  started_at: string
+  expires_at: string
+  duration_seconds: number
+  max_warnings: number
+  pass_mark: string
+  reward_discount_percentage: string
+  questions: ChallengeQuestion[]
+}
+
+export interface ChallengeWarningReceipt {
+  warnings: number
+  max_warnings: number
+  remaining: number
+  message: string
+  terminated: boolean
+}
+
+export interface ChallengeReviewItem {
+  question_id: string
+  position: number
+  prompt: string
+  topic: string | null
+  options: ChallengeOptionChoice[]
+  selected_option: string | null
+  correct_option: string
+  is_correct: boolean
+  explanation: string | null
+}
+
+export interface ChallengeResult {
+  reference_code: string
+  certification_name: string
+  exam_code: string | null
+  question_count: number
+  correct_count: number
+  score_percentage: string
+  pass_mark: string
+  passed: boolean
+  discount_percentage: string | null
+  warnings: number
+  auto_submitted: boolean
+  response_hours: number
+  retake_after_days: number
+  headline: string
+  message: string
+  pricing: ExamPricing | null
+  rewarded_price: string | null
+  review: ChallengeReviewItem[]
+}
+
+export interface ChallengeAttempt {
+  id: string
+  reference_code: string
+  user_id: string | null
+  full_name: string
+  email: string
+  phone: string
+  country: string | null
+  certification_id: string | null
+  certification_name: string
+  exam_code: string | null
+  status: string
+  question_count: number
+  correct_count: number
+  score_percentage: string | null
+  pass_mark: string | null
+  passed: boolean | null
+  discount_percentage: string | null
+  warnings: number
+  auto_submitted: boolean
+  lead_status: ChallengeLeadStatus
+  admin_notes: string | null
+  started_at: string
+  submitted_at: string | null
+  created_at: string
 }
 
 export interface ApiErrorBody {

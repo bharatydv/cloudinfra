@@ -32,6 +32,7 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    phone: Mapped[str] = mapped_column(String(30), nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(
         String(20), default=UserRole.STUDENT.value, nullable=False, index=True
@@ -83,5 +84,16 @@ class PasswordResetToken(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
     user_id: Mapped[uuid.UUID] = mapped_column(index=True, nullable=False)
     token_hash: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class EmailVerificationToken(Base, UUIDPrimaryKeyMixin, TimestampMixin):
+    """A short numeric code emailed at signup, so verification happens inline."""
+
+    __tablename__ = "email_verification_tokens"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(index=True, nullable=False)
+    code_hash: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

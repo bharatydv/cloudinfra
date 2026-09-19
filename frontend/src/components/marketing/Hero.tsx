@@ -29,7 +29,7 @@ export function Hero() {
         />
       </div>
 
-      <Container className="relative py-20 sm:py-28">
+      <Container className="relative py-12 sm:py-16">
         <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700">

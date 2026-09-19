@@ -52,6 +52,12 @@ class AuthenticationError(AppError):
     message = "Please sign in to continue."
 
 
+class EmailNotVerifiedError(AppError):
+    status_code = status.HTTP_403_FORBIDDEN
+    code = "email_not_verified"
+    message = "Please verify your email to continue."
+
+
 class PermissionDeniedError(AppError):
     status_code = status.HTTP_403_FORBIDDEN
     code = "forbidden"

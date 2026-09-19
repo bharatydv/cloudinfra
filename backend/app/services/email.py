@@ -80,6 +80,15 @@ def welcome_email(name: str) -> tuple[str, str]:
     )
 
 
+def verification_email(name: str, code: str) -> tuple[str, str]:
+    return (
+        f"Verify your email for {settings.email_from_name}",
+        f"Hi {name},\n\nUse this code to finish creating your account: {code}\n\n"
+        f"It expires in {settings.email_verification_code_expire_minutes} minutes.\n\n"
+        "If you did not request this, you can ignore this email.\n",
+    )
+
+
 def password_reset_email(name: str, token: str) -> tuple[str, str]:
     link = f"{settings.public_site_url}/reset-password?token={token}"
     return (
@@ -137,4 +146,80 @@ def payment_confirmation_email(name: str, course_title: str, amount: str) -> tup
         "Payment confirmed",
         f"Hi {name},\n\nWe have confirmed your payment of {amount} for {course_title}. "
         "Your enrollment is active.\n",
+    )
+
+
+def challenge_result_email(
+    *,
+    name: str,
+    certification_name: str,
+    reference_code: str,
+    score: str,
+    correct_count: int,
+    question_count: int,
+    passed: bool,
+    discount_percentage: str | None,
+    response_hours: int,
+    retake_after_days: int,
+    warnings: int,
+) -> tuple[str, str]:
+    """The candidate's copy of their result.
+
+    The score is restated here because the result page is not addressable
+    later -- this email is the only durable record the candidate keeps.
+    """
+    scoreline = f"You answered {correct_count} of {question_count} correctly ({score})."
+    note = ""
+    if warnings:
+        note = (
+            f"\nRecorded during your test: {warnings} warning(s) for leaving the "
+            "test window or attempting to copy text.\n"
+        )
+
+    if passed and discount_percentage:
+        return (
+            f"You passed - {discount_percentage} off your {certification_name} exam "
+            f"({reference_code})",
+            f"Hi {name},\n\n{scoreline}\n\n"
+            f"You have qualified for {discount_percentage} off the {certification_name} "
+            f"exam. Our team will contact you within {response_hours} hours to confirm "
+            "the discount and schedule your exam on a call, at a date and time that "
+            f"suits you.\n\nYour reference is {reference_code} - quote it when we "
+            f"speak.\n{note}\n"
+            "Seats are booked with the certification provider, so the final date and "
+            "time depend on their availability.\n",
+        )
+
+    return (
+        f"Your {certification_name} test result ({reference_code})",
+        f"Hi {name},\n\n{scoreline}\n\n"
+        "That is below the mark needed for the exam discount this time. Your result "
+        "page listed the correct answer and an explanation for every question, which "
+        "is the fastest way to see what to revise.\n\n"
+        f"You can take the test again after {retake_after_days} days. Your reference "
+        f"is {reference_code}.\n{note}",
+    )
+
+
+def challenge_lead_email(
+    *,
+    name: str,
+    email: str,
+    phone: str,
+    certification_name: str,
+    score: str,
+    discount_percentage: str,
+    reference_code: str,
+    response_hours: int,
+) -> tuple[str, str]:
+    """Internal alert: somebody has been promised a callback, with a clock on it."""
+    return (
+        f"Challenge lead: {name} qualified for {certification_name} ({score})",
+        f"{name} passed the {certification_name} challenge with {score} and has been "
+        f"promised {discount_percentage} off, plus a call within {response_hours} "
+        f"hours.\n\n"
+        f"Reference: {reference_code}\n"
+        f"Email:     {email}\n"
+        f"Phone:     {phone}\n\n"
+        "Open Admin > Challenge leads to record the outcome of the call.\n",
     )

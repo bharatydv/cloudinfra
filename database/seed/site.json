@@ -296,6 +296,22 @@
           }
         ]
       }
+    },
+    {
+      "key": "challenge",
+      "value": {
+        "enabled": true,
+        "providerSlug": "google-cloud",
+        "questionCount": 20,
+        "durationMinutes": 25,
+        "passMark": 70,
+        "rewardDiscountPercentage": 20,
+        "maxWarnings": 3,
+        "retakeAfterDays": 7,
+        "responseHours": 24
+      },
+      "description": "Certification challenge campaign terms: paper size, time limit, pass mark, the discount a pass earns, and how many proctoring warnings are allowed before the test auto-submits.",
+      "is_public": true
     }
   ]
 }

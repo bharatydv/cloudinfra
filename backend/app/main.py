@@ -47,9 +47,28 @@ TAGS_METADATA = [
 ]
 
 
+# Hostnames that are fine in development but must never reach production:
+# every canonical, og:url and sitemap entry is built from public_site_url, so
+# shipping a placeholder hands search engines the wrong site as canonical.
+_PLACEHOLDER_SITE_HOSTS = ("localhost", "127.0.0.1", ".cloudapp.azure.com", "example.com")
+
+
+def _warn_on_placeholder_site_url() -> None:
+    if not settings.is_production:
+        return
+    url = settings.public_site_url
+    if any(host in url for host in _PLACEHOLDER_SITE_HOSTS):
+        logger.warning(
+            "PUBLIC_SITE_URL is still %s in production. Canonical URLs, og:url "
+            "and sitemap.xml will all point there. Set it to the real domain.",
+            url,
+        )
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     logger.info("Starting %s in %s mode", settings.project_name, settings.environment)
+    _warn_on_placeholder_site_url()
     yield
     await engine.dispose()
 

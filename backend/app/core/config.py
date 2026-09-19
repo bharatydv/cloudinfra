@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 14
     password_hash_scheme: Literal["argon2", "bcrypt"] = "argon2"
     password_reset_token_expire_minutes: int = 60
+    email_verification_code_expire_minutes: int = 15
 
     # --- URLs / CORS ----------------------------------------------------
     frontend_url: str = "http://localhost:5173"
@@ -71,6 +72,10 @@ class Settings(BaseSettings):
     email_provider_key: str | None = None
     email_from_address: str = "no-reply@example.com"
     email_from_name: str = "Inferacloud"
+    # Where a qualified challenge lead is announced so somebody calls it back
+    # inside the window the result page promises. Unset means the admin
+    # console queue is the only place a lead surfaces.
+    sales_notification_email: str | None = None
 
     storage_provider: Literal["local", "s3"] = "local"
     storage_endpoint_url: str | None = None

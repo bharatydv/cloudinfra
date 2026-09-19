@@ -16,6 +16,27 @@
       name="description"
       content="Build job-ready skills and prepare for professional certifications with structured courses, practical resources and guided learning paths."
     />
+
+    <!--
+      Static social card. The app overwrites these per route once React mounts,
+      but most social crawlers (LinkedIn, Slack, WhatsApp, Facebook) never run
+      the JavaScript, so without these a shared link has no preview at all.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Inferacloud" />
+    <meta property="og:title" content="Learn. Get Certified. Build Your Future." />
+    <meta
+      property="og:description"
+      content="Build job-ready skills and prepare for professional certifications with structured courses, practical resources and guided learning paths."
+    />
+    <meta property="og:image" content="/og-default.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Learn. Get Certified. Build Your Future." />
+    <meta
+      name="twitter:description"
+      content="Build job-ready skills and prepare for professional certifications with structured courses, practical resources and guided learning paths."
+    />
+    <meta name="twitter:image" content="/og-default.png" />
   </head>
   <body>
     <div id="root"></div>

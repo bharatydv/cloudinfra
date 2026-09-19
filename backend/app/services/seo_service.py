@@ -14,14 +14,20 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.models.catalog import Course, CourseCategory
+from app.models.catalog import Course
 from app.models.certification import Certification, CertificationProvider
-from app.models.content import Article, ArticleCategory
+from app.models.content import Article
 from app.repositories.article_repo import published_filter
 from app.schemas.common import Breadcrumb, SeoMeta
 
-NOINDEX = "noindex,nofollow"
+# "follow" rather than "nofollow": these pages should stay out of the index
+# but the links they carry still point at pages that should be crawled.
+NOINDEX = "noindex,follow"
 INDEX = "index,follow"
+
+# Fallback social card, used whenever a record has no image of its own.
+# Social crawlers need an absolute URL, so this is resolved at build time.
+DEFAULT_OG_IMAGE_PATH = "/og-default.png"
 
 # Routes that must never be indexed.
 DISALLOWED_PATHS = (
@@ -177,6 +183,16 @@ def website_schema() -> dict[str, Any]:
     }
 
 
+def _absolute_og_image(og_image: str | None) -> str:
+    """Social crawlers reject relative URLs, and a missing card costs a
+    thumbnail on every share -- so always return an absolute one."""
+    if not og_image:
+        return absolute_url(DEFAULT_OG_IMAGE_PATH)
+    if og_image.startswith(("http://", "https://")):
+        return og_image
+    return absolute_url(og_image)
+
+
 def build_meta(
     *,
     title: str,
@@ -196,7 +212,7 @@ def build_meta(
         title=title,
         description=_truncate(description),
         canonical_url=canonical_url or absolute_url(path),
-        og_image=og_image,
+        og_image=_absolute_og_image(og_image),
         robots=robots,
         breadcrumbs=crumbs,
         structured_data=data,
@@ -234,6 +250,7 @@ async def build_sitemap_xml(db: AsyncSession) -> str:
         _url_entry(absolute_url("/certifications"), now, "daily", "0.9"),
         _url_entry(absolute_url("/courses"), now, "daily", "0.9"),
         _url_entry(absolute_url("/resources"), now, "daily", "0.9"),
+        _url_entry(absolute_url("/schedule-exam"), now, "weekly", "0.9"),
         _url_entry(absolute_url("/about"), now, "monthly", "0.5"),
         _url_entry(absolute_url("/contact"), now, "monthly", "0.5"),
         _url_entry(absolute_url("/privacy"), now, "yearly", "0.3"),
@@ -243,18 +260,10 @@ async def build_sitemap_xml(db: AsyncSession) -> str:
         _url_entry(absolute_url("/cookie-policy"), now, "yearly", "0.3"),
     ]
 
-    categories = await db.scalars(
-        select(CourseCategory).where(CourseCategory.is_published.is_(True))
-    )
-    for category in categories:
-        entries.append(
-            _url_entry(
-                absolute_url(f"/courses?category={category.slug}"),
-                category.updated_at,
-                "weekly",
-                "0.6",
-            )
-        )
+    # Filtered listing URLs (?category=...) are deliberately absent: the
+    # listing pages serve "noindex,follow" whenever a filter is active and
+    # canonicalise back to the unfiltered listing, so advertising them here
+    # would only spend crawl budget on pages that turn the crawler away.
 
     courses = await db.scalars(select(Course).where(Course.is_published.is_(True)))
     for course in courses:
@@ -289,17 +298,6 @@ async def build_sitemap_xml(db: AsyncSession) -> str:
                 certification.updated_at,
                 "weekly",
                 "0.8",
-            )
-        )
-
-    article_categories = await db.scalars(select(ArticleCategory))
-    for category in article_categories:
-        entries.append(
-            _url_entry(
-                absolute_url(f"/resources?category={category.slug}"),
-                category.updated_at,
-                "weekly",
-                "0.6",
             )
         )
 

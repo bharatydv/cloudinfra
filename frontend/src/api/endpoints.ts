@@ -12,6 +12,13 @@ import type {
   CertificationDetail,
   CertificationOption,
   CertificationResource,
+  ChallengeAttempt,
+  ChallengeIntro,
+  ChallengeLeadStatus,
+  ChallengeResult,
+  ChallengeSession,
+  ChallengeViolationKind,
+  ChallengeWarningReceipt,
   ContactMessage,
   CourseCard,
   CourseCategory,
@@ -57,12 +64,19 @@ export const getPageSeo = (path: string) =>
 export interface RegisterPayload {
   name: string
   email: string
+  phone: string
   password: string
   confirm_password: string
 }
 
 export const register = (payload: RegisterPayload) =>
-  api.post<AuthResponse>('/auth/register', payload, { auth: false })
+  api.post<{ email: string; message: string }>('/auth/register', payload, { auth: false })
+
+export const verifyEmail = (payload: { email: string; code: string }) =>
+  api.post<AuthResponse>('/auth/verify-email', payload, { auth: false })
+
+export const resendVerification = (email: string) =>
+  api.post<{ message: string }>('/auth/resend-verification', { email }, { auth: false })
 
 export const login = (payload: { email: string; password: string }) =>
   api.post<AuthResponse>('/auth/login', payload, { auth: false })
@@ -422,3 +436,62 @@ export const lookupCourses = () =>
 
 export const lookupCertifications = () =>
   api.get<Array<{ id: string; name: string; slug: string }>>('/admin/lookup/certifications')
+
+/* -------------------------------------------------------------------------- */
+/* Certification challenge                                                    */
+/* -------------------------------------------------------------------------- */
+export interface ChallengeStartPayload {
+  full_name: string
+  email: string
+  phone: string
+  country?: string | null
+  certification_id: string
+  accept_rules: boolean
+  /** Honeypot. Left empty by real visitors. */
+  website?: string
+}
+
+export const getChallengeIntro = () => api.get<ChallengeIntro>('/challenge', { auth: false })
+
+/**
+ * Open a paper. The token in the response is the only copy -- it authorises
+ * the warning and submit calls, and the server keeps only its hash.
+ */
+export const startChallenge = (payload: ChallengeStartPayload) =>
+  api.post<ChallengeSession>('/challenge/attempts', payload)
+
+export const reportChallengeWarning = (
+  attemptId: string,
+  payload: { token: string; kind: ChallengeViolationKind },
+) =>
+  api.post<ChallengeWarningReceipt>(`/challenge/attempts/${attemptId}/warnings`, payload, {
+    auth: false,
+  })
+
+export const submitChallenge = (
+  attemptId: string,
+  payload: {
+    token: string
+    answers: Array<{ question_id: string; option_key: string }>
+    auto_submitted: boolean
+  },
+) => api.post<ChallengeResult>(`/challenge/attempts/${attemptId}/submit`, payload, { auth: false })
+
+export const getAdminChallengeAttempts = (
+  query: {
+    page?: number
+    page_size?: number
+    q?: string
+    lead_status?: string
+    passed?: boolean
+    certification_id?: string
+  } = {},
+) => api.get<Page<ChallengeAttempt>>('/admin/challenge-attempts', { query })
+
+export const updateChallengeAttempt = (
+  id: string,
+  payload: { lead_status?: ChallengeLeadStatus; admin_notes?: string | null },
+) => api.put<ChallengeAttempt>(`/admin/challenge-attempts/${id}`, payload)
+
+export const deleteChallengeAttempt = (id: string) =>
+  api.delete(`/admin/challenge-attempts/${id}`)

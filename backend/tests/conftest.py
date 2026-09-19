@@ -114,6 +114,7 @@ async def _make_user(db: AsyncSession, email: str, role: str, password: str) -> 
     user = User(
         name=email.split("@")[0].title(),
         email=email,
+        phone="+15551234567",
         password_hash=hash_password(password),
         role=role,
         is_active=True,

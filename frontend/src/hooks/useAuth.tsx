@@ -21,7 +21,8 @@ interface AuthContextValue {
   /** True until the stored session has been validated against the API. */
   isLoading: boolean
   login: (email: string, password: string) => Promise<User>
-  register: (payload: endpoints.RegisterPayload) => Promise<User>
+  register: (payload: endpoints.RegisterPayload) => Promise<{ email: string; message: string }>
+  verifyEmail: (email: string, code: string) => Promise<User>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
   setUser: (user: User) => void
@@ -76,9 +77,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const register = useCallback(async (payload: endpoints.RegisterPayload) => {
-    const response = await endpoints.register(payload)
+    // No session yet: the account is not usable until the emailed code is
+    // confirmed through verifyEmail.
+    return endpoints.register(payload)
+  }, [])
+
+  const verifyEmail = useCallback(async (email: string, code: string) => {
+    const response = await endpoints.verifyEmail({ email, code })
     tokenStore.set(response.tokens.access_token, response.tokens.refresh_token)
     setUser(response.user)
+    await queryClient.invalidateQueries()
     return response.user
   }, [])
 
@@ -108,11 +116,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       login,
       register,
+      verifyEmail,
       logout,
       refreshUser,
       setUser,
     }),
-    [user, isLoading, login, register, logout, refreshUser],
+    [user, isLoading, login, register, verifyEmail, logout, refreshUser],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

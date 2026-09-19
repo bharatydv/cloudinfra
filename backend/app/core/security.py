@@ -85,6 +85,11 @@ def generate_opaque_token(length: int = 48) -> str:
     return secrets.token_urlsafe(length)
 
 
+def generate_numeric_code(length: int = 6) -> str:
+    """A short code a person can type by hand, e.g. an email verification OTP."""
+    return f"{secrets.randbelow(10**length):0{length}d}"
+
+
 def hash_opaque_token(token: str) -> str:
     """Refresh and password-reset tokens are persisted only as digests."""
     return hashlib.sha256(token.encode("utf-8")).hexdigest()

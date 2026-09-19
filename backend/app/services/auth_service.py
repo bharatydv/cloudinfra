@@ -5,11 +5,17 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.errors import AuthenticationError, ConflictError, ValidationFailedError
+from app.core.errors import (
+    AuthenticationError,
+    ConflictError,
+    EmailNotVerifiedError,
+    ValidationFailedError,
+)
 from app.core.security import (
     create_access_token,
     create_refresh_token,
     decode_token,
+    generate_numeric_code,
     generate_opaque_token,
     hash_opaque_token,
     hash_password,
@@ -25,6 +31,7 @@ from app.schemas.auth import (
     RegisterRequest,
     ResetPasswordRequest,
     TokenPair,
+    VerifyEmailRequest,
 )
 from app.services import email as email_service
 
@@ -62,9 +69,20 @@ async def issue_token_pair(
     )
 
 
-async def register(
-    db: AsyncSession, payload: RegisterRequest, user_agent: str | None = None
-) -> tuple[User, TokenPair]:
+async def _send_verification_code(db: AsyncSession, user: User) -> None:
+    now = datetime.now(UTC)
+    await user_repo.invalidate_verification_codes(db, user.id, now)
+
+    code = generate_numeric_code()
+    expires_at = now + timedelta(minutes=settings.email_verification_code_expire_minutes)
+    await user_repo.store_verification_code(db, user.id, hash_opaque_token(code), expires_at)
+    await db.commit()
+
+    subject, body = email_service.verification_email(user.name, code)
+    await email_service.send_email(user.email, subject, body)
+
+
+async def register(db: AsyncSession, payload: RegisterRequest) -> User:
     email = payload.email.strip().lower()
     if await user_repo.email_exists(db, email):
         raise ConflictError("An account with that email already exists.")
@@ -72,12 +90,35 @@ async def register(
     user = User(
         name=payload.name.strip(),
         email=email,
+        phone=payload.phone,
         password_hash=hash_password(payload.password),
         role=UserRole.STUDENT.value,
     )
     db.add(user)
     await db.flush()
+    await db.refresh(user)
 
+    await _send_verification_code(db, user)
+    return user
+
+
+async def verify_email(
+    db: AsyncSession, payload: VerifyEmailRequest, user_agent: str | None = None
+) -> tuple[User, TokenPair]:
+    user = await user_repo.get_by_email(db, payload.email)
+    if user is None:
+        raise ValidationFailedError("This code is invalid or has expired.")
+    if user.is_email_verified:
+        raise ValidationFailedError("This account is already verified. Please sign in.")
+
+    stored = await user_repo.get_verification_code(db, user.id, hash_opaque_token(payload.code))
+    now = datetime.now(UTC)
+    if stored is None or stored.used_at is not None or stored.expires_at <= now:
+        raise ValidationFailedError("This code is invalid or has expired.")
+
+    stored.used_at = now
+    user.is_email_verified = True
+    user.last_login_at = now
     tokens = await issue_token_pair(db, user, user_agent)
     await db.commit()
     await db.refresh(user)
@@ -85,6 +126,14 @@ async def register(
     subject, body = email_service.welcome_email(user.name)
     await email_service.send_email(user.email, subject, body)
     return user, tokens
+
+
+async def resend_verification(db: AsyncSession, email: str) -> None:
+    """Always succeeds from the caller's point of view (no account enumeration)."""
+    user = await user_repo.get_by_email(db, email)
+    if user is None or user.is_email_verified:
+        return
+    await _send_verification_code(db, user)
 
 
 async def login(
@@ -96,6 +145,8 @@ async def login(
         raise AuthenticationError("Incorrect email or password.")
     if not user.is_active:
         raise AuthenticationError("This account has been deactivated.")
+    if not user.is_email_verified:
+        raise EmailNotVerifiedError()
 
     if needs_rehash(user.password_hash):
         user.password_hash = hash_password(payload.password)
