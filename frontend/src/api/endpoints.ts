@@ -64,12 +64,19 @@ export const getPageSeo = (path: string) =>
 export interface RegisterPayload {
   name: string
   email: string
+  phone: string
   password: string
   confirm_password: string
 }
 
 export const register = (payload: RegisterPayload) =>
-  api.post<AuthResponse>('/auth/register', payload, { auth: false })
+  api.post<{ email: string; message: string }>('/auth/register', payload, { auth: false })
+
+export const verifyEmail = (payload: { email: string; code: string }) =>
+  api.post<AuthResponse>('/auth/verify-email', payload, { auth: false })
+
+export const resendVerification = (email: string) =>
+  api.post<{ message: string }>('/auth/resend-verification', { email }, { auth: false })
 
 export const login = (payload: { email: string; password: string }) =>
   api.post<AuthResponse>('/auth/login', payload, { auth: false })

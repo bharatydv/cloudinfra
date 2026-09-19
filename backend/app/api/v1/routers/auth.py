@@ -10,9 +10,12 @@ from app.schemas.auth import (
     LoginRequest,
     RefreshRequest,
     RegisterRequest,
+    RegisterResponse,
+    ResendVerificationRequest,
     ResetPasswordRequest,
     TokenPair,
     UserRead,
+    VerifyEmailRequest,
 )
 from app.schemas.common import Message
 from app.services import auth_service
@@ -24,12 +27,37 @@ def _agent(request: Request) -> str | None:
     return request.headers.get("user-agent")
 
 
-@router.post("/register", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit(settings.rate_limit_auth)
-async def register(request: Request, payload: RegisterRequest, db: DbSession) -> AuthResponse:
-    """Create a student account and return an access/refresh token pair."""
-    user, tokens = await auth_service.register(db, payload, _agent(request))
+async def register(request: Request, payload: RegisterRequest, db: DbSession) -> RegisterResponse:
+    """Create a student account and email it a verification code.
+
+    No tokens are issued yet -- the account cannot sign in until the code is
+    confirmed through /auth/verify-email.
+    """
+    user = await auth_service.register(db, payload)
+    return RegisterResponse(
+        email=user.email,
+        message="We sent a 6-digit code to your email. Enter it to finish creating your account.",
+    )
+
+
+@router.post("/verify-email", response_model=AuthResponse)
+@limiter.limit(settings.rate_limit_auth)
+async def verify_email(request: Request, payload: VerifyEmailRequest, db: DbSession) -> AuthResponse:
+    """Confirm the signup code and return an access/refresh token pair."""
+    user, tokens = await auth_service.verify_email(db, payload, _agent(request))
     return AuthResponse(user=UserRead.model_validate(user), tokens=tokens)
+
+
+@router.post("/resend-verification", response_model=Message)
+@limiter.limit(settings.rate_limit_auth)
+async def resend_verification(
+    request: Request, payload: ResendVerificationRequest, db: DbSession
+) -> Message:
+    """Always reports success so accounts cannot be enumerated."""
+    await auth_service.resend_verification(db, payload.email)
+    return Message(message="If that account needs verifying, a new code is on its way.")
 
 
 @router.post("/login", response_model=AuthResponse)

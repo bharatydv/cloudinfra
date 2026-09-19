@@ -80,6 +80,15 @@ def welcome_email(name: str) -> tuple[str, str]:
     )
 
 
+def verification_email(name: str, code: str) -> tuple[str, str]:
+    return (
+        f"Verify your email for {settings.email_from_name}",
+        f"Hi {name},\n\nUse this code to finish creating your account: {code}\n\n"
+        f"It expires in {settings.email_verification_code_expire_minutes} minutes.\n\n"
+        "If you did not request this, you can ignore this email.\n",
+    )
+
+
 def password_reset_email(name: str, token: str) -> tuple[str, str]:
     link = f"{settings.public_site_url}/reset-password?token={token}"
     return (

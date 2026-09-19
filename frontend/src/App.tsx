@@ -1,108 +1,110 @@
-import { lazy, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 
 import PublicLayout from '@/layouts/PublicLayout'
+import { lazyImport } from '@/lib/lazyImport'
 import { RedirectIfAuthenticated, RequireAdmin, RequireAuth } from '@/layouts/guards'
 import HomePage from '@/pages/public/HomePage'
 import { AnalyticsEvent, track } from '@/lib/analytics'
 
 /* Route-level code splitting: the homepage ships on its own. */
-const CoursesPage = lazy(() => import('@/pages/public/CoursesPage'))
-const CourseDetailPage = lazy(() => import('@/pages/public/CourseDetailPage'))
-const CertificationsPage = lazy(() => import('@/pages/public/CertificationsPage'))
-const ProviderPage = lazy(() => import('@/pages/public/ProviderPage'))
-const CertificationDetailPage = lazy(() => import('@/pages/public/CertificationDetailPage'))
-const ScheduleExamPage = lazy(() => import('@/pages/public/ScheduleExamPage'))
-const ChallengePage = lazy(() => import('@/pages/public/ChallengePage'))
-const ResourcesPage = lazy(() => import('@/pages/public/ResourcesPage'))
-const ArticlePage = lazy(() => import('@/pages/public/ArticlePage'))
-const SearchPage = lazy(() => import('@/pages/public/SearchPage'))
-const AboutPage = lazy(() => import('@/pages/public/AboutPage'))
-const ContactPage = lazy(() => import('@/pages/public/ContactPage'))
-const LegalPage = lazy(() => import('@/pages/public/LegalPage'))
-const NotFoundPage = lazy(() => import('@/pages/public/NotFoundPage'))
+const CoursesPage = lazyImport(() => import('@/pages/public/CoursesPage'))
+const CourseDetailPage = lazyImport(() => import('@/pages/public/CourseDetailPage'))
+const CertificationsPage = lazyImport(() => import('@/pages/public/CertificationsPage'))
+const ProviderPage = lazyImport(() => import('@/pages/public/ProviderPage'))
+const CertificationDetailPage = lazyImport(() => import('@/pages/public/CertificationDetailPage'))
+const ScheduleExamPage = lazyImport(() => import('@/pages/public/ScheduleExamPage'))
+const ChallengePage = lazyImport(() => import('@/pages/public/ChallengePage'))
+const ResourcesPage = lazyImport(() => import('@/pages/public/ResourcesPage'))
+const ArticlePage = lazyImport(() => import('@/pages/public/ArticlePage'))
+const SearchPage = lazyImport(() => import('@/pages/public/SearchPage'))
+const AboutPage = lazyImport(() => import('@/pages/public/AboutPage'))
+const ContactPage = lazyImport(() => import('@/pages/public/ContactPage'))
+const LegalPage = lazyImport(() => import('@/pages/public/LegalPage'))
+const NotFoundPage = lazyImport(() => import('@/pages/public/NotFoundPage'))
 
-const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
-const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'))
-const ForgotPasswordPage = lazy(() =>
+const LoginPage = lazyImport(() => import('@/pages/auth/LoginPage'))
+const RegisterPage = lazyImport(() => import('@/pages/auth/RegisterPage'))
+const VerifyEmailPage = lazyImport(() => import('@/pages/auth/VerifyEmailPage'))
+const ForgotPasswordPage = lazyImport(() =>
   import('@/pages/auth/PasswordPages').then((module) => ({ default: module.ForgotPasswordPage })),
 )
-const ResetPasswordPage = lazy(() =>
+const ResetPasswordPage = lazyImport(() =>
   import('@/pages/auth/PasswordPages').then((module) => ({ default: module.ResetPasswordPage })),
 )
 
-const DashboardLayout = lazy(() => import('@/layouts/DashboardLayout'))
-const DashboardOverviewPage = lazy(() =>
+const DashboardLayout = lazyImport(() => import('@/layouts/DashboardLayout'))
+const DashboardOverviewPage = lazyImport(() =>
   import('@/pages/dashboard/DashboardPages').then((m) => ({ default: m.DashboardOverviewPage })),
 )
-const MyCoursesPage = lazy(() =>
+const MyCoursesPage = lazyImport(() =>
   import('@/pages/dashboard/DashboardPages').then((m) => ({ default: m.MyCoursesPage })),
 )
-const ProgressPage = lazy(() =>
+const ProgressPage = lazyImport(() =>
   import('@/pages/dashboard/DashboardPages').then((m) => ({ default: m.ProgressPage })),
 )
-const SavedCertificationsPage = lazy(() =>
+const SavedCertificationsPage = lazyImport(() =>
   import('@/pages/dashboard/DashboardPages').then((m) => ({ default: m.SavedCertificationsPage })),
 )
-const PracticePage = lazy(() =>
+const PracticePage = lazyImport(() =>
   import('@/pages/dashboard/DashboardPages').then((m) => ({ default: m.PracticePage })),
 )
-const CertificatesPage = lazy(() =>
+const CertificatesPage = lazyImport(() =>
   import('@/pages/dashboard/DashboardPages').then((m) => ({ default: m.CertificatesPage })),
 )
-const ProfilePage = lazy(() =>
+const ProfilePage = lazyImport(() =>
   import('@/pages/dashboard/DashboardPages').then((m) => ({ default: m.ProfilePage })),
 )
 
-const LearnPage = lazy(() => import('@/pages/learn/LearnPage'))
+const LearnPage = lazyImport(() => import('@/pages/learn/LearnPage'))
 
-const AdminLayout = lazy(() => import('@/layouts/AdminLayout'))
-const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'))
-const AdminCoursesPage = lazy(() => import('@/pages/admin/AdminCoursesPage'))
-const AdminCourseEditorPage = lazy(() => import('@/pages/admin/AdminCourseEditorPage'))
-const AdminArticlesPage = lazy(() =>
+const AdminLayout = lazyImport(() => import('@/layouts/AdminLayout'))
+const AdminDashboardPage = lazyImport(() => import('@/pages/admin/AdminDashboardPage'))
+const AdminCoursesPage = lazyImport(() => import('@/pages/admin/AdminCoursesPage'))
+const AdminCourseEditorPage = lazyImport(() => import('@/pages/admin/AdminCourseEditorPage'))
+const AdminArticlesPage = lazyImport(() =>
   import('@/pages/admin/AdminArticlesPage').then((m) => ({ default: m.AdminArticlesPage })),
 )
-const AdminArticleEditorPage = lazy(() =>
+const AdminArticleEditorPage = lazyImport(() =>
   import('@/pages/admin/AdminArticlesPage').then((m) => ({ default: m.AdminArticleEditorPage })),
 )
-const AdminCertificationsPage = lazy(() =>
+const AdminCertificationsPage = lazyImport(() =>
   import('@/pages/admin/AdminCertificationsPage').then((m) => ({
     default: m.AdminCertificationsPage,
   })),
 )
-const AdminCertificationEditorPage = lazy(() =>
+const AdminCertificationEditorPage = lazyImport(() =>
   import('@/pages/admin/AdminCertificationsPage').then((m) => ({
     default: m.AdminCertificationEditorPage,
   })),
 )
-const AdminProvidersPage = lazy(() =>
+const AdminProvidersPage = lazyImport(() =>
   import('@/pages/admin/AdminCertificationsPage').then((m) => ({ default: m.AdminProvidersPage })),
 )
-const AdminUsersPage = lazy(() =>
+const AdminUsersPage = lazyImport(() =>
   import('@/pages/admin/AdminOpsPages').then((m) => ({ default: m.AdminUsersPage })),
 )
-const AdminEnrollmentsPage = lazy(() =>
+const AdminEnrollmentsPage = lazyImport(() =>
   import('@/pages/admin/AdminOpsPages').then((m) => ({ default: m.AdminEnrollmentsPage })),
 )
-const AdminExamBookingsPage = lazy(() => import('@/pages/admin/AdminExamBookingsPage'))
-const AdminChallengePage = lazy(() => import('@/pages/admin/AdminChallengePage'))
-const AdminPaymentsPage = lazy(() =>
+const AdminExamBookingsPage = lazyImport(() => import('@/pages/admin/AdminExamBookingsPage'))
+const AdminChallengePage = lazyImport(() => import('@/pages/admin/AdminChallengePage'))
+const AdminPaymentsPage = lazyImport(() =>
   import('@/pages/admin/AdminOpsPages').then((m) => ({ default: m.AdminPaymentsPage })),
 )
-const AdminMessagesPage = lazy(() =>
+const AdminMessagesPage = lazyImport(() =>
   import('@/pages/admin/AdminOpsPages').then((m) => ({ default: m.AdminMessagesPage })),
 )
-const AdminFaqsPage = lazy(() =>
+const AdminFaqsPage = lazyImport(() =>
   import('@/pages/admin/AdminOpsPages').then((m) => ({ default: m.AdminFaqsPage })),
 )
-const AdminTestimonialsPage = lazy(() =>
+const AdminTestimonialsPage = lazyImport(() =>
   import('@/pages/admin/AdminOpsPages').then((m) => ({ default: m.AdminTestimonialsPage })),
 )
-const AdminCategoriesPage = lazy(() =>
+const AdminCategoriesPage = lazyImport(() =>
   import('@/pages/admin/AdminOpsPages').then((m) => ({ default: m.AdminCategoriesPage })),
 )
-const AdminSettingsPage = lazy(() =>
+const AdminSettingsPage = lazyImport(() =>
   import('@/pages/admin/AdminOpsPages').then((m) => ({ default: m.AdminSettingsPage })),
 )
 
@@ -146,6 +148,7 @@ export default function App() {
         <Route element={<RedirectIfAuthenticated />}>
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
+          <Route path="verify-email" element={<VerifyEmailPage />} />
           <Route path="forgot-password" element={<ForgotPasswordPage />} />
         </Route>
         <Route path="reset-password" element={<ResetPasswordPage />} />

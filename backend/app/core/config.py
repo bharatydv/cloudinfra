@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 14
     password_hash_scheme: Literal["argon2", "bcrypt"] = "argon2"
     password_reset_token_expire_minutes: int = 60
+    email_verification_code_expire_minutes: int = 15
 
     # --- URLs / CORS ----------------------------------------------------
     frontend_url: str = "http://localhost:5173"

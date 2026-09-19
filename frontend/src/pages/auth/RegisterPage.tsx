@@ -19,6 +19,11 @@ const schema = z
   .object({
     name: z.string().min(2, 'Please enter your full name.').max(120),
     email: z.string().email('Please enter a valid email address.'),
+    phone: z
+      .string()
+      .min(7, 'Please enter a valid phone number.')
+      .max(20)
+      .regex(/^[0-9+\-\s()]+$/, 'Please enter a valid phone number.'),
     password: z
       .string()
       .min(8, 'Use at least 8 characters.')
@@ -59,8 +64,8 @@ export default function RegisterPage() {
   async function onSubmit(values: RegisterForm) {
     setFormError(null)
     try {
-      await registerUser(values)
-      navigate('/dashboard', { replace: true })
+      const { email } = await registerUser(values)
+      navigate(`/verify-email?email=${encodeURIComponent(email)}`, { replace: true })
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.status === 409) {
@@ -113,6 +118,16 @@ export default function RegisterPage() {
             autoComplete="email"
             invalid={Boolean(errors.email)}
             {...register('email')}
+          />
+        </Field>
+
+        <Field label="Phone number" htmlFor="phone" required error={errors.phone?.message}>
+          <Input
+            id="phone"
+            type="tel"
+            autoComplete="tel"
+            invalid={Boolean(errors.phone)}
+            {...register('phone')}
           />
         </Field>
 

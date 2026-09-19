@@ -76,6 +76,7 @@ async def seed_users(session: AsyncSession) -> dict[str, User]:
         {
             "email": settings.seed_admin_email.lower(),
             "name": settings.seed_admin_name,
+            "phone": "+10000000000",
             "role": UserRole.ADMIN.value,
             "password": settings.seed_admin_password,
             "headline": "Platform administrator",
@@ -83,6 +84,7 @@ async def seed_users(session: AsyncSession) -> dict[str, User]:
         {
             "email": "instructor@example.com",
             "name": "Demo Instructor",
+            "phone": "+10000000001",
             "role": UserRole.INSTRUCTOR.value,
             "password": "Instructor123!",
             "headline": "Course author - demo account",
@@ -92,6 +94,7 @@ async def seed_users(session: AsyncSession) -> dict[str, User]:
         {
             "email": "student@example.com",
             "name": "Demo Student",
+            "phone": "+10000000002",
             "role": UserRole.STUDENT.value,
             "password": "Student123!",
             "headline": "Demo learner account",

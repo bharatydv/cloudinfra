@@ -12,6 +12,7 @@ from app.schemas.common import ORMModel
 PASSWORD_MIN_LENGTH = 8
 _HAS_LETTER = re.compile(r"[A-Za-z]")
 _HAS_DIGIT = re.compile(r"\d")
+_PHONE_RE = re.compile(r"^[0-9+\-\s()]{7,20}$")
 
 
 def _validate_password_strength(value: str) -> str:
@@ -19,6 +20,13 @@ def _validate_password_strength(value: str) -> str:
         raise ValueError(f"Password must be at least {PASSWORD_MIN_LENGTH} characters.")
     if not _HAS_LETTER.search(value) or not _HAS_DIGIT.search(value):
         raise ValueError("Password must contain at least one letter and one number.")
+    return value
+
+
+def _validate_phone(value: str) -> str:
+    value = value.strip()
+    if not _PHONE_RE.match(value):
+        raise ValueError("Enter a valid phone number.")
     return value
 
 
@@ -33,6 +41,7 @@ class UserRead(ORMModel):
     id: uuid.UUID
     name: str
     email: EmailStr
+    phone: str
     role: UserRole
     profile_image: str | None = None
     headline: str | None = None
@@ -58,8 +67,14 @@ class AdminUserUpdate(UserUpdate):
 class RegisterRequest(BaseModel):
     name: str = Field(min_length=2, max_length=120)
     email: EmailStr
+    phone: str
     password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=128)
     confirm_password: str
+
+    @field_validator("phone")
+    @classmethod
+    def _phone(cls, value: str) -> str:
+        return _validate_phone(value)
 
     @field_validator("password")
     @classmethod
@@ -71,6 +86,20 @@ class RegisterRequest(BaseModel):
         if self.password != self.confirm_password:
             raise ValueError("Passwords do not match.")
         return self
+
+
+class RegisterResponse(BaseModel):
+    email: EmailStr
+    message: str
+
+
+class VerifyEmailRequest(BaseModel):
+    email: EmailStr
+    code: str = Field(min_length=6, max_length=6)
+
+
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr
 
 
 class LoginRequest(BaseModel):

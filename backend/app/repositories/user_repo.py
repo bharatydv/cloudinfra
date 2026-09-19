@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.pagination import PageParams
-from app.models.user import PasswordResetToken, RefreshToken, User
+from app.models.user import EmailVerificationToken, PasswordResetToken, RefreshToken, User
 
 
 async def get_by_id(db: AsyncSession, user_id: uuid.UUID) -> User | None:
@@ -103,3 +103,37 @@ async def get_reset_token(db: AsyncSession, token_hash: str) -> PasswordResetTok
     return await db.scalar(
         select(PasswordResetToken).where(PasswordResetToken.token_hash == token_hash)
     )
+
+
+# --- Email verification -------------------------------------------------
+async def store_verification_code(
+    db: AsyncSession, user_id: uuid.UUID, code_hash: str, expires_at: datetime
+) -> EmailVerificationToken:
+    token = EmailVerificationToken(user_id=user_id, code_hash=code_hash, expires_at=expires_at)
+    db.add(token)
+    await db.flush()
+    return token
+
+
+async def get_verification_code(
+    db: AsyncSession, user_id: uuid.UUID, code_hash: str
+) -> EmailVerificationToken | None:
+    return await db.scalar(
+        select(EmailVerificationToken).where(
+            EmailVerificationToken.user_id == user_id,
+            EmailVerificationToken.code_hash == code_hash,
+        )
+    )
+
+
+async def invalidate_verification_codes(
+    db: AsyncSession, user_id: uuid.UUID, now: datetime
+) -> None:
+    rows = await db.scalars(
+        select(EmailVerificationToken).where(
+            EmailVerificationToken.user_id == user_id,
+            EmailVerificationToken.used_at.is_(None),
+        )
+    )
+    for row in rows:
+        row.used_at = now

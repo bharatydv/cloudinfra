@@ -49,6 +49,10 @@ export default function LoginPage() {
         replace: true,
       })
     } catch (error) {
+      if (error instanceof ApiError && error.code === 'email_not_verified') {
+        navigate(`/verify-email?email=${encodeURIComponent(values.email)}`)
+        return
+      }
       setFormError(
         error instanceof ApiError ? error.message : 'Sign-in failed. Please try again.',
       )
