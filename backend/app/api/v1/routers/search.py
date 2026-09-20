@@ -6,6 +6,7 @@ from app.core.deps import DbSession
 from app.models.enums import SearchEntity
 from app.repositories import search_repo
 from app.schemas.system import SearchResponse, SearchResult
+from app.services import pricing
 
 router = APIRouter(tags=["Search"])
 
@@ -20,8 +21,14 @@ async def search(
     limit: int = Query(20, ge=1, le=50),
 ) -> SearchResponse:
     """Cross-entity search backed by PostgreSQL full-text search."""
+    # Results carry prices, so they are computed from the same config the
+    # catalogue pages use rather than re-derived per surface.
     results, counts = await search_repo.search_all(
-        db, q, types=[item.value for item in types] if types else None, limit=limit
+        db,
+        q,
+        types=[item.value for item in types] if types else None,
+        limit=limit,
+        config=await pricing.load_config(db),
     )
     return SearchResponse(
         query=q,

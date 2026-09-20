@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query, status
@@ -54,8 +55,19 @@ async def list_certifications(
     provider: str | None = Query(None, description="Provider slug"),
     level: CertificationLevel | None = None,
     category: str | None = None,
-    sort: Literal["featured", "name", "level", "newest"] = "featured",
+    min_discount: int | None = Query(
+        None, ge=0, le=100, description="Only exams discounted by at least this percent"
+    ),
+    max_price: Decimal | None = Query(
+        None, ge=0, description="Highest pre-tax price to include"
+    ),
+    sort: Literal[
+        "featured", "name", "level", "newest", "discount", "price"
+    ] = "featured",
 ) -> Page[CertificationCard]:
+    # The discount filter and sort have to see the same figures the cards will
+    # print, so the site-wide default is resolved before the query runs.
+    pricing_config = await pricing.load_config(db)
     items, total = await certification_repo.list_certifications(
         db,
         params,
@@ -63,9 +75,14 @@ async def list_certifications(
         provider_slug=provider,
         level=level.value if level else None,
         category=category,
+        min_discount=min_discount,
+        max_price=max_price,
         sort=sort,
+        default_discount=pricing_config.discount_percentage,
+        tax_rate=(
+            pricing_config.tax_rate if pricing_config.tax_enabled else Decimal(0)
+        ),
     )
-    pricing_config = await pricing.load_config(db)
     saved_ids = (
         await engagement_repo.saved_certification_ids(db, viewer.id) if viewer else set()
     )

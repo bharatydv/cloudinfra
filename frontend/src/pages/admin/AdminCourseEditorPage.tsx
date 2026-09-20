@@ -37,6 +37,12 @@ const courseSchema = z.object({
   category_id: z.string().optional(),
   level: z.enum(['beginner', 'intermediate', 'advanced']),
   price: z.coerce.number().min(0, 'Price cannot be negative.'),
+  // Blank means "not discounted". Coercing an empty string straight to a
+  // number would make it 0, which reads as a 100% discount.
+  compare_at_price: z
+    .string()
+    .optional()
+    .refine((value) => !value || Number(value) >= 0, 'Price cannot be negative.'),
   currency: z.string().length(3),
   duration_minutes: z.coerce.number().min(0),
   learning_outcomes: z.string().optional(),
@@ -95,6 +101,7 @@ export default function AdminCourseEditorPage() {
       level: 'beginner',
       currency: 'USD',
       price: 0,
+      compare_at_price: '',
       duration_minutes: 0,
     },
   })
@@ -110,6 +117,7 @@ export default function AdminCourseEditorPage() {
       category_id: course.category?.id ?? '',
       level: course.level,
       price: Number(course.price),
+      compare_at_price: course.compare_at_price ?? '',
       currency: course.currency,
       duration_minutes: course.duration_minutes,
       learning_outcomes: course.learning_outcomes.join('\n'),
@@ -129,6 +137,8 @@ export default function AdminCourseEditorPage() {
         category_id: values.category_id || null,
         level: values.level,
         price: String(values.price),
+        // Null clears the saving entirely; the card then shows only the price.
+        compare_at_price: values.compare_at_price ? String(values.compare_at_price) : null,
         currency: values.currency,
         duration_minutes: values.duration_minutes,
         learning_outcomes: toLines(values.learning_outcomes),
@@ -285,10 +295,25 @@ export default function AdminCourseEditorPage() {
                 <Field
                   label="Price"
                   htmlFor="price"
-                  hint="Use 0 for a free course."
+                  hint="What a learner pays today. Use 0 for a free course."
                   error={form.formState.errors.price?.message}
                 >
                   <Input id="price" type="number" step="0.01" min="0" {...form.register('price')} />
+                </Field>
+                <Field
+                  label="Was price"
+                  htmlFor="compare_at_price"
+                  hint="What this course normally sells for. Leave blank unless it genuinely sold at this price -- it is shown struck through, and the discount is worked out from it."
+                  error={form.formState.errors.compare_at_price?.message}
+                >
+                  <Input
+                    id="compare_at_price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="No discount"
+                    {...form.register('compare_at_price')}
+                  />
                 </Field>
                 <Field label="Currency" htmlFor="currency">
                   <Input id="currency" maxLength={3} {...form.register('currency')} />

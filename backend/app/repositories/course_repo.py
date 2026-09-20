@@ -104,6 +104,20 @@ async def list_courses(
     return list(rows.unique()), total
 
 
+async def discounted(db: AsyncSession) -> list[Course]:
+    """Published courses an operator has recorded a higher list price for."""
+    rows = await db.scalars(
+        select(Course)
+        .where(
+            Course.is_published.is_(True),
+            Course.compare_at_price.is_not(None),
+            Course.compare_at_price > Course.price,
+        )
+        .options(*_CARD_LOADS)
+    )
+    return list(rows.unique())
+
+
 async def get_by_slug(
     db: AsyncSession, slug: str, *, published_only: bool = True
 ) -> Course | None:

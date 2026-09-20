@@ -4,8 +4,13 @@ import { ArrowRight } from 'lucide-react'
 import { ArticleCard } from '@/components/cards/ArticleCard'
 import { CertificationCard } from '@/components/cards/CertificationCard'
 import { CourseCard } from '@/components/cards/CourseCard'
-import { ProviderCard, TestimonialCard } from '@/components/cards/misc'
+import { TestimonialCard } from '@/components/cards/misc'
 import { Hero } from '@/components/marketing/Hero'
+import {
+  CertificationPathsSection,
+  ProviderSpotlightSection,
+  TopDealsSection,
+} from '@/components/marketing/discovery'
 import {
   CTASection,
   HowItWorksSection,
@@ -18,6 +23,7 @@ import { ButtonLink } from '@/components/ui/Button'
 import { Container, Section, SectionHeading } from '@/components/ui/primitives'
 import { CardGridSkeleton, ErrorState } from '@/components/ui/states'
 import { getHome } from '@/api/endpoints'
+import { siteConfig } from '@/config/brand'
 import { useServerSeo } from '@/hooks/useSeo'
 import { useSite } from '@/hooks/useSite'
 import { queryKeys } from '@/lib/queryClient'
@@ -30,11 +36,15 @@ export default function HomePage() {
     queryFn: getHome,
   })
 
-  useServerSeo(data?.seo, 'Learn. Get Certified. Build Your Future.')
+  useServerSeo(data?.seo, 'Cloud Certifications & Courses at Discounted Prices')
+
+  // The hero quotes the deepest discount actually on offer, so the headline is
+  // a fact about the catalogue rather than a marketing claim.
+  const topDiscount = data?.top_deals?.[0]?.discount_percentage ?? null
 
   return (
     <>
-      <Hero />
+      <Hero topDiscount={topDiscount} />
 
       {isError ? (
         <Section>
@@ -48,15 +58,18 @@ export default function HomePage() {
         </Section>
       ) : (
         <>
-          <TrustSection categories={data?.categories ?? []} />
+          {/* Deals lead: price is what a visitor came to compare. */}
+          <TopDealsSection deals={data?.top_deals ?? []} />
+
+          <ProviderSpotlightSection providers={data?.providers ?? []} />
 
           {/* Featured certifications */}
-          <Section>
+          <Section tone="muted">
             <Container>
               <SectionHeading
                 eyebrow="Certifications"
-                title="Popular Certifications"
-                description="Explore certification preparation paths across leading technology ecosystems."
+                title="Popular certifications and what they cost"
+                description="Exam codes, levels and current prices for the certifications people prepare for most."
                 action={
                   <ButtonLink
                     to="/certifications"
@@ -76,28 +89,17 @@ export default function HomePage() {
                   ))}
                 </div>
               )}
-
-              {(data?.providers.length ?? 0) > 0 && (
-                <div className="mt-10">
-                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-ink-500">
-                    Preparation resources by provider
-                  </h3>
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {data?.providers.map((provider) => (
-                      <ProviderCard key={provider.id} provider={provider} />
-                    ))}
-                  </div>
-                </div>
-              )}
             </Container>
           </Section>
 
+          <CertificationPathsSection providers={data?.providers ?? []} />
+
           {/* Popular courses */}
-          <Section tone="muted">
+          <Section>
             <Container>
               <SectionHeading
                 eyebrow="Courses"
-                title="Explore Popular Courses"
+                title="Courses that prepare you for the exam"
                 description="Self-paced, structured courses across cloud, AI, data, DevOps and marketing."
                 action={
                   <ButtonLink
@@ -120,6 +122,8 @@ export default function HomePage() {
               )}
             </Container>
           </Section>
+
+          <TrustSection categories={data?.categories ?? []} />
 
           <LearningPathSection steps={learningPath} />
           <WhyChooseUsSection />
@@ -189,6 +193,16 @@ export default function HomePage() {
               </Container>
             </Section>
           )}
+
+          {/* Stated plainly rather than buried in the footer: visitors compare
+              prices here, so they should know what we are and are not. */}
+          <Section className="py-10">
+            <Container className="max-w-3xl">
+              <p className="rounded-lg border border-ink-200 bg-ink-50 p-4 text-center text-xs leading-relaxed text-ink-500">
+                {siteConfig.independenceNotice} {siteConfig.trademarkNotice}
+              </p>
+            </Container>
+          </Section>
         </>
       )}
 
@@ -196,7 +210,7 @@ export default function HomePage() {
         title="Ready to sit your certification exam?"
         description="Tell us which exam you want and when suits you. Our team confirms your slot by email."
         primary={{ label: 'Schedule an Exam', to: '/schedule-exam' }}
-        secondary={{ label: 'Explore Certifications', to: '/certifications' }}
+        secondary={{ label: 'Explore Deals', to: '/deals' }}
       />
     </>
   )

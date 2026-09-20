@@ -12,8 +12,9 @@ from app.schemas.catalog import CourseCard, CourseCategoryRead
 from app.schemas.certification import CertificationCard, ProviderCard
 from app.schemas.common import SeoMeta
 from app.schemas.content import ArticleCard, FaqRead, TestimonialRead
+from app.schemas.deals import DealCard
 from app.schemas.system import SiteSettingRead
-from app.services import pricing, seo_service, serializers
+from app.services import deal_service, pricing, seo_service, serializers
 
 router = APIRouter(tags=["Site"])
 
@@ -22,6 +23,9 @@ class HomePayload(BaseModel):
     categories: list[CourseCategoryRead]
     featured_courses: list[CourseCard]
     featured_certifications: list[CertificationCard]
+    #: Deepest current discounts. Empty when nothing is on offer, which the
+    #: homepage reads as "hide the deals strip" rather than "show zeroes".
+    top_deals: list[DealCard]
     providers: list[ProviderCard]
     latest_articles: list[ArticleCard]
     testimonials: list[TestimonialRead]
@@ -39,13 +43,14 @@ async def homepage(db: DbSession) -> HomePayload:
     articles = await article_repo.latest(db, limit=3)
     testimonials = await misc_repo.list_testimonials(db, limit=6)
     pricing_config = await pricing.load_config(db)
+    top_deals = await deal_service.top_deals(db, limit=6)
     faqs = await misc_repo.list_faqs(db, category="home")
 
     seo = seo_service.build_meta(
-        title="Learn. Get Certified. Build Your Future.",
+        title="Cloud Certifications & Courses at Discounted Prices",
         description=(
-            "Build job-ready skills and prepare for professional certifications with "
-            "structured courses, practical resources and guided learning paths."
+            "Discover AWS, Microsoft Azure, Google Cloud and other certification "
+            "courses, exam preparation and learning resources at discounted prices."
         ),
         path="/",
         structured_data=[
@@ -75,6 +80,7 @@ async def homepage(db: DbSession) -> HomePayload:
             serializers.certification_card(item, pricing_config=pricing_config)
             for item in certifications
         ],
+        top_deals=top_deals,
         providers=[
             serializers.provider_card(provider, count) for provider, count in providers
         ],
@@ -120,14 +126,19 @@ async def page_seo(path: str = Query("/"), title: str | None = None) -> SeoMeta:
             "Get in touch with our team for support, partnerships or feedback.",
         ),
         "/courses": (
-            "Online technology courses",
-            "Browse structured, self-paced courses across cloud, AI, data, DevOps and "
-            "digital marketing.",
+            "Cloud and certification courses",
+            "Structured, self-paced courses for AWS, Microsoft Azure and Google Cloud "
+            "certifications, plus data, DevOps and digital marketing.",
         ),
         "/certifications": (
-            "Professional certifications",
-            "Explore certification preparation resources, learning paths and courses "
-            "designed to help you build the skills you need.",
+            "Cloud certifications and exam preparation",
+            "Compare AWS, Microsoft Azure and Google Cloud certifications by exam "
+            "code, level and price, with current discounts on every exam we list.",
+        ),
+        "/deals": (
+            "Certification and course deals",
+            "Current discounts on cloud certification exams and courses, ranked by "
+            "how much they save, each with the date the price was last verified.",
         ),
         "/resources": (
             "Learning resources, guides and roadmaps",

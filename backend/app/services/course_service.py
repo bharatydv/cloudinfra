@@ -100,7 +100,7 @@ async def build_course_detail(
     )
 
     return CourseDetail(
-        **card.model_dump(exclude={"is_free"}),
+        **card.model_dump(exclude={"is_free", "discount_percentage", "savings_amount"}),
         description=course.description,
         language=course.language,
         learning_outcomes=course.learning_outcomes or [],

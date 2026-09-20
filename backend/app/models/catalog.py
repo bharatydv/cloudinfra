@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
@@ -46,6 +47,10 @@ class Course(Base, UUIDPrimaryKeyMixin, TimestampMixin):
             "level IN ('beginner', 'intermediate', 'advanced')", name="level_valid"
         ),
         CheckConstraint("price >= 0", name="price_non_negative"),
+        CheckConstraint(
+            "compare_at_price IS NULL OR compare_at_price >= 0",
+            name="compare_at_price_non_negative",
+        ),
         Index("ix_courses_published_created", "is_published", "created_at"),
     )
 
@@ -66,6 +71,11 @@ class Course(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
     duration_minutes: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     price: Mapped[float] = mapped_column(Numeric(10, 2), default=0, nullable=False)
+    # The undiscounted list price this course is normally sold at. Nullable
+    # because a course that has never been discounted has no "was" price, and
+    # we do not invent one to manufacture a saving. A discount is shown only
+    # when an operator has entered a figure above `price`.
+    compare_at_price: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     currency: Mapped[str] = mapped_column(String(3), default="USD", nullable=False)
     language: Mapped[str] = mapped_column(String(20), default="en", nullable=False)
     learning_outcomes: Mapped[list[str]] = mapped_column(

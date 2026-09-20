@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal
 from typing import Literal
 
-from sqlalchemy import Select, func, or_, select
+from sqlalchemy import Select, case, func, literal, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -15,7 +16,7 @@ from app.models.certification import (
 )
 from app.models.enums import ContentStatus, ResourceType
 
-CertificationSort = Literal["featured", "name", "level", "newest"]
+CertificationSort = Literal["featured", "name", "level", "newest", "discount", "price"]
 
 _DETAIL_LOADS = (
     selectinload(Certification.provider),
@@ -25,7 +26,38 @@ _DETAIL_LOADS = (
 _CARD_LOADS = (selectinload(Certification.provider), selectinload(Certification.courses))
 
 
-def _apply_sort(stmt: Select, sort: CertificationSort) -> Select:
+def _effective_discount(default_discount: Decimal):
+    """The percentage actually applied to one exam.
+
+    A NULL override inherits the site-wide default, and an exam with no quoted
+    fee has no discount at all -- mirroring pricing.compute, so a sort or a
+    filter can never disagree with the figure printed on the card.
+    """
+    return case(
+        (
+            or_(Certification.exam_fee_amount.is_(None), Certification.exam_fee_amount <= 0),
+            literal(Decimal(0)),
+        ),
+        else_=func.coalesce(
+            Certification.discount_percentage, literal(default_discount)
+        ),
+    )
+
+
+def _total_price(default_discount: Decimal, tax_rate: Decimal):
+    """What a visitor actually pays, tax included.
+
+    Filtering on the pre-tax figure would quietly admit exams that are shown on
+    the card above the stated ceiling, so the whole chain is rebuilt here.
+    Unpriced exams evaluate to NULL and sort last.
+    """
+    net = Certification.exam_fee_amount * (100 - _effective_discount(default_discount)) / 100
+    return net * (100 + tax_rate) / 100
+
+
+def _apply_sort(
+    stmt: Select, sort: CertificationSort, default_discount: Decimal, tax_rate: Decimal
+) -> Select:
     match sort:
         case "name":
             return stmt.order_by(Certification.name.asc())
@@ -33,6 +65,15 @@ def _apply_sort(stmt: Select, sort: CertificationSort) -> Select:
             return stmt.order_by(Certification.created_at.desc())
         case "level":
             return stmt.order_by(Certification.level.asc(), Certification.name.asc())
+        case "discount":
+            return stmt.order_by(
+                _effective_discount(default_discount).desc(), Certification.name.asc()
+            )
+        case "price":
+            return stmt.order_by(
+                _total_price(default_discount, tax_rate).asc().nulls_last(),
+                Certification.name.asc(),
+            )
         case _:
             return stmt.order_by(
                 Certification.is_featured.desc(),
@@ -50,8 +91,12 @@ async def list_certifications(
     provider_id: uuid.UUID | None = None,
     level: str | None = None,
     category: str | None = None,
+    min_discount: int | None = None,
+    max_price: Decimal | None = None,
     is_published: bool | None = True,
     sort: CertificationSort = "featured",
+    default_discount: Decimal = Decimal(0),
+    tax_rate: Decimal = Decimal(0),
 ) -> tuple[list[Certification], int]:
     stmt = select(Certification)
     if is_published is not None:
@@ -75,15 +120,38 @@ async def list_certifications(
         stmt = stmt.where(Certification.level == level)
     if category:
         stmt = stmt.where(Certification.category == category)
+    if min_discount:
+        stmt = stmt.where(_effective_discount(default_discount) >= min_discount)
+    if max_price is not None:
+        stmt = stmt.where(_total_price(default_discount, tax_rate) <= max_price)
 
     total = await db.scalar(select(func.count()).select_from(stmt.subquery())) or 0
     rows = await db.scalars(
-        _apply_sort(stmt, sort)
+        _apply_sort(stmt, sort, default_discount, tax_rate)
         .options(*_CARD_LOADS)
         .offset(params.offset)
         .limit(params.limit)
     )
     return list(rows.unique()), total
+
+
+async def priced(db: AsyncSession) -> list[Certification]:
+    """Every published certification carrying a quoted vendor fee.
+
+    Whether each one is actually discounted depends on the site-wide default,
+    which is not a column, so that decision is left to the caller rather than
+    guessed at in SQL.
+    """
+    rows = await db.scalars(
+        select(Certification)
+        .where(
+            Certification.is_published.is_(True),
+            Certification.exam_fee_amount.is_not(None),
+            Certification.exam_fee_amount > 0,
+        )
+        .options(*_CARD_LOADS)
+    )
+    return list(rows.unique())
 
 
 async def get_by_slug(

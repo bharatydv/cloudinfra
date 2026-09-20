@@ -1,6 +1,5 @@
-import { Badge } from '@/components/ui/primitives'
-import { cn } from '@/lib/cn'
-import { formatPrice } from '@/lib/format'
+import { LastVerified, PriceRow } from '@/components/cards/PriceParts'
+import { formatDate, formatPrice } from '@/lib/format'
 import { hasTax } from '@/lib/pricing'
 import type { ExamPricing } from '@/types/api'
 
@@ -13,49 +12,32 @@ import type { ExamPricing } from '@/types/api'
 export function ExamPriceComparison({
   pricing,
   size = 'md',
+  showVerified = false,
   className,
 }: {
   pricing: ExamPricing | null
   size?: 'sm' | 'md'
+  /** Adds the date the vendor fee was last confirmed, where one is recorded. */
+  showVerified?: boolean
   className?: string
 }) {
   if (!pricing) return null
 
-  const { currency } = pricing
-  const small = size === 'sm'
   const discounted = Number(pricing.discount_amount) > 0
 
   return (
-    <div className={cn('flex flex-wrap items-baseline gap-x-2.5 gap-y-1', className)}>
-      <span
-        className={cn(
-          'font-extrabold tracking-tight text-ink-900',
-          small ? 'text-lg' : 'text-2xl',
-        )}
-      >
-        {formatPrice(pricing.total_price_amount, currency)}
-      </span>
-
-      {/* Only strike a price out when it is genuinely higher than ours. */}
-      {discounted && (
-        <s className={cn('text-ink-500', small ? 'text-xs' : 'text-sm')}>
-          {formatPrice(pricing.exam_fee_amount, currency)}
-        </s>
-      )}
-
-      {hasTax(pricing) && (
-        <span className={cn('text-ink-500', small ? 'text-[0.6875rem]' : 'text-xs')}>
-          incl. {pricing.tax_label}
-        </span>
-      )}
-
-      {/* Money first: "Save $25" is more concrete than "20% off", and both fit. */}
-      {discounted && (
-        <Badge tone="success">
-          Save {formatPrice(pricing.discount_amount, currency)}
-          {pricing.savings_percentage !== null && ` · ${pricing.savings_percentage}%`}
-        </Badge>
-      )}
+    <div className={className}>
+      <PriceRow
+        price={pricing.total_price_amount}
+        // Only offer the vendor fee as a comparison when ours is genuinely lower.
+        compareAtPrice={discounted ? pricing.exam_fee_amount : null}
+        savings={pricing.discount_amount}
+        discountPercentage={pricing.savings_percentage}
+        currency={pricing.currency}
+        note={hasTax(pricing) ? `incl. ${pricing.tax_label}` : null}
+        size={size}
+      />
+      {showVerified && <LastVerified date={pricing.fee_checked_on} className="mt-1.5" />}
     </div>
   )
 }
@@ -140,7 +122,7 @@ export function ExamPricePanel({ pricing }: { pricing: ExamPricing | null }) {
           today's authoritative figure. */}
       <p className="mt-3 text-xs leading-relaxed text-ink-500">
         {pricing.fee_checked_on
-          ? `Provider fee last checked on ${pricing.fee_checked_on}.`
+          ? `Provider fee last verified on ${formatDate(pricing.fee_checked_on)}.`
           : 'Provider fee is indicative.'}{' '}
         Exam fees vary by region and change without notice &mdash; confirm the current fee on
         the provider&rsquo;s official page before booking.

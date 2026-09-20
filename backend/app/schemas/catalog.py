@@ -130,18 +130,45 @@ class CourseCard(ORMModel):
     level: CourseLevel
     duration_minutes: int
     price: Decimal
+    # The price this course is normally sold at. None when nobody has recorded
+    # one, in which case no saving is shown rather than one being invented.
+    compare_at_price: Decimal | None = None
     currency: str
     rating_average: Decimal
     rating_count: int
     enrollment_count: int
     lesson_count: int = 0
     is_published: bool = True
+    # When the catalogue row was last touched, so a card can say how fresh the
+    # price is without a second column to keep in sync.
+    price_updated_at: datetime | None = None
     category: CourseCardCategory | None = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def is_free(self) -> bool:
         return self.price == 0
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def discount_percentage(self) -> int | None:
+        """Whole-percent saving, or None when the course is not discounted."""
+        discount = self._discount()
+        return discount.discount_percentage if discount else None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def savings_amount(self) -> Decimal | None:
+        """Money saved against the list price. Derived so the two agree."""
+        discount = self._discount()
+        return discount.discount_amount if discount else None
+
+    def _discount(self):
+        # Imported here rather than at module scope: app.services.pricing pulls
+        # in app.schemas.certification, which imports this module.
+        from app.services.pricing import course_discount
+
+        return course_discount(price=self.price, compare_at_price=self.compare_at_price)
 
 
 class CourseReviewRead(ORMModel):
@@ -194,6 +221,7 @@ class CourseWrite(BaseModel):
     level: CourseLevel = CourseLevel.BEGINNER
     duration_minutes: int = Field(default=0, ge=0, le=1000000)
     price: Decimal = Field(default=Decimal("0"), ge=0)
+    compare_at_price: Decimal | None = Field(default=None, ge=0)
     currency: str = Field(default="USD", min_length=3, max_length=3)
     language: str = "en"
     learning_outcomes: list[str] = []
@@ -218,6 +246,7 @@ class CourseUpdate(BaseModel):
     level: CourseLevel | None = None
     duration_minutes: int | None = Field(default=None, ge=0, le=1000000)
     price: Decimal | None = Field(default=None, ge=0)
+    compare_at_price: Decimal | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, min_length=3, max_length=3)
     language: str | None = None
     learning_outcomes: list[str] | None = None

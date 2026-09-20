@@ -329,6 +329,13 @@ reorder endpoints for both
 `GET /api/certification-providers` · `GET /api/certifications/{id}/resources` ·
 full CRUD for certifications, providers and resources (staff)
 
+**Deals** — `GET /api/deals` — every discounted certification exam and course
+in one listing, filterable by `kind`, `provider`, `level` and `min_discount`
+and sortable by `discount`, `savings`, `price` or `newest`. A record appears
+only when the price its discount is measured against has been recorded: an exam
+with no quoted vendor fee, and a course with no `compare_at_price` above its
+`price`, are absent rather than shown at a notional saving.
+
 **Articles** — `GET /api/articles` · `GET /api/articles/{slug}` ·
 `GET /api/articles/featured` · `/popular` · `GET /api/article-categories` ·
 `GET /api/tags` · full CRUD (staff)

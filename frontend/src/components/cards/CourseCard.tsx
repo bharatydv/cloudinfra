@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, BookOpen, Clock, Users } from 'lucide-react'
 
 import { CategoryIcon } from '@/components/cards/CategoryIcon'
+import { DiscountFlag, LastVerified, PriceRow } from '@/components/cards/PriceParts'
 import { Badge, Card, Rating } from '@/components/ui/primitives'
 import { formatDuration, formatLevel, formatNumber, formatPrice, pluralize } from '@/lib/format'
 import { cn } from '@/lib/cn'
@@ -19,6 +20,8 @@ export function CourseCard({
       interactive
       className={cn('group relative flex h-full flex-col overflow-hidden', className)}
     >
+      <DiscountFlag percentage={course.discount_percentage} />
+
       {course.thumbnail ? (
         <img
           src={course.thumbnail}
@@ -78,16 +81,34 @@ export function CourseCard({
           )}
         </dl>
 
-        <div className="mt-auto flex items-center justify-between gap-3 pt-5">
+        <div className="mt-auto pt-5">
           <Rating value={course.rating_average} count={course.rating_count} />
-          <span
-            className={cn(
-              'text-sm font-bold',
-              course.is_free ? 'text-emerald-700' : 'text-ink-900',
-            )}
-          >
-            {formatPrice(course.price, course.currency)}
-          </span>
+
+          {/* A saving is shown only where an operator recorded what the course
+              was previously sold at; otherwise this is just the price. */}
+          {course.discount_percentage ? (
+            <>
+              <PriceRow
+                price={course.price}
+                compareAtPrice={course.compare_at_price}
+                savings={course.savings_amount}
+                discountPercentage={course.discount_percentage}
+                currency={course.currency}
+                size="sm"
+                className="mt-2.5"
+              />
+              <LastVerified date={course.price_updated_at} className="mt-1.5" />
+            </>
+          ) : (
+            <p
+              className={cn(
+                'mt-2.5 text-lg font-extrabold tracking-tight',
+                course.is_free ? 'text-emerald-700' : 'text-ink-900',
+              )}
+            >
+              {formatPrice(course.price, course.currency)}
+            </p>
+          )}
         </div>
 
         <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">

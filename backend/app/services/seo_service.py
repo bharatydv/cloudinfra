@@ -18,6 +18,7 @@ from app.models.catalog import Course
 from app.models.certification import Certification, CertificationProvider
 from app.models.content import Article
 from app.repositories.article_repo import published_filter
+from app.schemas.certification import ExamPricing
 from app.schemas.common import Breadcrumb, SeoMeta
 
 # "follow" rather than "nofollow": these pages should stay out of the index
@@ -156,6 +157,57 @@ def article_schema(article: Article) -> dict[str, Any]:
     }
 
 
+def certification_schema(
+    certification: Certification, pricing: ExamPricing | None, path: str
+) -> dict[str, Any]:
+    """Structured data for a certification preparation page.
+
+    The offer is emitted only when someone has actually priced the exam, and
+    quotes the total a visitor pays here -- never the vendor's fee, which we do
+    not sell at. `educationalCredentialAwarded` is deliberately absent: the
+    vendor awards the credential, not us.
+    """
+    provider = certification.provider
+    data: dict[str, Any] = {
+        "@context": "https://schema.org",
+        "@type": "Course",
+        "name": f"{certification.name} certification preparation",
+        "description": certification.short_description,
+        "url": absolute_url(path),
+        "provider": {
+            "@type": "Organization",
+            "name": settings.email_from_name,
+            "url": settings.public_site_url,
+        },
+        "educationalLevel": certification.level,
+        "about": {
+            "@type": "Thing",
+            "name": (
+                f"{certification.name} ({certification.exam_code})"
+                if certification.exam_code
+                else certification.name
+            ),
+        },
+        "hasCourseInstance": {
+            "@type": "CourseInstance",
+            "courseMode": "online",
+        },
+    }
+    if provider is not None:
+        data["about"]["description"] = f"{provider.name} certification"
+
+    if pricing is not None:
+        data["offers"] = {
+            "@type": "Offer",
+            "name": f"{certification.name} exam booking",
+            "price": str(pricing.total_price_amount),
+            "priceCurrency": pricing.currency,
+            "availability": "https://schema.org/InStock",
+            "url": absolute_url(path),
+        }
+    return data
+
+
 def organization_schema() -> dict[str, Any]:
     return {
         "@context": "https://schema.org",
@@ -249,6 +301,7 @@ async def build_sitemap_xml(db: AsyncSession) -> str:
         _url_entry(absolute_url("/"), now, "daily", "1.0"),
         _url_entry(absolute_url("/certifications"), now, "daily", "0.9"),
         _url_entry(absolute_url("/courses"), now, "daily", "0.9"),
+        _url_entry(absolute_url("/deals"), now, "daily", "0.9"),
         _url_entry(absolute_url("/resources"), now, "daily", "0.9"),
         _url_entry(absolute_url("/schedule-exam"), now, "weekly", "0.9"),
         _url_entry(absolute_url("/about"), now, "monthly", "0.5"),

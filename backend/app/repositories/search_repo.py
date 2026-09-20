@@ -24,6 +24,8 @@ from app.models.certification import (
 from app.models.content import Article, ArticleCategory
 from app.models.enums import ContentStatus, SearchEntity
 from app.repositories.article_repo import published_filter
+from app.services import pricing
+from app.services.pricing import PricingConfig
 
 LANG = "english"
 
@@ -63,6 +65,7 @@ async def search_courses(
             Course.level,
             Course.duration_minutes,
             Course.price,
+            Course.compare_at_price,
             Course.currency,
             CourseCategory.name.label("category_name"),
             rank.label("rank"),
@@ -90,14 +93,27 @@ async def search_courses(
                 "duration_minutes": row["duration_minutes"],
                 "price": str(row["price"]),
                 "currency": row["currency"],
+                **_course_saving(row["price"], row["compare_at_price"]),
             },
         }
         for row in rows
     ]
 
 
+def _course_saving(price, compare_at_price) -> dict[str, Any]:
+    """Discount fields for a result card, or nothing at all when undiscounted."""
+    discount = pricing.course_discount(price=price, compare_at_price=compare_at_price)
+    if discount is None:
+        return {}
+    return {
+        "compare_at_price": str(discount.compare_at_amount),
+        "savings_amount": str(discount.discount_amount),
+        "discount_percentage": discount.discount_percentage,
+    }
+
+
 async def search_certifications(
-    db: AsyncSession, query: str, limit: int
+    db: AsyncSession, query: str, limit: int, config: PricingConfig | None = None
 ) -> list[dict[str, Any]]:
     vector = _tsvector(
         Certification.name,
@@ -117,6 +133,10 @@ async def search_certifications(
             Certification.slug,
             Certification.level,
             Certification.exam_code,
+            Certification.exam_fee_amount,
+            Certification.exam_fee_currency,
+            Certification.exam_fee_checked_on,
+            Certification.discount_percentage,
             CertificationProvider.name.label("provider_name"),
             CertificationProvider.slug.label("provider_slug"),
             rank.label("rank"),
@@ -134,6 +154,9 @@ async def search_certifications(
         .limit(limit)
     )
     rows = (await db.execute(stmt)).mappings().all()
+    # Someone typing "SAA-C03" wants that one exam, not the dozen pages that
+    # mention it, so an exact code match outranks everything else outright.
+    code = query.strip().lower()
     return [
         {
             "type": SearchEntity.CERTIFICATION,
@@ -142,11 +165,43 @@ async def search_certifications(
             "description": row["short_description"],
             "url": f"/certifications/{row['provider_slug']}/{row['slug']}",
             "category": row["provider_name"],
-            "rank": float(row["rank"] or 0) + 0.05,
-            "metadata": {"level": row["level"], "exam_code": row["exam_code"]},
+            "rank": float(row["rank"] or 0)
+            + 0.05
+            + (10.0 if (row["exam_code"] or "").lower() == code else 0.0),
+            "metadata": {
+                "level": row["level"],
+                "exam_code": row["exam_code"],
+                "provider_name": row["provider_name"],
+                **_exam_pricing(row, config),
+            },
         }
         for row in rows
     ]
+
+
+def _exam_pricing(row, config: PricingConfig | None) -> dict[str, Any]:
+    """Price fields for a result card. Empty when nobody has priced the exam."""
+    if config is None:
+        return {}
+    breakdown = pricing.compute(
+        exam_fee_amount=row["exam_fee_amount"],
+        currency=row["exam_fee_currency"],
+        fee_checked_on=row["exam_fee_checked_on"],
+        discount_override=row["discount_percentage"],
+        config=config,
+    )
+    if breakdown is None:
+        return {}
+    return {
+        "currency": breakdown.currency,
+        "price": str(breakdown.total_price_amount),
+        "compare_at_price": str(breakdown.exam_fee_amount),
+        "savings_amount": str(breakdown.discount_amount),
+        "discount_percentage": breakdown.savings_percentage,
+        "last_verified_on": (
+            breakdown.fee_checked_on.isoformat() if breakdown.fee_checked_on else None
+        ),
+    }
 
 
 async def search_articles(
@@ -247,7 +302,12 @@ async def search_resources(
 
 
 async def search_all(
-    db: AsyncSession, query: str, *, types: list[str] | None = None, limit: int = 20
+    db: AsyncSession,
+    query: str,
+    *,
+    types: list[str] | None = None,
+    limit: int = 20,
+    config: PricingConfig | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, int]]:
     query = query.strip()
     if not query:
@@ -268,7 +328,11 @@ async def search_all(
     for key, runner in runners.items():
         if key not in wanted:
             continue
-        found = await runner(db, query, per_type_limit)
+        found = (
+            await runner(db, query, per_type_limit, config)
+            if key == SearchEntity.CERTIFICATION.value
+            else await runner(db, query, per_type_limit)
+        )
         counts[key] = len(found)
         results.extend(found)
 

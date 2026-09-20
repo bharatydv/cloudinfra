@@ -4,7 +4,7 @@ import { Check, ShieldCheck } from 'lucide-react'
 import { ScheduleExamLink } from '@/components/scheduling/ScheduleExamCta'
 import { Card } from '@/components/ui/primitives'
 import { useSite } from '@/hooks/useSite'
-import { formatPrice } from '@/lib/format'
+import { formatDate, formatPrice } from '@/lib/format'
 import { hasTax } from '@/lib/pricing'
 import type { ExamPricing } from '@/types/api'
 
@@ -130,7 +130,7 @@ export function ExamOfferCard({
 
         <p className="mt-4 text-xs leading-relaxed text-ink-500">
           {pricing.fee_checked_on
-            ? `Provider fee last checked on ${pricing.fee_checked_on}.`
+            ? `Provider fee last verified on ${formatDate(pricing.fee_checked_on)}.`
             : 'Provider fee is indicative.'}{' '}
           Exam fees vary by region and change without notice &mdash; confirm the current fee
           on the provider&rsquo;s official page.

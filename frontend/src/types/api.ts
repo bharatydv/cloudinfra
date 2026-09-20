@@ -125,6 +125,8 @@ export interface CourseCard {
   level: CourseLevel
   duration_minutes: number
   price: string
+  /** The price the course normally sells at. Null when nobody has recorded one. */
+  compare_at_price: string | null
   currency: string
   rating_average: string
   rating_count: number
@@ -132,6 +134,10 @@ export interface CourseCard {
   lesson_count: number
   is_published: boolean
   is_free: boolean
+  /** Null unless `compare_at_price` is genuinely above `price`. */
+  discount_percentage: number | null
+  savings_amount: string | null
+  price_updated_at: string | null
   category: { id: string; name: string; slug: string } | null
 }
 
@@ -262,6 +268,43 @@ export interface CertificationCard {
   is_saved: boolean
   /** Null when nobody has priced this exam; the UI then shows no pricing. */
   pricing: ExamPricing | null
+}
+
+export type DealKind = 'certification' | 'course'
+
+/**
+ * One discounted exam or course, flattened so both can be ranked together.
+ *
+ * `sale_price` is what a visitor pays (tax included where tax is switched on)
+ * and `original_price` is what the discount comes off, exactly as the
+ * certification and course cards present them.
+ */
+export interface DealCard {
+  kind: DealKind
+  id: string
+  title: string
+  short_description: string
+  url: string
+  thumbnail: string | null
+  provider_name: string | null
+  provider_slug: string | null
+  provider_logo: string | null
+  exam_code: string | null
+  level: string | null
+  category: string | null
+  currency: string
+  original_price: string
+  sale_price: string
+  savings_amount: string
+  discount_percentage: number
+  tax_label: string | null
+  tax_amount: string | null
+  duration_minutes: number | null
+  rating_average: string | null
+  rating_count: number | null
+  /** Null when nobody has recorded a check; the card then says nothing. */
+  last_verified_on: string | null
+  created_at: string
 }
 
 export interface CertificationResource {
@@ -503,6 +546,7 @@ export interface HomePayload {
   categories: CourseCategory[]
   featured_courses: CourseCard[]
   featured_certifications: CertificationCard[]
+  top_deals: DealCard[]
   providers: ProviderCard[]
   latest_articles: ArticleCard[]
   testimonials: Testimonial[]

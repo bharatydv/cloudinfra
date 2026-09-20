@@ -1,17 +1,26 @@
-import { ArrowRight, CheckCircle2, GraduationCap, Layers, Target } from 'lucide-react'
+import { ArrowRight, BadgePercent, CheckCircle2, GraduationCap, Layers, Target } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
-import { ScheduleExamLink } from '@/components/scheduling/ScheduleExamCta'
+import { SearchBar } from '@/components/layout/SearchBar'
 import { ButtonLink } from '@/components/ui/Button'
 import { Container } from '@/components/ui/primitives'
 import { AnalyticsEvent, track } from '@/lib/analytics'
 
 const HIGHLIGHTS = [
-  'Structured paths, not scattered tutorials',
-  'Mapped to published exam objectives',
-  'Progress that follows you across devices',
+  'Exam fees and course prices shown side by side with the discount',
+  'Mapped to published exam objectives, with the exam code on every listing',
+  'Every price carries the date it was last verified',
 ]
 
-export function Hero() {
+/** Worked examples, so the search box explains itself without placeholder prose. */
+const SEARCH_EXAMPLES = [
+  'SAA-C03',
+  'AZ-104',
+  'AWS Solutions Architect',
+  'Associate Cloud Engineer',
+]
+
+export function Hero({ topDiscount }: { topDiscount?: number | null }) {
   return (
     <section className="relative overflow-hidden bg-white">
       {/* Restrained background geometry: depth without visual noise. */}
@@ -34,19 +43,42 @@ export function Hero() {
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700">
               <GraduationCap className="h-3.5 w-3.5" aria-hidden="true" />
-              Courses and certification preparation
+              Certifications, courses and exam preparation
             </span>
 
-            <h1 className="mt-6 text-display-lg text-ink-900 sm:text-[3.75rem]">
-              Learn. Get Certified.
+            <h1 className="mt-6 text-display-lg text-ink-900 sm:text-[3.5rem]">
+              Cloud Certifications &amp; Courses
               <br />
-              <span className="text-brand-600">Build Your Future.</span>
+              {/* The headline figure is the deepest discount actually on offer,
+                  so it changes with the catalogue instead of being a claim. */}
+              <span className="text-brand-600">
+                {topDiscount ? `at Up to ${topDiscount}% Off` : 'at Discounted Prices'}
+              </span>
             </h1>
 
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-600">
-              Build job-ready skills and prepare for professional certifications with structured
-              courses, practical resources and guided learning paths.
+              Discover AWS, Microsoft Azure, Google Cloud and other certification courses, exam
+              preparation and learning resources at discounted prices.
             </p>
+
+            <div className="mt-8 max-w-xl">
+              <SearchBar
+                size="lg"
+                placeholder="Search certifications, exam codes or courses..."
+              />
+              <p className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-500">
+                <span>Try:</span>
+                {SEARCH_EXAMPLES.map((example) => (
+                  <Link
+                    key={example}
+                    to={`/search?q=${encodeURIComponent(example)}`}
+                    className="rounded-full border border-ink-200 px-2.5 py-1 font-medium text-ink-600 transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700"
+                  >
+                    {example}
+                  </Link>
+                ))}
+              </p>
+            </div>
 
             <ul className="mt-8 space-y-2.5">
               {HIGHLIGHTS.map((item) => (
@@ -61,8 +93,16 @@ export function Hero() {
             </ul>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              {/* The form has its own certification picker, so go straight there. */}
-              <ScheduleExamLink cta="hero_schedule" />
+              <ButtonLink
+                to="/deals"
+                size="lg"
+                leadingIcon={<BadgePercent className="h-4 w-4" aria-hidden="true" />}
+                onClick={() =>
+                  track(AnalyticsEvent.CtaClicked, { properties: { cta: 'hero_deals' } })
+                }
+              >
+                Explore Deals
+              </ButtonLink>
               <ButtonLink
                 to="/certifications"
                 size="lg"
@@ -72,7 +112,7 @@ export function Hero() {
                   track(AnalyticsEvent.CtaClicked, { properties: { cta: 'hero_certifications' } })
                 }
               >
-                Explore Certifications
+                Browse Certifications
               </ButtonLink>
               <ButtonLink
                 to="/courses"

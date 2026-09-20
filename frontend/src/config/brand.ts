@@ -30,9 +30,9 @@ const env = import.meta.env
 
 export const defaultBrand: Brand = {
   brandName: 'Inferacloud',
-  brandTagline: 'Learn. Get Certified. Build Your Future.',
+  brandTagline: 'Cloud certifications and courses at discounted prices.',
   brandDescription:
-    'Structured courses and independent certification preparation resources for cloud, AI, data and DevOps careers.',
+    'An independent platform for discovering AWS, Microsoft Azure and Google Cloud certifications, courses and exam preparation resources, with the current price of each.',
   logo: null,
   logoMark: 'IC',
   primaryDomain: 'example.com',
@@ -48,14 +48,25 @@ export const siteConfig = {
   /** Kept in sync with the backend disclaimer copy. */
   independenceNotice:
     'We are an independent learning platform. We are not affiliated with, endorsed by, or an authorised training partner of any certification provider, and we do not issue vendor certifications.',
+  /**
+   * Shown wherever vendor names appear beside prices. Naming a provider
+   * describes what the material covers; it is not a claim to represent them.
+   */
+  trademarkNotice:
+    'AWS, Microsoft Azure, Google Cloud and other provider names and marks are trademarks of their respective owners.',
 } as const
 
+/**
+ * Primary navigation, ordered by what people come here to do: find a
+ * certification, find a course, find what either costs today. The logo already
+ * links home, so "Home" would only push the useful items further right.
+ */
 export const navigation = [
-  { label: 'Home', to: '/' },
   { label: 'Certifications', to: '/certifications' },
+  { label: 'Courses', to: '/courses' },
+  { label: 'Deals', to: '/deals' },
   { label: 'Schedule Exam', to: '/schedule-exam' },
   { label: 'Win a Discount', to: '/challenge' },
-  { label: 'Courses', to: '/courses' },
   { label: 'Resources', to: '/resources' },
   { label: 'About', to: '/about' },
   { label: 'Contact', to: '/contact' },
@@ -65,6 +76,7 @@ export const footerNavigation = {
   learn: [
     { label: 'All courses', to: '/courses' },
     { label: 'Certifications', to: '/certifications' },
+    { label: 'Deals and discounts', to: '/deals' },
     { label: 'Schedule an exam', to: '/schedule-exam' },
     { label: 'Certification challenge', to: '/challenge' },
     { label: 'Resources', to: '/resources' },

@@ -27,6 +27,7 @@ async def make_course(
     *,
     title: str = "Cloud Fundamentals",
     price: str = "0",
+    compare_at_price: str | None = None,
     published: bool = True,
     category: CourseCategory | None = None,
     lessons: int = 2,
@@ -37,6 +38,9 @@ async def make_course(
         short_description=f"{title} short description for tests.",
         description="Body",
         price=Decimal(price),
+        compare_at_price=(
+            Decimal(compare_at_price) if compare_at_price is not None else None
+        ),
         is_published=published,
         category_id=category.id if category else None,
     )
@@ -79,6 +83,8 @@ async def make_certification(
     published: bool = True,
     exam_fee: str | None = None,
     discount_percentage: str | None = None,
+    exam_code: str = "EX-100",
+    fee_checked_on=None,
 ) -> Certification:
     certification = Certification(
         provider_id=provider.id,
@@ -87,10 +93,11 @@ async def make_certification(
         short_description="Preparation resources for tests.",
         description="Body",
         level="associate",
-        exam_code="EX-100",
+        exam_code=exam_code,
         skills=["Networking"],
         is_published=published,
         exam_fee_amount=Decimal(exam_fee) if exam_fee is not None else None,
+        exam_fee_checked_on=fee_checked_on,
         discount_percentage=(
             Decimal(discount_percentage) if discount_percentage is not None else None
         ),

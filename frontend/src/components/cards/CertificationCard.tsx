@@ -92,7 +92,12 @@ export function CertificationCard({
       </div>
 
       {/* Renders nothing when the certification has no quoted price. */}
-      <ExamPriceComparison pricing={certification.pricing} size="sm" className="mt-4" />
+      <ExamPriceComparison
+        pricing={certification.pricing}
+        size="sm"
+        showVerified
+        className="mt-4"
+      />
 
       <div className="mt-auto flex items-center justify-between gap-3 pt-5">
         <span className="text-xs text-ink-500">
@@ -101,7 +106,7 @@ export function CertificationCard({
             : 'Study resources available'}
         </span>
         <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">
-          Explore
+          {certification.pricing ? 'View deal' : 'Explore'}
           <ArrowRight
             className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
             aria-hidden="true"

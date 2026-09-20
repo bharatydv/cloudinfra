@@ -140,3 +140,40 @@ def compute(
         tax_amount=tax_amount,
         total_price_amount=_money(net + tax_amount),
     )
+
+
+@dataclass(frozen=True, slots=True)
+class CourseDiscount:
+    """What a course saves against the price it is normally sold at."""
+
+    compare_at_amount: Decimal
+    discount_amount: Decimal
+    discount_percentage: int
+
+
+def course_discount(
+    *, price: Decimal | None, compare_at_price: Decimal | None
+) -> CourseDiscount | None:
+    """Resolve a course's saving, or None when there is no genuine one.
+
+    Returns None unless an operator has recorded a list price strictly above
+    what the course sells for: the whole point of the column is that a "was"
+    price is something someone verified, not something derived from the sale
+    price to make the card look better.
+    """
+    if price is None or compare_at_price is None:
+        return None
+    price = _money(Decimal(price))
+    compare_at = _money(Decimal(compare_at_price))
+    if compare_at <= price or compare_at <= 0:
+        return None
+
+    saving = _money(compare_at - price)
+    percentage = int(
+        (saving / compare_at * 100).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    )
+    return CourseDiscount(
+        compare_at_amount=compare_at,
+        discount_amount=saving,
+        discount_percentage=percentage,
+    )

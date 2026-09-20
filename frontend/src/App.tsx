@@ -11,6 +11,7 @@ import { AnalyticsEvent, track } from '@/lib/analytics'
 const CoursesPage = lazyImport(() => import('@/pages/public/CoursesPage'))
 const CourseDetailPage = lazyImport(() => import('@/pages/public/CourseDetailPage'))
 const CertificationsPage = lazyImport(() => import('@/pages/public/CertificationsPage'))
+const DealsPage = lazyImport(() => import('@/pages/public/DealsPage'))
 const ProviderPage = lazyImport(() => import('@/pages/public/ProviderPage'))
 const CertificationDetailPage = lazyImport(() => import('@/pages/public/CertificationDetailPage'))
 const ScheduleExamPage = lazyImport(() => import('@/pages/public/ScheduleExamPage'))
@@ -127,6 +128,7 @@ export default function App() {
           <Route path="courses" element={<CoursesPage />} />
           <Route path="courses/:slug" element={<CourseDetailPage />} />
           <Route path="certifications" element={<CertificationsPage />} />
+          <Route path="deals" element={<DealsPage />} />
           <Route path="certifications/:provider" element={<ProviderPage />} />
           <Route path="certifications/:provider/:slug" element={<CertificationDetailPage />} />
           <Route path="schedule-exam" element={<ScheduleExamPage />} />

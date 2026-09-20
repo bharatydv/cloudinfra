@@ -72,7 +72,7 @@ export function Navbar() {
           <ul className="hidden items-center gap-0.5 lg:flex">
             {navigation.map((item) => (
               <li key={item.to}>
-                <NavLink to={item.to} end={item.to === '/'} className={linkClass}>
+                <NavLink to={item.to} className={linkClass}>
                   {({ isActive }) => (
                     <>
                       {item.label}
@@ -198,7 +198,6 @@ export function Navbar() {
                 <li key={item.to}>
                   <NavLink
                     to={item.to}
-                    end={item.to === '/'}
                     className={({ isActive }) =>
                       cn(
                         'block rounded-lg px-3 py-3 text-base font-medium transition',

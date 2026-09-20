@@ -37,8 +37,28 @@ const LEVEL_OPTIONS = [
   { value: 'expert', label: 'Expert' },
 ]
 
+const DISCOUNT_OPTIONS = [
+  { value: '', label: 'Any discount' },
+  { value: '10', label: '10% or more' },
+  { value: '25', label: '25% or more' },
+  { value: '50', label: '50% or more' },
+  { value: '70', label: '70% or more' },
+]
+
+// Upper bounds rather than bands: a visitor with a budget wants everything
+// they can afford, not only the exams inside one bracket.
+const PRICE_OPTIONS = [
+  { value: '', label: 'Any price' },
+  { value: '25', label: 'Under $25' },
+  { value: '50', label: 'Under $50' },
+  { value: '100', label: 'Under $100' },
+  { value: '250', label: 'Under $250' },
+]
+
 const SORT_OPTIONS = [
   { value: 'featured', label: 'Featured' },
+  { value: 'discount', label: 'Highest discount' },
+  { value: 'price', label: 'Lowest price' },
   { value: 'name', label: 'Name A-Z' },
   { value: 'level', label: 'Level' },
   { value: 'newest', label: 'Recently added' },
@@ -55,12 +75,14 @@ export default function CertificationsPage() {
   const provider = params.get('provider') ?? ''
   const level = params.get('level') ?? ''
   const category = params.get('category') ?? ''
+  const minDiscount = params.get('min_discount') ?? ''
+  const maxPrice = params.get('max_price') ?? ''
   const sort = params.get('sort') ?? 'featured'
 
   useSeo({
-    title: 'Professional certifications',
+    title: 'Cloud certifications and exam preparation',
     description:
-      'Explore certification preparation resources, learning paths and courses designed to help you build the skills you need.',
+      'Compare AWS, Microsoft Azure and Google Cloud certifications by exam code, level and price, with current discounts on every exam we list.',
     robots: params.toString() ? 'noindex,follow' : 'index,follow',
   })
 
@@ -83,9 +105,11 @@ export default function CertificationsPage() {
       provider: provider || undefined,
       level: level || undefined,
       category: category || undefined,
+      min_discount: minDiscount ? Number(minDiscount) : undefined,
+      max_price: maxPrice ? Number(maxPrice) : undefined,
       sort,
     }),
-    [page, q, provider, level, category, sort],
+    [page, q, provider, level, category, minDiscount, maxPrice, sort],
   )
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -115,7 +139,7 @@ export default function CertificationsPage() {
     setParams(next)
   }
 
-  const activeCount = [provider, level, category].filter(Boolean).length
+  const activeCount = [provider, level, category, minDiscount, maxPrice].filter(Boolean).length
 
   const filterDefinitions: FilterDefinition[] = [
     {
@@ -145,13 +169,27 @@ export default function CertificationsPage() {
       ],
       onChange: (value) => update('category', value),
     },
+    {
+      id: 'filter-discount',
+      label: 'Discount',
+      value: minDiscount,
+      options: DISCOUNT_OPTIONS,
+      onChange: (value) => update('min_discount', value),
+    },
+    {
+      id: 'filter-price',
+      label: 'Price',
+      value: maxPrice,
+      options: PRICE_OPTIONS,
+      onChange: (value) => update('max_price', value),
+    },
   ]
 
   return (
     <>
       <PageHeader
-        title="Professional Certifications"
-        description="Explore certification preparation resources, learning paths and courses designed to help you build the skills you need."
+        title="Cloud Certifications"
+        description="Compare certifications by provider, level and exam code, and see what each exam costs today alongside the provider's own published fee."
         breadcrumbs={[
           { name: 'Home', url: '/' },
           { name: 'Certifications', url: '/certifications' },
@@ -161,12 +199,12 @@ export default function CertificationsPage() {
         <div className="mt-8 max-w-2xl">
           <SearchBar
             defaultValue={q}
-            placeholder="Search by name or exam code"
+            placeholder="Search certifications or exam codes, e.g. SAA-C03"
             onSubmitQuery={(value) => update('q', value)}
           />
         </div>
         <p className="mt-6 max-w-3xl rounded-lg border border-ink-200 bg-white p-3.5 text-xs leading-relaxed text-ink-500">
-          {siteConfig.independenceNotice}
+          {siteConfig.independenceNotice} {siteConfig.trademarkNotice}
         </p>
       </PageHeader>
 

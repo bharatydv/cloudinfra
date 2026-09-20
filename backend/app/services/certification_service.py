@@ -27,6 +27,7 @@ from app.schemas.certification import (
     CertificationResourceWrite,
     CertificationUpdate,
     CertificationWrite,
+    ExamPricing,
     ExamPricingInput,
     ProviderDetail,
     ProviderUpdate,
@@ -99,16 +100,40 @@ async def build_provider_detail(
         faqs=serializers.faq_items(faqs),
         seo=seo_service.build_meta(
             title=provider.meta_title
-            or f"{provider.name} Certification Preparation & Study Resources",
+            or f"{provider.name} Certifications: Costs, Discounts & Exam Preparation",
             description=provider.meta_description
             or provider.short_description
-            or f"Independent preparation resources and learning paths for {provider.name} "
-            "certifications.",
+            or f"Every {provider.name} certification we cover, with exam codes, levels, "
+            f"current prices and independent preparation resources.",
             path=f"/certifications/{provider.slug}",
             breadcrumbs=breadcrumbs,
             structured_data=[seo_service.faq_page_schema(faq_dicts)],
         ),
     )
+
+
+def _certification_title(certification: Certification) -> str:
+    """A title that leads with the exam code people actually search for."""
+    if certification.exam_code:
+        return f"{certification.name} ({certification.exam_code}): Cost & Preparation"
+    return f"{certification.name}: Cost & Preparation Guide"
+
+
+def _certification_description(
+    certification: Certification, exam_pricing: ExamPricing | None
+) -> str:
+    """A description that quotes the real saving, or omits it entirely.
+
+    A percentage is only mentioned when one is genuinely applied, so the
+    snippet can never promise a discount the page does not show.
+    """
+    base = certification.short_description.rstrip(". ")
+    if exam_pricing is not None and exam_pricing.savings_percentage:
+        return (
+            f"{base}. Exam fee, current price and {exam_pricing.savings_percentage}% "
+            "discount, plus preparation resources and practice material."
+        )
+    return f"{base}. Exam cost, preparation resources, practice material and FAQs."
 
 
 async def build_certification_detail(
@@ -180,12 +205,15 @@ async def build_certification_detail(
         ],
         faqs=serializers.faq_items(faqs),
         seo=seo_service.build_meta(
-            title=certification.meta_title
-            or f"{certification.name} Certification Preparation Guide",
-            description=certification.meta_description or certification.short_description,
+            title=certification.meta_title or _certification_title(certification),
+            description=certification.meta_description
+            or _certification_description(certification, card.pricing),
             path=path,
             breadcrumbs=breadcrumbs,
-            structured_data=[seo_service.faq_page_schema(faq_dicts)],
+            structured_data=[
+                seo_service.certification_schema(certification, card.pricing, path),
+                seo_service.faq_page_schema(faq_dicts),
+            ],
         ),
     )
 

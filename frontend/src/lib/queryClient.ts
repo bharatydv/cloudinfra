@@ -30,6 +30,7 @@ export const queryKeys = {
   providers: ['providers'] as const,
   provider: (slug: string) => ['provider', slug] as const,
   certificationCategories: ['certification-categories'] as const,
+  deals: (filters: unknown) => ['deals', filters] as const,
   practiceResources: ['practice-resources'] as const,
   certificationOptions: ['certification-options'] as const,
   challengeIntro: ['challenge', 'intro'] as const,

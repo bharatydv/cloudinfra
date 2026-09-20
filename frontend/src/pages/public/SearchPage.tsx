@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Award, BookOpen, FileText, Search as SearchIcon, Target } from 'lucide-react'
 
+import { LastVerified, PriceRow } from '@/components/cards/PriceParts'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { SearchBar } from '@/components/layout/SearchBar'
 import { Badge, Card, Container, Section } from '@/components/ui/primitives'
@@ -15,6 +16,18 @@ import { queryKeys } from '@/lib/queryClient'
 import { NOINDEX } from '@/lib/seo'
 import { cn } from '@/lib/cn'
 import type { SearchEntity } from '@/types/api'
+
+/** Reads a string off a result's untyped metadata bag. */
+function text(metadata: Record<string, unknown>, key: string): string | null {
+  const value = metadata[key]
+  return typeof value === 'string' && value ? value : null
+}
+
+/** Reads a number off a result's untyped metadata bag. */
+function count(metadata: Record<string, unknown>, key: string): number | null {
+  const value = metadata[key]
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
 
 const TYPE_META: Record<SearchEntity, { label: string; icon: typeof BookOpen; tone: string }> = {
   course: { label: 'Course', icon: BookOpen, tone: 'brand' },
@@ -39,7 +52,8 @@ export default function SearchPage() {
   // Search result pages carry no unique indexable value.
   useSeo({
     title: query ? `Search results for "${query}"` : 'Search',
-    description: 'Search courses, certifications and learning resources.',
+    description:
+      'Search certifications, exam codes, courses and learning resources, with the current price of each.',
     robots: NOINDEX,
   })
 
@@ -61,7 +75,7 @@ export default function SearchPage() {
     <>
       <PageHeader
         title="Search"
-        description="Find courses, certifications and study resources across the platform."
+        description="Find a certification by name or exam code, a course, or a study resource -- each result shows what it costs today."
         breadcrumbs={[
           { name: 'Home', url: '/' },
           { name: 'Search', url: '/search' },
@@ -72,6 +86,7 @@ export default function SearchPage() {
             defaultValue={query}
             size="lg"
             autoFocus
+            placeholder="Search certifications, exam codes or courses..."
             onSubmitQuery={(value) => setParams({ q: value })}
           />
         </div>
@@ -163,6 +178,7 @@ export default function SearchPage() {
                               <p className="mt-1.5 line-clamp-2 text-sm text-ink-600">
                                 {result.description}
                               </p>
+                              <ResultPrice metadata={result.metadata} />
                             </div>
                           </div>
                         </Card>
@@ -176,5 +192,39 @@ export default function SearchPage() {
         </Container>
       </Section>
     </>
+  )
+}
+
+/**
+ * The price line under a search result.
+ *
+ * Only courses and priced certifications send these fields, so an article or
+ * an unpriced exam renders nothing rather than an empty row.
+ */
+function ResultPrice({ metadata }: { metadata: Record<string, unknown> }) {
+  const price = text(metadata, 'price')
+  const examCode = text(metadata, 'exam_code')
+  const verified = text(metadata, 'last_verified_on')
+  if (!price && !examCode) return null
+
+  return (
+    <div className="mt-3 space-y-1.5">
+      {examCode && (
+        <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">
+          Exam {examCode}
+        </p>
+      )}
+      {price && (
+        <PriceRow
+          price={price}
+          compareAtPrice={text(metadata, 'compare_at_price')}
+          savings={text(metadata, 'savings_amount')}
+          discountPercentage={count(metadata, 'discount_percentage')}
+          currency={text(metadata, 'currency') ?? 'USD'}
+          size="sm"
+        />
+      )}
+      <LastVerified date={verified} />
+    </div>
   )
 }

@@ -26,6 +26,7 @@ import type {
   CourseModule,
   CourseProgress,
   DashboardOverview,
+  DealCard,
   Enrollment,
   ExamBooking,
   ExamBookingReceipt,
@@ -145,6 +146,10 @@ export interface CertificationFilters {
   provider?: string
   level?: string
   category?: string
+  /** Percent, e.g. 25 for "25% or more off". */
+  min_discount?: number
+  /** Highest pre-tax price to include. */
+  max_price?: number
   sort?: string
 }
 
@@ -158,6 +163,22 @@ export const getCertificationCategories = () =>
   api.get<string[]>('/certification-categories', { auth: false })
 
 export const getProvider = (slug: string) => api.get<ProviderDetail>(`/certifications/${slug}`)
+
+/* -------------------------------------------------------------------------- */
+/* Deals                                                                      */
+/* -------------------------------------------------------------------------- */
+export interface DealFilters {
+  page?: number
+  page_size?: number
+  kind?: string
+  provider?: string
+  level?: string
+  min_discount?: number
+  sort?: string
+}
+
+export const getDeals = (filters: DealFilters = {}) =>
+  api.get<Page<DealCard>>('/deals', { auth: false, query: { ...filters } })
 
 export const getCertification = (providerSlug: string, slug: string) =>
   api.get<CertificationDetail>(`/certifications/${providerSlug}/${slug}`)
