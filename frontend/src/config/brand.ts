@@ -59,7 +59,8 @@ export const siteConfig = {
 /**
  * Primary navigation, ordered by what people come here to do: find a
  * certification, find a course, find what either costs today. The logo already
- * links home, so "Home" would only push the useful items further right.
+ * links home, so "Home" would only push the useful items further right, and
+ * About and Contact live in the footer rather than compete with these.
  */
 export const navigation = [
   { label: 'Certifications', to: '/certifications' },
@@ -68,8 +69,6 @@ export const navigation = [
   { label: 'Schedule Exam', to: '/schedule-exam' },
   { label: 'Win a Discount', to: '/challenge' },
   { label: 'Resources', to: '/resources' },
-  { label: 'About', to: '/about' },
-  { label: 'Contact', to: '/contact' },
 ] as const
 
 export const footerNavigation = {
