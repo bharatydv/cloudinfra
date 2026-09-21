@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 
+import { InlineSpinner } from '@/components/ui/states'
 import PublicLayout from '@/layouts/PublicLayout'
 import { lazyImport } from '@/lib/lazyImport'
 import { RedirectIfAuthenticated, RequireAdmin, RequireAuth } from '@/layouts/guards'
@@ -121,82 +122,90 @@ export default function App() {
   return (
     <>
       <PageViewTracker />
-      <Routes>
-        {/* Public marketing and content */}
-        <Route element={<PublicLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="courses" element={<CoursesPage />} />
-          <Route path="courses/:slug" element={<CourseDetailPage />} />
-          <Route path="certifications" element={<CertificationsPage />} />
-          <Route path="deals" element={<DealsPage />} />
-          <Route path="certifications/:provider" element={<ProviderPage />} />
-          <Route path="certifications/:provider/:slug" element={<CertificationDetailPage />} />
-          <Route path="schedule-exam" element={<ScheduleExamPage />} />
-          <Route path="challenge" element={<ChallengePage />} />
-          <Route path="resources" element={<ResourcesPage />} />
-          <Route path="resources/:slug" element={<ArticlePage />} />
-          <Route path="search" element={<SearchPage />} />
-          <Route path="about" element={<AboutPage />} />
-          <Route path="contact" element={<ContactPage />} />
-          <Route path="privacy" element={<LegalPage />} />
-          <Route path="terms" element={<LegalPage />} />
-          <Route path="refund-policy" element={<LegalPage />} />
-          <Route path="disclaimer" element={<LegalPage />} />
-          <Route path="cookie-policy" element={<LegalPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-
-        {/* Authentication */}
-        <Route element={<RedirectIfAuthenticated />}>
-          <Route path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
-          <Route path="verify-email" element={<VerifyEmailPage />} />
-          <Route path="forgot-password" element={<ForgotPasswordPage />} />
-        </Route>
-        <Route path="reset-password" element={<ResetPasswordPage />} />
-
-        {/* Authenticated learner area */}
-        <Route element={<RequireAuth />}>
-          <Route path="dashboard" element={<DashboardLayout />}>
-            <Route index element={<DashboardOverviewPage />} />
-            <Route path="courses" element={<MyCoursesPage />} />
-            <Route path="progress" element={<ProgressPage />} />
-            <Route path="certifications" element={<SavedCertificationsPage />} />
-            <Route path="practice" element={<PracticePage />} />
-            <Route path="certificates" element={<CertificatesPage />} />
-            <Route path="profile" element={<ProfilePage />} />
+      {/*
+        Every lazy route needs a Suspense boundary above it. The layouts carry
+        their own, but the auth pages and the dashboard/admin layouts sit
+        directly under a guard, and a click-driven navigation that suspends
+        with no boundary is a hard error in React 18 (error #426).
+      */}
+      <Suspense fallback={<InlineSpinner label="Loading page" />}>
+        <Routes>
+          {/* Public marketing and content */}
+          <Route element={<PublicLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="courses" element={<CoursesPage />} />
+            <Route path="courses/:slug" element={<CourseDetailPage />} />
+            <Route path="certifications" element={<CertificationsPage />} />
+            <Route path="deals" element={<DealsPage />} />
+            <Route path="certifications/:provider" element={<ProviderPage />} />
+            <Route path="certifications/:provider/:slug" element={<CertificationDetailPage />} />
+            <Route path="schedule-exam" element={<ScheduleExamPage />} />
+            <Route path="challenge" element={<ChallengePage />} />
+            <Route path="resources" element={<ResourcesPage />} />
+            <Route path="resources/:slug" element={<ArticlePage />} />
+            <Route path="search" element={<SearchPage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="privacy" element={<LegalPage />} />
+            <Route path="terms" element={<LegalPage />} />
+            <Route path="refund-policy" element={<LegalPage />} />
+            <Route path="disclaimer" element={<LegalPage />} />
+            <Route path="cookie-policy" element={<LegalPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
-          <Route path="learn/:courseSlug" element={<LearnPage />} />
-          <Route path="learn/:courseSlug/:lessonSlug" element={<LearnPage />} />
-        </Route>
 
-        {/* Admin console */}
-        <Route element={<RequireAdmin />}>
-          <Route path="admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboardPage />} />
-            <Route path="courses" element={<AdminCoursesPage />} />
-            <Route path="courses/new" element={<AdminCourseEditorPage />} />
-            <Route path="courses/:id" element={<AdminCourseEditorPage />} />
-            <Route path="certifications" element={<AdminCertificationsPage />} />
-            <Route path="certifications/new" element={<AdminCertificationEditorPage />} />
-            <Route path="certifications/:id" element={<AdminCertificationEditorPage />} />
-            <Route path="providers" element={<AdminProvidersPage />} />
-            <Route path="articles" element={<AdminArticlesPage />} />
-            <Route path="articles/new" element={<AdminArticleEditorPage />} />
-            <Route path="articles/:id" element={<AdminArticleEditorPage />} />
-            <Route path="categories" element={<AdminCategoriesPage />} />
-            <Route path="faqs" element={<AdminFaqsPage />} />
-            <Route path="testimonials" element={<AdminTestimonialsPage />} />
-            <Route path="users" element={<AdminUsersPage />} />
-            <Route path="enrollments" element={<AdminEnrollmentsPage />} />
-            <Route path="exam-bookings" element={<AdminExamBookingsPage />} />
-            <Route path="challenge-leads" element={<AdminChallengePage />} />
-            <Route path="payments" element={<AdminPaymentsPage />} />
-            <Route path="messages" element={<AdminMessagesPage />} />
-            <Route path="settings" element={<AdminSettingsPage />} />
+          {/* Authentication */}
+          <Route element={<RedirectIfAuthenticated />}>
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
+            <Route path="verify-email" element={<VerifyEmailPage />} />
+            <Route path="forgot-password" element={<ForgotPasswordPage />} />
           </Route>
-        </Route>
-      </Routes>
+          <Route path="reset-password" element={<ResetPasswordPage />} />
+
+          {/* Authenticated learner area */}
+          <Route element={<RequireAuth />}>
+            <Route path="dashboard" element={<DashboardLayout />}>
+              <Route index element={<DashboardOverviewPage />} />
+              <Route path="courses" element={<MyCoursesPage />} />
+              <Route path="progress" element={<ProgressPage />} />
+              <Route path="certifications" element={<SavedCertificationsPage />} />
+              <Route path="practice" element={<PracticePage />} />
+              <Route path="certificates" element={<CertificatesPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+            </Route>
+            <Route path="learn/:courseSlug" element={<LearnPage />} />
+            <Route path="learn/:courseSlug/:lessonSlug" element={<LearnPage />} />
+          </Route>
+
+          {/* Admin console */}
+          <Route element={<RequireAdmin />}>
+            <Route path="admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboardPage />} />
+              <Route path="courses" element={<AdminCoursesPage />} />
+              <Route path="courses/new" element={<AdminCourseEditorPage />} />
+              <Route path="courses/:id" element={<AdminCourseEditorPage />} />
+              <Route path="certifications" element={<AdminCertificationsPage />} />
+              <Route path="certifications/new" element={<AdminCertificationEditorPage />} />
+              <Route path="certifications/:id" element={<AdminCertificationEditorPage />} />
+              <Route path="providers" element={<AdminProvidersPage />} />
+              <Route path="articles" element={<AdminArticlesPage />} />
+              <Route path="articles/new" element={<AdminArticleEditorPage />} />
+              <Route path="articles/:id" element={<AdminArticleEditorPage />} />
+              <Route path="categories" element={<AdminCategoriesPage />} />
+              <Route path="faqs" element={<AdminFaqsPage />} />
+              <Route path="testimonials" element={<AdminTestimonialsPage />} />
+              <Route path="users" element={<AdminUsersPage />} />
+              <Route path="enrollments" element={<AdminEnrollmentsPage />} />
+              <Route path="exam-bookings" element={<AdminExamBookingsPage />} />
+              <Route path="challenge-leads" element={<AdminChallengePage />} />
+              <Route path="payments" element={<AdminPaymentsPage />} />
+              <Route path="messages" element={<AdminMessagesPage />} />
+              <Route path="settings" element={<AdminSettingsPage />} />
+            </Route>
+          </Route>
+        </Routes>
+      </Suspense>
     </>
   )
 }
