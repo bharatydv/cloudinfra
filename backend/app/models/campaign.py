@@ -121,6 +121,12 @@ class ChallengeAttempt(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     phone: Mapped[str] = mapped_column(String(40), nullable=False)
     country: Mapped[str | None] = mapped_column(String(80))
+    # When the sitting was started from the scheduling form, the slot the
+    # applicant asked for travels with the lead so the callback can book it:
+    # {"preferred_date": "2026-10-04", "alternate_date": null,
+    #  "preferred_time_slot": "morning", "timezone": "Asia/Kolkata",
+    #  "delivery_mode": "online_proctored", "city": "Pune"}
+    booking_preferences: Mapped[dict | None] = mapped_column(JSONB)
 
     # --- Which exam --------------------------------------------------------
     certification_id: Mapped[uuid.UUID | None] = mapped_column(

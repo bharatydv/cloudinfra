@@ -13,6 +13,7 @@ import type {
   CertificationOption,
   CertificationResource,
   ChallengeAttempt,
+  ChallengeBookingPreferences,
   ChallengeIntro,
   ChallengeLeadStatus,
   ChallengeResult,
@@ -468,6 +469,8 @@ export interface ChallengeStartPayload {
   country?: string | null
   certification_id: string
   accept_rules: boolean
+  /** Carried from the scheduling form when the test is started from there. */
+  booking_preferences?: ChallengeBookingPreferences | null
   /** Honeypot. Left empty by real visitors. */
   website?: string
 }

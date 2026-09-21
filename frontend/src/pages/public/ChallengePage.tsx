@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import {
   AlertTriangle,
@@ -43,6 +43,7 @@ import { cn } from '@/lib/cn'
 import { formatLevel, formatPrice, pluralize } from '@/lib/format'
 import { queryKeys } from '@/lib/queryClient'
 import type {
+  ChallengeBookingPreferences,
   ChallengeIntro,
   ChallengeResult,
   ChallengeSession,
@@ -51,7 +52,18 @@ import type {
 
 type Phase = 'intro' | 'test' | 'result'
 
+/** Carried in `location.state` when the test is started from the scheduling
+ * form: preselects the certification, prefills the lead form, and threads
+ * the requested slot through to the discount callback. */
+interface ChallengeHandoff {
+  certificationId?: string
+  prefill?: { full_name?: string; email?: string; phone?: string; country?: string }
+  bookingPreferences?: ChallengeBookingPreferences
+}
+
 export default function ChallengePage() {
+  const location = useLocation()
+  const handoff = (location.state as ChallengeHandoff | null) ?? null
   const [phase, setPhase] = useState<Phase>('intro')
   const [session, setSession] = useState<ChallengeSession | null>(null)
   const [result, setResult] = useState<ChallengeResult | null>(null)
@@ -114,6 +126,7 @@ export default function ChallengePage() {
   return (
     <IntroScreen
       intro={data}
+      handoff={handoff}
       onStarted={(started) => {
         setSession(started)
         setPhase('test')
@@ -135,21 +148,28 @@ function ChallengeShell({ children }: { children: React.ReactNode }) {
 /* -------------------------------------------------------------------------- */
 function IntroScreen({
   intro,
+  handoff,
   onStarted,
 }: {
   intro: ChallengeIntro
+  handoff: ChallengeHandoff | null
   onStarted: (session: ChallengeSession) => void
 }) {
   const { user } = useAuth()
   const { terms, options } = intro
   // Held by id rather than by object so the selection survives a refetch that
   // returns new option instances for the same certifications.
-  const [selectedId, setSelectedId] = useState(() => options[0]?.id ?? '')
+  const [selectedId, setSelectedId] = useState(() => {
+    if (handoff?.certificationId && options.some((o) => o.id === handoff.certificationId)) {
+      return handoff.certificationId
+    }
+    return options[0]?.id ?? ''
+  })
   const [form, setForm] = useState({
-    full_name: '',
-    email: '',
-    phone: '',
-    country: '',
+    full_name: handoff?.prefill?.full_name ?? '',
+    email: handoff?.prefill?.email ?? '',
+    phone: handoff?.prefill?.phone ?? '',
+    country: handoff?.prefill?.country ?? '',
     website: '',
   })
   const [accepted, setAccepted] = useState(false)
@@ -201,14 +221,16 @@ function IntroScreen({
       country: form.country.trim() || null,
       certification_id: certificationId,
       accept_rules: accepted,
+      booking_preferences: handoff?.bookingPreferences ?? null,
       website: form.website,
     })
   }
 
-  const reward = Number(terms.reward_discount_percentage)
-  const saving =
-    selected.pricing && reward > 0
-      ? (Number(selected.pricing.total_price_amount) * reward) / 100
+  const minReward = Number(terms.reward_discount_min_percentage)
+  const maxReward = Number(terms.reward_discount_max_percentage)
+  const maxSaving =
+    selected.pricing && maxReward > 0
+      ? (Number(selected.pricing.total_price_amount) * maxReward) / 100
       : null
 
   return (
@@ -221,16 +243,28 @@ function IntroScreen({
             Limited campaign
           </Badge>
           <h1 className="text-heading-xl text-ink-900">
-            Pass our {intro.provider_name} test, get{' '}
-            <span className="text-brand-600">{reward}% off</span> your exam
+            Pass our {intro.provider_name} test, win{' '}
+            <span className="text-brand-600">
+              {minReward}%&ndash;{maxReward}% off
+            </span>{' '}
+            your exam
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base text-ink-600">
             {terms.question_count} questions, {terms.duration_minutes} minutes, on the{' '}
-            {intro.provider_name} certification of your choice. Score{' '}
-            {Number(terms.pass_mark)}% or more and our team calls you within{' '}
-            {terms.response_hours} hours to apply the discount and schedule your exam on the
-            date you want.
+            {intro.provider_name} certification of your choice &mdash; the same length and
+            question count as the real exam. Score {Number(terms.pass_mark)}% or more and our
+            team calls you within {terms.response_hours} hours to apply your discount and
+            schedule your exam on the date you want. The higher you score, the bigger the
+            discount: {Number(terms.pass_mark)}% earns {minReward}% off, and a perfect paper
+            earns the full {maxReward}%.
           </p>
+
+          {handoff?.bookingPreferences && (
+            <p className="mx-auto mt-4 max-w-xl rounded-lg border border-brand-200 bg-white px-4 py-2.5 text-sm font-medium text-brand-800">
+              Continuing from your exam request &mdash; we already have your details below.
+              Review the rules and start when ready.
+            </p>
+          )}
 
           <dl className="mx-auto mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
             {[
@@ -298,7 +332,8 @@ function IntroScreen({
                             <Badge tone="neutral">{formatLevel(option.level)}</Badge>
                           </span>
                           <span className="mt-1 block text-xs text-ink-500">
-                            {pluralize(option.question_count, 'question')} in this paper
+                            {pluralize(option.question_count, 'question')} in{' '}
+                            {option.duration_minutes} minutes &mdash; same as the real exam
                           </span>
                           {option.pricing && (
                             <ExamPriceComparison
@@ -428,10 +463,10 @@ function IntroScreen({
                     </span>
                   </label>
 
-                  {saving !== null && selected.pricing && (
+                  {maxSaving !== null && selected.pricing && (
                     <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
-                      Pass and you save about{' '}
-                      {formatPrice(saving, selected.pricing.currency)} on {selected.name}.
+                      Pass and save {minReward}%&ndash;{maxReward}% on {selected.name} &mdash; up
+                      to {formatPrice(maxSaving, selected.pricing.currency)} for a perfect score.
                     </p>
                   )}
 

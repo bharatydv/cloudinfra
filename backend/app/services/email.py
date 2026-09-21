@@ -6,10 +6,16 @@ by changing EMAIL_PROVIDER; no call site changes.
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import smtplib
 from dataclasses import dataclass
+from email.message import EmailMessage as EmailMessageBuilder
+from email.utils import formataddr
 from functools import lru_cache
 from typing import Protocol
+
+import httpx
 
 from app.core.config import settings
 
@@ -54,13 +60,76 @@ class NotConfiguredEmailSender:
         )
 
 
+class SmtpEmailSender:
+    """Plain SMTP, run off the event loop.
+
+    smtplib is blocking, and a slow relay must not stall the request that
+    triggered the mail, so each send happens in a worker thread.
+    """
+
+    async def send(self, message: EmailMessage) -> None:
+        await asyncio.to_thread(self._send_blocking, message)
+
+    @staticmethod
+    def _send_blocking(message: EmailMessage) -> None:
+        mail = EmailMessageBuilder()
+        mail["Subject"] = message.subject
+        mail["From"] = formataddr((settings.email_from_name, settings.email_from_address))
+        mail["To"] = message.to
+        mail.set_content(message.text_body)
+        if message.html_body:
+            mail.add_alternative(message.html_body, subtype="html")
+
+        host = settings.smtp_host or ""
+        if settings.smtp_use_ssl:
+            server: smtplib.SMTP = smtplib.SMTP_SSL(host, settings.smtp_port, timeout=30)
+        else:
+            server = smtplib.SMTP(host, settings.smtp_port, timeout=30)
+        try:
+            server.ehlo()
+            if settings.smtp_use_tls and not settings.smtp_use_ssl:
+                server.starttls()
+                server.ehlo()
+            if settings.smtp_username and settings.smtp_password:
+                server.login(settings.smtp_username, settings.smtp_password)
+            server.send_message(mail)
+        finally:
+            server.quit()
+
+
+class ResendEmailSender:
+    """Resend's HTTP API, authenticated with EMAIL_PROVIDER_KEY."""
+
+    async def send(self, message: EmailMessage) -> None:
+        payload: dict[str, object] = {
+            "from": formataddr((settings.email_from_name, settings.email_from_address)),
+            "to": [message.to],
+            "subject": message.subject,
+            "text": message.text_body,
+        }
+        if message.html_body:
+            payload["html"] = message.html_body
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post(
+                "https://api.resend.com/emails",
+                json=payload,
+                headers={"Authorization": f"Bearer {settings.email_provider_key}"},
+            )
+            response.raise_for_status()
+
+
 @lru_cache
 def get_email_sender() -> EmailSender:
     if settings.email_provider == "console":
         return ConsoleEmailSender()
-    # SMTP/Resend adapters plug in here once credentials are provisioned.
-    if not settings.email_provider_key:
-        return NotConfiguredEmailSender(settings.email_provider)
+    if settings.email_provider == "smtp":
+        if not settings.smtp_host:
+            return NotConfiguredEmailSender("smtp (SMTP_HOST is not set)")
+        return SmtpEmailSender()
+    if settings.email_provider == "resend":
+        if not settings.email_provider_key:
+            return NotConfiguredEmailSender("resend (EMAIL_PROVIDER_KEY is not set)")
+        return ResendEmailSender()
     return NotConfiguredEmailSender(settings.email_provider)
 
 
@@ -162,6 +231,7 @@ def challenge_result_email(
     response_hours: int,
     retake_after_days: int,
     warnings: int,
+    booking_preferences: dict | None = None,
 ) -> tuple[str, str]:
     """The candidate's copy of their result.
 
@@ -177,14 +247,19 @@ def challenge_result_email(
         )
 
     if passed and discount_percentage:
+        slot = ""
+        if booking_preferences:
+            slot = "\nThe slot you asked for: " + _describe_slot(booking_preferences) + "\n"
         return (
             f"You passed - {discount_percentage} off your {certification_name} exam "
             f"({reference_code})",
             f"Hi {name},\n\n{scoreline}\n\n"
-            f"You have qualified for {discount_percentage} off the {certification_name} "
-            f"exam. Our team will contact you within {response_hours} hours to confirm "
-            "the discount and schedule your exam on a call, at a date and time that "
-            f"suits you.\n\nYour reference is {reference_code} - quote it when we "
+            f"Your score earns {discount_percentage} off the {certification_name} exam. "
+            "The discount is based on your result: the pass mark earns the minimum "
+            "and a perfect paper the maximum.\n\n"
+            f"Our team will contact you within {response_hours} hours to confirm the "
+            "discount and schedule your exam on a call, at a date and time that suits "
+            f"you.\n{slot}\nYour reference is {reference_code} - quote it when we "
             f"speak.\n{note}\n"
             "Seats are booked with the certification provider, so the final date and "
             "time depend on their availability.\n",
@@ -201,6 +276,24 @@ def challenge_result_email(
     )
 
 
+def _describe_slot(preferences: dict) -> str:
+    """One line for the slot an applicant asked for on the scheduling form."""
+    parts: list[str] = []
+    if preferences.get("preferred_date"):
+        parts.append(str(preferences["preferred_date"]))
+    if preferences.get("alternate_date"):
+        parts.append(f"or {preferences['alternate_date']}")
+    if preferences.get("preferred_time_slot"):
+        parts.append(str(preferences["preferred_time_slot"]))
+    if preferences.get("timezone"):
+        parts.append(f"({preferences['timezone']})")
+    if preferences.get("delivery_mode"):
+        parts.append(str(preferences["delivery_mode"]).replace("_", " "))
+    if preferences.get("city"):
+        parts.append(f"near {preferences['city']}")
+    return " ".join(parts) or "not specified"
+
+
 def challenge_lead_email(
     *,
     name: str,
@@ -211,8 +304,12 @@ def challenge_lead_email(
     discount_percentage: str,
     reference_code: str,
     response_hours: int,
+    booking_preferences: dict | None = None,
 ) -> tuple[str, str]:
     """Internal alert: somebody has been promised a callback, with a clock on it."""
+    slot = ""
+    if booking_preferences:
+        slot = f"Slot asked for: {_describe_slot(booking_preferences)}\n"
     return (
         f"Challenge lead: {name} qualified for {certification_name} ({score})",
         f"{name} passed the {certification_name} challenge with {score} and has been "
@@ -220,6 +317,7 @@ def challenge_lead_email(
         f"hours.\n\n"
         f"Reference: {reference_code}\n"
         f"Email:     {email}\n"
-        f"Phone:     {phone}\n\n"
+        f"Phone:     {phone}\n"
+        f"{slot}\n"
         "Open Admin > Challenge leads to record the outcome of the call.\n",
     )

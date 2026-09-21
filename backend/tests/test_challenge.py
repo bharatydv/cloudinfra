@@ -34,7 +34,8 @@ async def _terms(db, **overrides):
         "questionCount": 4,
         "durationMinutes": 25,
         "passMark": 70,
-        "rewardDiscountPercentage": 20,
+        "rewardDiscountMinPercentage": 20,
+        "rewardDiscountMaxPercentage": 65,
         "maxWarnings": 3,
         "retakeAfterDays": 7,
         "responseHours": 24,
@@ -255,9 +256,11 @@ async def test_passing_records_the_discount_and_returns_the_review(client, db_se
     body = response.json()
     assert body["passed"] is True
     assert body["score_percentage"] == "100.00"
-    assert body["discount_percentage"] == "20.00"
-    # 125.00 less 20% = 100.00, quoted against the price the site already shows.
-    assert body["rewarded_price"] == "100.00"
+    # A perfect paper earns the top of the campaign's discount range, not just
+    # the minimum a bare pass would earn.
+    assert body["discount_percentage"] == "65.00"
+    # 125.00 less 65% = 43.75, quoted against the price the site already shows.
+    assert body["rewarded_price"] == "43.75"
     assert len(body["review"]) == 4
     assert body["review"][0]["explanation"]
 
@@ -282,6 +285,40 @@ async def test_failing_earns_no_discount(client, db_session):
     assert body["score_percentage"] == "0.00"
     assert body["discount_percentage"] is None
     assert body["rewarded_price"] is None
+
+
+async def test_discount_scales_with_score_between_pass_mark_and_a_perfect_paper(
+    client, db_session
+):
+    """A bare pass earns the minimum; a stronger score earns more, up to the max."""
+    _, certification = await _setup(
+        db_session, questionCount=20, passMark=50,
+        rewardDiscountMinPercentage=20, rewardDiscountMaxPercentage=60,
+    )
+    # _setup already stocked 6; add enough that the paper draws exactly 20.
+    await _questions(db_session, certification, count=14, prefix="scale")
+    session = (
+        await client.post("/api/challenge/attempts", json=_start_payload(certification.id))
+    ).json()
+    qids, key = await _answer_key(db_session, session["attempt_id"])
+    assert len(qids) == 20
+
+    # 15 of 20 right = 75%: exactly halfway between the 50% pass mark and
+    # 100%, so the reward should land exactly halfway between 20% and 60%.
+    answers = [
+        {"question_id": qid, "option_key": key[qid] if i < 15 else "b"}
+        for i, qid in enumerate(qids)
+    ]
+    body = (
+        await client.post(
+            f"/api/challenge/attempts/{session['attempt_id']}/submit",
+            json={"token": session["token"], "answers": answers},
+        )
+    ).json()
+    assert body["score_percentage"] == "75.00"
+    assert body["passed"] is True
+    # The Numeric(5,2) column always returns two decimal places.
+    assert body["discount_percentage"] == "40.00"
 
 
 async def test_answers_for_questions_never_served_are_ignored(client, db_session):
@@ -438,4 +475,5 @@ async def test_the_promised_discount_is_snapshotted_onto_the_attempt(client, db_
             ChallengeAttempt.id == uuid.UUID(session["attempt_id"])
         )
     )
-    assert attempt.discount_percentage == Decimal("20.00")
+    # A 100% score at the default terms earned the maximum, 65%.
+    assert attempt.discount_percentage == Decimal("65.00")

@@ -160,3 +160,21 @@ def _clear_auth_override():
     yield
     app.dependency_overrides.pop(get_current_user, None)
     app.dependency_overrides.pop(get_optional_user, None)
+
+
+@pytest.fixture(autouse=True)
+def _reset_challenge_config_cache():
+    """Every test gets a fresh read of the `challenge` setting.
+
+    `challenge_service` caches campaign terms for 30 seconds so the landing
+    page and every submission are not each a database round trip. That
+    cache survives across tests in this session-scoped process, and
+    `scheduling_service` now reads it too (a campaign that names specific
+    certifications restricts the scheduling picker to the same ones) -- so a
+    setting written by one test can otherwise leak into the next.
+    """
+    from app.services import challenge_service
+
+    challenge_service.reset_cache()
+    yield
+    challenge_service.reset_cache()

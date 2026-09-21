@@ -302,15 +302,20 @@
       "value": {
         "enabled": true,
         "providerSlug": "google-cloud",
-        "questionCount": 20,
-        "durationMinutes": 25,
+        "certificationSlugs": [
+          "cloud-digital-leader",
+          "generative-ai-leader"
+        ],
+        "questionCount": 50,
+        "durationMinutes": 90,
         "passMark": 70,
-        "rewardDiscountPercentage": 20,
+        "rewardDiscountMinPercentage": 20,
+        "rewardDiscountMaxPercentage": 65,
         "maxWarnings": 3,
         "retakeAfterDays": 7,
         "responseHours": 24
       },
-      "description": "Certification challenge campaign terms: paper size, time limit, pass mark, the discount a pass earns, and how many proctoring warnings are allowed before the test auto-submits.",
+      "description": "Certification challenge campaign terms: which certifications are offered, paper size, time limit, pass mark, the discount scale a pass earns (minimum at the pass mark, maximum for a perfect score), and how many proctoring warnings are allowed before the test auto-submits.",
       "is_public": true
     }
   ]

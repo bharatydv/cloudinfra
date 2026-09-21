@@ -4,7 +4,10 @@ from datetime import date, timedelta
 
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import select
 
+from app.models.system import SiteSetting
+from app.services import challenge_service
 from tests.conftest import auth_override
 from tests.factories import make_certification, make_provider
 
@@ -40,6 +43,41 @@ async def test_options_list_published_certifications_only(client: AsyncClient, d
     names = [item["name"] for item in response.json()]
     assert "Visible Cert" in names
     assert "Hidden Cert" not in names
+
+
+async def test_options_are_restricted_to_the_challenge_campaigns_certifications(
+    client: AsyncClient, db_session
+):
+    """When the campaign names specific exams, scheduling offers only those.
+
+    The scheduling form and the discount test are two doors into the same
+    offer, so a certification the campaign does not cover should not appear
+    as something a visitor can book through this form either.
+    """
+    provider = await make_provider(db_session, name="Google Cloud")
+    provider.slug = "google-cloud"
+    await db_session.commit()
+    covered = await make_certification(db_session, provider, name="Covered Cert")
+    other = await make_certification(db_session, provider, name="Uncovered Cert")
+
+    db_session.add(
+        SiteSetting(
+            key="challenge",
+            value={
+                "enabled": True,
+                "providerSlug": "google-cloud",
+                "certificationSlugs": [covered.slug],
+            },
+            is_public=True,
+        )
+    )
+    await db_session.commit()
+    challenge_service.reset_cache()
+
+    response = await client.get("/api/exam-bookings/options")
+    names = [item["name"] for item in response.json()]
+    assert covered.name in names
+    assert other.name not in names
 
 
 async def test_anonymous_visitor_can_submit_a_request(client: AsyncClient, db_session):

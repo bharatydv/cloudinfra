@@ -724,7 +724,10 @@ export interface ChallengeTerms {
   question_count: number
   duration_minutes: number
   pass_mark: string
-  reward_discount_percentage: string
+  // The reward scales with the score: the pass mark earns the minimum, a
+  // perfect paper the maximum.
+  reward_discount_min_percentage: string
+  reward_discount_max_percentage: string
   max_warnings: number
   retake_after_days: number
   response_hours: number
@@ -737,7 +740,19 @@ export interface ChallengeCertificationOption {
   level: CertificationLevel
   url: string
   question_count: number
+  duration_minutes: number
   pricing: ExamPricing | null
+}
+
+/** The slot an applicant asked for on the scheduling form, carried through to
+ * a test started from there so the discount callback can book it. */
+export interface ChallengeBookingPreferences {
+  preferred_date?: string | null
+  alternate_date?: string | null
+  preferred_time_slot?: string | null
+  timezone?: string | null
+  delivery_mode?: string | null
+  city?: string | null
 }
 
 export interface ChallengeIntro {
@@ -771,7 +786,8 @@ export interface ChallengeSession {
   duration_seconds: number
   max_warnings: number
   pass_mark: string
-  reward_discount_percentage: string
+  reward_discount_min_percentage: string
+  reward_discount_max_percentage: string
   questions: ChallengeQuestion[]
 }
 
@@ -824,6 +840,7 @@ export interface ChallengeAttempt {
   email: string
   phone: string
   country: string | null
+  booking_preferences: ChallengeBookingPreferences | null
   certification_id: string | null
   certification_name: string
   exam_code: string | null

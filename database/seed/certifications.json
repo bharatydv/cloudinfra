@@ -1066,6 +1066,206 @@
       "exam_fee_amount": 165.0,
       "exam_fee_currency": "USD",
       "discount_percentage": null
+    },
+    {
+      "provider": "google-cloud",
+      "name": "Cloud Digital Leader",
+      "slug": "cloud-digital-leader",
+      "exam_code": "CDL",
+      "level": "foundational",
+      "category": "Cloud Fundamentals",
+      "position": 0,
+      "is_featured": true,
+      "short_description": "Explain the value of Google Cloud and how it addresses business challenges, with no hands-on experience required.",
+      "description": "The Cloud Digital Leader is Google Cloud's entry-level certification. It has no lab component: instead of testing whether you can configure a resource, it tests whether you can explain, in business terms, what Google Cloud does and why an organization would choose it.\n\nThat makes it the right starting point for people who work alongside engineers rather than as one -- managers, analysts, sales and support staff, and anyone early in a cloud career who wants the vocabulary before the hands-on certifications.",
+      "audience": "Managers, analysts and anyone who works with cloud teams without configuring the cloud themselves.",
+      "recommended_experience": "None required. Comfort with basic business and technology concepts is enough.",
+      "exam_duration_minutes": 90,
+      "exam_format": "Multiple choice and multiple select",
+      "official_url": "https://cloud.google.com/learn/certification/cloud-digital-leader",
+      "skills": [
+        "Cloud value proposition",
+        "Core Google Cloud services",
+        "Data and AI on Google Cloud",
+        "Infrastructure modernization",
+        "Security and operations basics"
+      ],
+      "exam_topics": [
+        {
+          "title": "Digital transformation with Google Cloud",
+          "weight": 10,
+          "items": [
+            "Why organizations move to the cloud",
+            "Shared responsibility and cloud operating models",
+            "Total cost of ownership versus on-premises"
+          ]
+        },
+        {
+          "title": "Innovating with data and Google Cloud",
+          "weight": 30,
+          "items": [
+            "Databases and storage options",
+            "Data analytics with BigQuery",
+            "Machine learning and AI building blocks"
+          ]
+        },
+        {
+          "title": "Infrastructure and application modernization",
+          "weight": 30,
+          "items": [
+            "Compute options: Compute Engine, GKE, Cloud Run, App Engine",
+            "Migration strategies: rehost, replatform, refactor",
+            "Networking fundamentals"
+          ]
+        },
+        {
+          "title": "Google Cloud security and operations",
+          "weight": 30,
+          "items": [
+            "Identity and Access Management basics",
+            "Compliance and shared responsibility for security",
+            "Reliability, monitoring and cost management"
+          ]
+        }
+      ],
+      "preparation_roadmap": [
+        {
+          "step": 1,
+          "title": "Learn the vocabulary",
+          "description": "Regions, zones, projects, IAM, and the difference between IaaS, PaaS and SaaS.",
+          "estimated_weeks": 1
+        },
+        {
+          "step": 2,
+          "title": "Tour the core services",
+          "description": "Compute, storage, databases, BigQuery and the main AI products, at a what-and-why level.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 3,
+          "title": "Read two case studies",
+          "description": "Pick two Google Cloud customer stories and be able to explain which products they used and why.",
+          "estimated_weeks": 1
+        },
+        {
+          "step": 4,
+          "title": "Practice questions",
+          "description": "This exam rewards recognizing the right product for a described business problem. Drill scenario questions.",
+          "estimated_weeks": 1
+        }
+      ],
+      "resources": [
+        {
+          "title": "Cloud Digital Leader study roadmap",
+          "resource_type": "roadmap",
+          "estimated_minutes": 6,
+          "description": "A five-week plan for a certification with no lab component.",
+          "content": "## Principle\n\nThis exam is entirely conceptual: nothing is configured or built. The fastest path is repetition on *why* a product exists, not *how* to run it.\n\n## Weeks 1-2\n\nLearn Google Cloud's vocabulary and tour the core compute, storage and data products at a summary level.\n\n## Weeks 3-4\n\nRead customer case studies and connect each one to the products involved.\n\n## Week 5\n\nDrill scenario-style practice questions daily."
+        }
+      ],
+      "exam_fee_amount": 99.0,
+      "exam_fee_currency": "USD",
+      "discount_percentage": null
+    },
+    {
+      "provider": "google-cloud",
+      "name": "Generative AI Leader",
+      "slug": "generative-ai-leader",
+      "exam_code": null,
+      "level": "foundational",
+      "category": "Artificial Intelligence",
+      "position": 1,
+      "is_featured": true,
+      "short_description": "Explain generative AI concepts and Google Cloud's generative AI offerings well enough to guide a business strategy.",
+      "description": "The Generative AI Leader certification is business-focused rather than hands-on: it tests whether you can reason about generative AI strategy, pick an appropriate Google Cloud product for a described use case, and speak sensibly about responsible and secure AI adoption. There is no coding or lab component.\n\nIt suits product managers, strategists and technical leaders who need to make or influence decisions about adopting generative AI without personally building the models.",
+      "audience": "Product managers, strategists and leaders shaping a generative AI adoption plan.",
+      "recommended_experience": "None required. Familiarity with basic AI and cloud concepts helps.",
+      "exam_duration_minutes": 90,
+      "exam_format": "Multiple choice and multiple select",
+      "official_url": "https://cloud.google.com/learn/certification/generative-ai-leader",
+      "skills": [
+        "Generative AI fundamentals",
+        "Google Cloud AI offerings",
+        "Prompting and model output techniques",
+        "Responsible AI adoption",
+        "Generative AI business strategy"
+      ],
+      "exam_topics": [
+        {
+          "title": "Fundamentals of generative AI",
+          "weight": 30,
+          "items": [
+            "Foundation models and how they are trained",
+            "Generative AI use cases and limitations",
+            "Key terms: tokens, embeddings, context windows"
+          ]
+        },
+        {
+          "title": "Google Cloud's generative AI offerings",
+          "weight": 35,
+          "items": [
+            "Vertex AI and Gemini models",
+            "Pre-built and custom AI solutions",
+            "Choosing a product for a described use case"
+          ]
+        },
+        {
+          "title": "Techniques to improve model output",
+          "weight": 20,
+          "items": [
+            "Prompt design and prompt engineering",
+            "Grounding and retrieval-augmented generation",
+            "Fine-tuning versus prompting"
+          ]
+        },
+        {
+          "title": "Business strategy for generative AI",
+          "weight": 15,
+          "items": [
+            "Responsible AI and governance",
+            "Data privacy and security for AI systems",
+            "Measuring the value of a generative AI initiative"
+          ]
+        }
+      ],
+      "preparation_roadmap": [
+        {
+          "step": 1,
+          "title": "Learn the core concepts",
+          "description": "Foundation models, tokens, embeddings, context windows and what makes generative AI different from traditional ML.",
+          "estimated_weeks": 1
+        },
+        {
+          "step": 2,
+          "title": "Tour Google Cloud's AI stack",
+          "description": "Vertex AI, the Gemini model family, and the pre-built AI APIs, at a product-selection level.",
+          "estimated_weeks": 2
+        },
+        {
+          "step": 3,
+          "title": "Study prompting and grounding",
+          "description": "Prompt design techniques and how retrieval-augmented generation reduces hallucination.",
+          "estimated_weeks": 1
+        },
+        {
+          "step": 4,
+          "title": "Practice scenario questions",
+          "description": "This exam rewards matching a business problem to the right product and technique. Drill scenarios daily.",
+          "estimated_weeks": 1
+        }
+      ],
+      "resources": [
+        {
+          "title": "Generative AI Leader study roadmap",
+          "resource_type": "roadmap",
+          "estimated_minutes": 6,
+          "description": "A five-week plan built around concepts and product selection, not code.",
+          "content": "## Principle\n\nNo lab work is tested here. The fastest path is fluency in generative AI vocabulary and Google Cloud's product lineup.\n\n## Weeks 1-2\n\nLearn the core concepts, then tour Vertex AI, Gemini and the pre-built AI APIs.\n\n## Weeks 3-4\n\nStudy prompting, grounding and responsible AI practices.\n\n## Week 5\n\nDrill scenario-style practice questions daily."
+        }
+      ],
+      "exam_fee_amount": 99.0,
+      "exam_fee_currency": "USD",
+      "discount_percentage": null
     }
   ]
 }

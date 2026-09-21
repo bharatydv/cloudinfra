@@ -16,7 +16,7 @@ import { useDebounce } from '@/hooks/useDebounce'
 import { useToast } from '@/hooks/useToast'
 import { formatDate } from '@/lib/format'
 import { queryKeys } from '@/lib/queryClient'
-import type { ChallengeAttempt, ChallengeLeadStatus } from '@/types/api'
+import type { ChallengeAttempt, ChallengeBookingPreferences, ChallengeLeadStatus } from '@/types/api'
 
 const LEAD_STATUSES: Array<{ value: ChallengeLeadStatus; label: string }> = [
   { value: 'new', label: 'New' },
@@ -379,6 +379,12 @@ export default function AdminChallengePage() {
                 label="Submitted"
                 value={selected.submitted_at ? formatDate(selected.submitted_at) : 'Not submitted'}
               />
+              {selected.booking_preferences && (
+                <DetailRow
+                  label="Requested slot"
+                  value={describeSlot(selected.booking_preferences)}
+                />
+              )}
             </dl>
 
             <Field label="Internal notes" htmlFor="challenge-notes">
@@ -394,6 +400,19 @@ export default function AdminChallengePage() {
       </Modal>
     </>
   )
+}
+
+/** The slot an applicant asked for, if the test was started from the
+ * scheduling form -- what the callback needs to actually book it. */
+function describeSlot(preferences: ChallengeBookingPreferences): string {
+  const parts: string[] = []
+  if (preferences.preferred_date) parts.push(preferences.preferred_date)
+  if (preferences.alternate_date) parts.push(`or ${preferences.alternate_date}`)
+  if (preferences.preferred_time_slot) parts.push(preferences.preferred_time_slot)
+  if (preferences.timezone) parts.push(`(${preferences.timezone})`)
+  if (preferences.delivery_mode) parts.push(preferences.delivery_mode.replace('_', ' '))
+  if (preferences.city) parts.push(`near ${preferences.city}`)
+  return parts.length > 0 ? parts.join(' ') : 'Not specified'
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {

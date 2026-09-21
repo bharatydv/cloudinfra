@@ -14,7 +14,8 @@ about the result:
   * warnings are counted on the row, so refreshing the page does not clear them.
 
 Passing does not discount anything by itself. It records a promise -- captured
-on the attempt as `discount_percentage` -- that the team honours on a call.
+on the attempt as `discount_percentage`, sized by the score -- that the team
+honours on a call.
 """
 
 from __future__ import annotations
@@ -83,19 +84,39 @@ class ChallengeConfig:
 
     enabled: bool = True
     provider_slug: str = "google-cloud"
-    question_count: int = 20
-    duration_minutes: int = 25
+    # The paper mirrors the real exam: both campaign certifications sit 50-60
+    # questions in 90 minutes, so a candidate who passes here has practised
+    # the pace as well as the content.
+    question_count: int = 50
+    duration_minutes: int = 90
     pass_mark: Decimal = Decimal("70.00")
-    reward_discount_percentage: Decimal = Decimal("20.00")
+    # The reward scales with the score. Exactly the pass mark earns the
+    # minimum, a perfect paper the maximum, and everything between is on a
+    # straight line -- so a stronger candidate is promised a bigger discount.
+    reward_discount_min_percentage: Decimal = Decimal("20.00")
+    reward_discount_max_percentage: Decimal = Decimal("65.00")
     max_warnings: int = 3
     retake_after_days: int = 7
     response_hours: int = 24
+    # Which of the provider's certifications the campaign covers, in the order
+    # they are offered. Empty means every published one with a question bank.
+    certification_slugs: tuple[str, ...] = ()
 
     @classmethod
     def from_setting(cls, value: dict | None) -> ChallengeConfig:
         if not value:
             return cls()
         default = cls()
+        # "rewardDiscountPercentage" is the pre-scale name for the minimum, kept
+        # so a setting saved under the old terms still reads sensibly.
+        minimum = _percent(
+            value.get("rewardDiscountMinPercentage", value.get("rewardDiscountPercentage")),
+            default=default.reward_discount_min_percentage,
+        )
+        maximum = _percent(
+            value.get("rewardDiscountMaxPercentage"),
+            default=max(minimum, default.reward_discount_max_percentage),
+        )
         return cls(
             enabled=bool(value.get("enabled", default.enabled)),
             provider_slug=str(value.get("providerSlug") or default.provider_slug),
@@ -106,10 +127,10 @@ class ChallengeConfig:
                 value.get("durationMinutes"), default.duration_minutes, 1, 240
             ),
             pass_mark=_percent(value.get("passMark"), default=default.pass_mark),
-            reward_discount_percentage=_percent(
-                value.get("rewardDiscountPercentage"),
-                default=default.reward_discount_percentage,
-            ),
+            reward_discount_min_percentage=minimum,
+            # A maximum below the minimum is a typo; the minimum wins.
+            reward_discount_max_percentage=max(minimum, maximum),
+            certification_slugs=_slugs(value.get("certificationSlugs")),
             max_warnings=_bounded(
                 value.get("maxWarnings"), default.max_warnings, 1, 20
             ),
@@ -128,11 +149,33 @@ class ChallengeConfig:
             question_count=self.question_count,
             duration_minutes=self.duration_minutes,
             pass_mark=self.pass_mark,
-            reward_discount_percentage=self.reward_discount_percentage,
+            reward_discount_min_percentage=self.reward_discount_min_percentage,
+            reward_discount_max_percentage=self.reward_discount_max_percentage,
             max_warnings=self.max_warnings,
             retake_after_days=self.retake_after_days,
             response_hours=self.response_hours,
         )
+
+    def covers(self, slug: str) -> bool:
+        return not self.certification_slugs or slug in self.certification_slugs
+
+    def discount_for(self, score: Decimal) -> Decimal | None:
+        """The discount a score earns, or None below the pass mark.
+
+        Linear between the pass mark (minimum) and 100% (maximum), rounded to
+        a whole percent because it is read out on a phone call.
+        """
+        if score < self.pass_mark:
+            return None
+        low = self.reward_discount_min_percentage
+        high = self.reward_discount_max_percentage
+        span = Decimal(100) - self.pass_mark
+        if span <= 0 or high <= low:
+            reward = high if score >= 100 else low
+        else:
+            fraction = min((score - self.pass_mark) / span, Decimal(1))
+            reward = low + (high - low) * fraction
+        return reward.quantize(Decimal(1), rounding=ROUND_HALF_UP)
 
 
 def _plain(value: Decimal) -> str:
@@ -146,6 +189,18 @@ def _plain(value: Decimal) -> str:
     if trimmed == trimmed.to_integral_value():
         trimmed = trimmed.quantize(Decimal(1))
     return f"{trimmed}"
+
+
+def _slugs(value: object) -> tuple[str, ...]:
+    """Coerce the setting's certification list to clean, de-duplicated slugs."""
+    if not isinstance(value, list):
+        return ()
+    seen: list[str] = []
+    for item in value:
+        slug = str(item).strip().lower()
+        if slug and slug not in seen:
+            seen.append(slug)
+    return tuple(seen)
 
 
 def _bounded(value: object, default: int, low: int, high: int) -> int:
@@ -219,14 +274,17 @@ async def build_intro(db: AsyncSession) -> ChallengeIntro:
         .order_by(Certification.position, Certification.name)
     )
 
-    options: list[ChallengeCertificationOption] = []
+    options: list[tuple[str, ChallengeCertificationOption]] = []
     for row in rows:
+        if not config.covers(row.slug):
+            continue
         available = per_certification.get(row.id, 0) + shared
         # A certification with no drawable paper is not offered at all, rather
         # than offered and then failing at start time.
         if available <= 0:
             continue
-        options.append(
+        options.append((
+            row.slug,
             ChallengeCertificationOption(
                 id=row.id,
                 name=row.name,
@@ -234,6 +292,7 @@ async def build_intro(db: AsyncSession) -> ChallengeIntro:
                 level=row.level,
                 url=f"/certifications/{provider.slug}/{row.slug}",
                 question_count=min(available, config.question_count),
+                duration_minutes=config.duration_minutes,
                 pricing=pricing.compute(
                     exam_fee_amount=row.exam_fee_amount,
                     currency=row.exam_fee_currency,
@@ -241,11 +300,18 @@ async def build_intro(db: AsyncSession) -> ChallengeIntro:
                     discount_override=row.discount_percentage,
                     config=price_config,
                 ),
-            )
-        )
+            ),
+        ))
+
+    if config.certification_slugs:
+        # Offered in the order the campaign lists them, not catalogue order.
+        order = {slug: index for index, slug in enumerate(config.certification_slugs)}
+        options.sort(key=lambda item: order.get(item[0], len(order)))
 
     return ChallengeIntro(
-        terms=config.terms, provider_name=provider.name, options=options
+        terms=config.terms,
+        provider_name=provider.name,
+        options=[option for _, option in options],
     )
 
 
@@ -309,6 +375,7 @@ async def start(
         certification is None
         or not certification.is_published
         or certification.provider.slug != config.provider_slug
+        or not config.covers(certification.slug)
     ):
         raise NotFoundError("That certification is not part of this challenge.")
 
@@ -334,6 +401,9 @@ async def start(
         email=email,
         phone=payload.phone.strip(),
         country=payload.country.strip() if payload.country else None,
+        booking_preferences=(
+            payload.booking_preferences.as_record() if payload.booking_preferences else None
+        ),
         certification_id=certification.id,
         certification_name=certification.name,
         exam_code=certification.exam_code,
@@ -362,7 +432,8 @@ async def start(
         duration_seconds=config.duration_minutes * 60,
         max_warnings=config.max_warnings,
         pass_mark=config.pass_mark,
-        reward_discount_percentage=config.reward_discount_percentage,
+        reward_discount_min_percentage=config.reward_discount_min_percentage,
+        reward_discount_max_percentage=config.reward_discount_max_percentage,
         questions=[
             ChallengeQuestionPublic(
                 id=question.id,
@@ -530,9 +601,7 @@ async def submit(
     attempt.score_percentage = score
     attempt.passed = passed
     attempt.pass_mark = config.pass_mark
-    attempt.discount_percentage = (
-        config.reward_discount_percentage if passed else None
-    )
+    attempt.discount_percentage = config.discount_for(score) if passed else None
     attempt.auto_submitted = payload.auto_submitted or late
     attempt.submitted_at = now
     attempt.status = (
@@ -615,9 +684,18 @@ async def _build_result(
 
     if passed:
         headline = f"You passed with {_plain(score)}%"
+        earned = attempt.discount_percentage or Decimal(0)
+        if earned >= config.reward_discount_max_percentage:
+            how = "That is the biggest discount the challenge offers."
+        else:
+            how = (
+                f"The discount is based on your score: {_plain(config.pass_mark)}% earns "
+                f"{_plain(config.reward_discount_min_percentage)}% off and a perfect "
+                f"paper earns {_plain(config.reward_discount_max_percentage)}%."
+            )
         message = (
-            f"You have earned {_plain(attempt.discount_percentage)}% off the "
-            f"{attempt.certification_name} exam. Our team will call you within "
+            f"Your score earns {_plain(earned)}% off the "
+            f"{attempt.certification_name} exam. {how} Our team will call you within "
             f"{config.response_hours} hours to confirm the discount and book your "
             "slot on the date you want."
         )
@@ -683,6 +761,7 @@ async def _send_result_emails(
             response_hours=config.response_hours,
             retake_after_days=config.retake_after_days,
             warnings=attempt.warnings,
+            booking_preferences=attempt.booking_preferences,
         )
         await email_service.send_email(attempt.email, subject, body)
     except Exception:
@@ -702,6 +781,7 @@ async def _send_result_emails(
             discount_percentage=f"{_plain(attempt.discount_percentage)}%",
             reference_code=attempt.reference_code,
             response_hours=config.response_hours,
+            booking_preferences=attempt.booking_preferences,
         )
         await email_service.send_email(
             settings.sales_notification_email, subject, body

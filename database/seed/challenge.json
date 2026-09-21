@@ -1674,6 +1674,2706 @@
       ],
       "correct_option": "b",
       "explanation": "Cloud Storage is the standard data lake landing zone: cheap, durable, and readable directly by BigQuery, Dataflow and Dataproc."
+    },
+    {
+      "reference": "cdl-001",
+      "certification": "cloud-digital-leader",
+      "topic": "Cloud value proposition",
+      "difficulty": "easy",
+      "prompt": "What is the main financial shift a company makes when it moves from owning data centers to using a public cloud?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Capital expenditure (CapEx) shifts to operating expenditure (OpEx)"
+        },
+        {
+          "key": "b",
+          "text": "OpEx shifts to CapEx"
+        },
+        {
+          "key": "c",
+          "text": "All spending becomes CapEx"
+        },
+        {
+          "key": "d",
+          "text": "There is no financial change"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Buying servers is CapEx paid up front; paying for cloud usage as you go is OpEx, billed for what is actually consumed."
+    },
+    {
+      "reference": "cdl-002",
+      "certification": "cloud-digital-leader",
+      "topic": "Cloud value proposition",
+      "difficulty": "easy",
+      "prompt": "Which term describes a cloud's ability to automatically add or remove resources to match demand?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Elasticity"
+        },
+        {
+          "key": "b",
+          "text": "Latency"
+        },
+        {
+          "key": "c",
+          "text": "Redundancy"
+        },
+        {
+          "key": "d",
+          "text": "Virtualization"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Elasticity is scaling resources up or down automatically as load changes, so capacity matches demand."
+    },
+    {
+      "reference": "cdl-003",
+      "certification": "cloud-digital-leader",
+      "topic": "Shared responsibility",
+      "difficulty": "medium",
+      "prompt": "In Google Cloud's shared responsibility model, who is always responsible for securing the physical data centers?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Google"
+        },
+        {
+          "key": "b",
+          "text": "The customer"
+        },
+        {
+          "key": "c",
+          "text": "A third-party auditor"
+        },
+        {
+          "key": "d",
+          "text": "Whoever signs the contract"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Google secures the physical infrastructure and the layers beneath it; the customer's share grows with how much of the stack they control."
+    },
+    {
+      "reference": "cdl-004",
+      "certification": "cloud-digital-leader",
+      "topic": "Cloud service models",
+      "difficulty": "medium",
+      "prompt": "A company runs its own application code but does not manage the underlying servers or operating system. Which service model is this?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Platform as a Service (PaaS)"
+        },
+        {
+          "key": "b",
+          "text": "Infrastructure as a Service (IaaS)"
+        },
+        {
+          "key": "c",
+          "text": "Software as a Service (SaaS)"
+        },
+        {
+          "key": "d",
+          "text": "On-premises hosting"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "PaaS gives you a managed runtime for your own code, so you are not responsible for patching or provisioning servers."
+    },
+    {
+      "reference": "cdl-005",
+      "certification": "cloud-digital-leader",
+      "topic": "Total cost of ownership",
+      "difficulty": "medium",
+      "prompt": "Which cost is most often underestimated when comparing on-premises infrastructure to the cloud?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Staff time spent on maintenance, patching and capacity planning"
+        },
+        {
+          "key": "b",
+          "text": "The price of the servers themselves"
+        },
+        {
+          "key": "c",
+          "text": "The cloud provider's list price"
+        },
+        {
+          "key": "d",
+          "text": "Network bandwidth"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "The sticker price of hardware is easy to compare; the ongoing staff time to run and maintain it is the part TCO comparisons most often miss."
+    },
+    {
+      "reference": "cdl-006",
+      "certification": "cloud-digital-leader",
+      "topic": "Cloud deployment models",
+      "difficulty": "easy",
+      "prompt": "A company keeps sensitive workloads on its own servers and runs everything else in Google Cloud. What is this called?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Hybrid cloud"
+        },
+        {
+          "key": "b",
+          "text": "Public cloud"
+        },
+        {
+          "key": "c",
+          "text": "Private cloud"
+        },
+        {
+          "key": "d",
+          "text": "Multi-region cloud"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Hybrid cloud combines on-premises infrastructure with a public cloud, connected so workloads can move between the two."
+    },
+    {
+      "reference": "cdl-007",
+      "certification": "cloud-digital-leader",
+      "topic": "Storage services",
+      "difficulty": "easy",
+      "prompt": "Which Google Cloud service is an object storage service, best suited for storing unstructured files like images and backups?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud Storage"
+        },
+        {
+          "key": "b",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "c",
+          "text": "Bigtable"
+        },
+        {
+          "key": "d",
+          "text": "BigQuery"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Cloud Storage stores objects (files) rather than rows or blocks, and is priced by storage class and access pattern."
+    },
+    {
+      "reference": "cdl-008",
+      "certification": "cloud-digital-leader",
+      "topic": "Storage classes",
+      "difficulty": "medium",
+      "prompt": "A company has log archives it must keep for compliance but almost never reads. Which Cloud Storage class minimizes cost?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Archive"
+        },
+        {
+          "key": "b",
+          "text": "Standard"
+        },
+        {
+          "key": "c",
+          "text": "Nearline"
+        },
+        {
+          "key": "d",
+          "text": "Multi-regional"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Archive storage has the lowest cost per gigabyte and is meant for data accessed less than once a year, at the price of a slower retrieval time."
+    },
+    {
+      "reference": "cdl-009",
+      "certification": "cloud-digital-leader",
+      "topic": "Databases",
+      "difficulty": "medium",
+      "prompt": "A team needs a fully managed relational database compatible with MySQL for a traditional web application. Which product fits?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "b",
+          "text": "Bigtable"
+        },
+        {
+          "key": "c",
+          "text": "Firestore"
+        },
+        {
+          "key": "d",
+          "text": "Spanner"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Cloud SQL is Google Cloud's managed relational database service, with MySQL, PostgreSQL and SQL Server engines."
+    },
+    {
+      "reference": "cdl-010",
+      "certification": "cloud-digital-leader",
+      "topic": "Databases",
+      "difficulty": "medium",
+      "prompt": "Which Google Cloud database is designed to scale globally while still offering strong relational consistency?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Spanner"
+        },
+        {
+          "key": "b",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "c",
+          "text": "Firestore"
+        },
+        {
+          "key": "d",
+          "text": "Persistent Disk"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Spanner combines horizontal scalability across regions with the strong consistency and SQL interface of a relational database."
+    },
+    {
+      "reference": "cdl-011",
+      "certification": "cloud-digital-leader",
+      "topic": "Databases",
+      "difficulty": "hard",
+      "prompt": "A gaming company needs a NoSQL database that can handle massive write throughput with single-digit-millisecond latency at petabyte scale. Which service is purpose-built for this?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Bigtable"
+        },
+        {
+          "key": "b",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "c",
+          "text": "BigQuery"
+        },
+        {
+          "key": "d",
+          "text": "Cloud Storage"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Bigtable is a wide-column NoSQL database built for very high throughput and low latency at huge scale, common in gaming, ad tech and IoT."
+    },
+    {
+      "reference": "cdl-012",
+      "certification": "cloud-digital-leader",
+      "topic": "Analytics",
+      "difficulty": "easy",
+      "prompt": "Which Google Cloud service is a serverless data warehouse used to run SQL analytics over very large datasets?",
+      "options": [
+        {
+          "key": "a",
+          "text": "BigQuery"
+        },
+        {
+          "key": "b",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "c",
+          "text": "Pub/Sub"
+        },
+        {
+          "key": "d",
+          "text": "Dataflow"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "BigQuery separates storage from compute and lets you run SQL queries over huge datasets without managing any infrastructure."
+    },
+    {
+      "reference": "cdl-013",
+      "certification": "cloud-digital-leader",
+      "topic": "Analytics",
+      "difficulty": "medium",
+      "prompt": "A retailer wants to combine years of sales data with real-time point-of-sale events to build dashboards. Which two services would typically be paired for the real-time ingestion and the analysis?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Pub/Sub for ingestion and BigQuery for analysis"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Storage for ingestion and Compute Engine for analysis"
+        },
+        {
+          "key": "c",
+          "text": "Cloud SQL for ingestion and Bigtable for analysis"
+        },
+        {
+          "key": "d",
+          "text": "Firestore for ingestion and Cloud Run for analysis"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Pub/Sub ingests streaming events reliably at scale, and BigQuery is where that data is queried and turned into dashboards."
+    },
+    {
+      "reference": "cdl-014",
+      "certification": "cloud-digital-leader",
+      "topic": "Analytics",
+      "difficulty": "medium",
+      "prompt": "Which Google Cloud product is a fully managed service for running Apache Spark and Hadoop workloads?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Dataproc"
+        },
+        {
+          "key": "b",
+          "text": "Dataflow"
+        },
+        {
+          "key": "c",
+          "text": "Data Fusion"
+        },
+        {
+          "key": "d",
+          "text": "Looker"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Dataproc provisions managed Spark and Hadoop clusters, useful for teams migrating existing big data workloads without rewriting them."
+    },
+    {
+      "reference": "cdl-015",
+      "certification": "cloud-digital-leader",
+      "topic": "Analytics",
+      "difficulty": "medium",
+      "prompt": "What is the primary purpose of Dataflow?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Running unified batch and stream data processing pipelines"
+        },
+        {
+          "key": "b",
+          "text": "Storing relational data"
+        },
+        {
+          "key": "c",
+          "text": "Hosting containerized applications"
+        },
+        {
+          "key": "d",
+          "text": "Managing IAM policies"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Dataflow runs Apache Beam pipelines that process data in batches or as a continuous stream, without managing the underlying servers."
+    },
+    {
+      "reference": "cdl-016",
+      "certification": "cloud-digital-leader",
+      "topic": "Business intelligence",
+      "difficulty": "easy",
+      "prompt": "Which Google Cloud product is a business intelligence and data visualization tool for building dashboards?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Looker"
+        },
+        {
+          "key": "b",
+          "text": "BigQuery"
+        },
+        {
+          "key": "c",
+          "text": "Dataproc"
+        },
+        {
+          "key": "d",
+          "text": "Bigtable"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Looker builds and shares interactive dashboards and reports on top of data warehouses like BigQuery."
+    },
+    {
+      "reference": "cdl-017",
+      "certification": "cloud-digital-leader",
+      "topic": "Machine learning",
+      "difficulty": "easy",
+      "prompt": "Which platform brings together Google Cloud's tools for building, training and deploying machine learning models?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Vertex AI"
+        },
+        {
+          "key": "b",
+          "text": "BigQuery"
+        },
+        {
+          "key": "c",
+          "text": "Cloud Run"
+        },
+        {
+          "key": "d",
+          "text": "Anthos"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Vertex AI is the unified platform for the full machine learning lifecycle on Google Cloud, from data prep to deployment."
+    },
+    {
+      "reference": "cdl-018",
+      "certification": "cloud-digital-leader",
+      "topic": "Machine learning",
+      "difficulty": "medium",
+      "prompt": "A company wants to add image labeling to an app without training its own model. What is the fastest approach?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Call a pre-trained Vision API"
+        },
+        {
+          "key": "b",
+          "text": "Train a custom model from scratch"
+        },
+        {
+          "key": "c",
+          "text": "Build a data warehouse first"
+        },
+        {
+          "key": "d",
+          "text": "Provision a GPU cluster manually"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Google Cloud's pre-trained APIs (Vision, Natural Language, Translation) solve common tasks immediately, with no training required."
+    },
+    {
+      "reference": "cdl-019",
+      "certification": "cloud-digital-leader",
+      "topic": "Machine learning",
+      "difficulty": "medium",
+      "prompt": "What is the difference between AutoML and custom model training on Vertex AI?",
+      "options": [
+        {
+          "key": "a",
+          "text": "AutoML trains a model automatically from your data with minimal ML expertise; custom training gives full control over the model code"
+        },
+        {
+          "key": "b",
+          "text": "AutoML is only for images; custom training is only for text"
+        },
+        {
+          "key": "c",
+          "text": "AutoML requires writing your own training code; custom training does not"
+        },
+        {
+          "key": "d",
+          "text": "There is no difference"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "AutoML automates model selection and tuning for teams without deep ML expertise, while custom training is for teams that want to write and control their own training code."
+    },
+    {
+      "reference": "cdl-020",
+      "certification": "cloud-digital-leader",
+      "topic": "Data governance",
+      "difficulty": "medium",
+      "prompt": "Which practice is most associated with making a large organization's data reliable and discoverable across teams?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Data governance"
+        },
+        {
+          "key": "b",
+          "text": "Load balancing"
+        },
+        {
+          "key": "c",
+          "text": "Autoscaling"
+        },
+        {
+          "key": "d",
+          "text": "Container orchestration"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Data governance covers the policies, ownership and quality controls that keep data trustworthy and findable as an organization grows."
+    },
+    {
+      "reference": "cdl-021",
+      "certification": "cloud-digital-leader",
+      "topic": "Data migration",
+      "difficulty": "hard",
+      "prompt": "A company wants to move a 50 TB on-premises database to Cloud Storage over a slow internet connection. What is the recommended approach?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Use a Transfer Appliance to ship the data physically"
+        },
+        {
+          "key": "b",
+          "text": "Upload it directly using a browser"
+        },
+        {
+          "key": "c",
+          "text": "Email the data in batches"
+        },
+        {
+          "key": "d",
+          "text": "Re-key the entire dataset by hand"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Transfer Appliance is a physical device you load on-site and ship to Google, avoiding the bottleneck of moving very large datasets over a slow network link."
+    },
+    {
+      "reference": "cdl-022",
+      "certification": "cloud-digital-leader",
+      "topic": "Analytics",
+      "difficulty": "medium",
+      "prompt": "What does it mean that BigQuery separates storage and compute?",
+      "options": [
+        {
+          "key": "a",
+          "text": "You pay for the data you store and the queries you run independently, and each can scale on its own"
+        },
+        {
+          "key": "b",
+          "text": "Data and queries must always be in the same region"
+        },
+        {
+          "key": "c",
+          "text": "BigQuery cannot store data longer than 30 days"
+        },
+        {
+          "key": "d",
+          "text": "Storage and compute must be purchased as a single fixed-size cluster"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Because storage and compute scale and are billed separately, a large stored dataset costs nothing extra to keep if no queries run against it."
+    },
+    {
+      "reference": "cdl-023",
+      "certification": "cloud-digital-leader",
+      "topic": "Compute options",
+      "difficulty": "easy",
+      "prompt": "Which Google Cloud service provides customizable virtual machines, giving the most control over the operating system?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Compute Engine"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Run"
+        },
+        {
+          "key": "c",
+          "text": "App Engine"
+        },
+        {
+          "key": "d",
+          "text": "Cloud Functions"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Compute Engine is Infrastructure as a Service: you choose the machine type, OS and configuration, and manage the VM yourself."
+    },
+    {
+      "reference": "cdl-024",
+      "certification": "cloud-digital-leader",
+      "topic": "Compute options",
+      "difficulty": "medium",
+      "prompt": "A team wants to deploy a stateless container and have it billed only while it is handling requests, with no idle cost. Which service fits best?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud Run"
+        },
+        {
+          "key": "b",
+          "text": "Compute Engine"
+        },
+        {
+          "key": "c",
+          "text": "Persistent Disk"
+        },
+        {
+          "key": "d",
+          "text": "Filestore"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Cloud Run runs containers and scales to zero when idle, so there is no charge when nothing is being served."
+    },
+    {
+      "reference": "cdl-025",
+      "certification": "cloud-digital-leader",
+      "topic": "Compute options",
+      "difficulty": "medium",
+      "prompt": "Which compute service is best suited for a team that wants to deploy code directly without managing containers or servers at all?",
+      "options": [
+        {
+          "key": "a",
+          "text": "App Engine"
+        },
+        {
+          "key": "b",
+          "text": "Compute Engine"
+        },
+        {
+          "key": "c",
+          "text": "Google Kubernetes Engine"
+        },
+        {
+          "key": "d",
+          "text": "Bare metal instances"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "App Engine is a fully managed platform where you deploy source code and Google handles the runtime, scaling and infrastructure."
+    },
+    {
+      "reference": "cdl-026",
+      "certification": "cloud-digital-leader",
+      "topic": "Containers",
+      "difficulty": "medium",
+      "prompt": "What is the role of Google Kubernetes Engine (GKE)?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Running and orchestrating containerized applications at scale"
+        },
+        {
+          "key": "b",
+          "text": "Storing relational data"
+        },
+        {
+          "key": "c",
+          "text": "Managing DNS records"
+        },
+        {
+          "key": "d",
+          "text": "Running serverless functions triggered by events"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "GKE is a managed Kubernetes service: it schedules, scales and heals containers across a cluster of machines."
+    },
+    {
+      "reference": "cdl-027",
+      "certification": "cloud-digital-leader",
+      "topic": "Serverless",
+      "difficulty": "easy",
+      "prompt": "Which service runs small pieces of code in response to events, such as a file being uploaded, without provisioning any servers?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud Functions"
+        },
+        {
+          "key": "b",
+          "text": "Compute Engine"
+        },
+        {
+          "key": "c",
+          "text": "Filestore"
+        },
+        {
+          "key": "d",
+          "text": "Persistent Disk"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Cloud Functions is event-driven serverless compute: a single function runs in response to a trigger and then stops."
+    },
+    {
+      "reference": "cdl-028",
+      "certification": "cloud-digital-leader",
+      "topic": "Migration strategies",
+      "difficulty": "medium",
+      "prompt": "A company moves an application to the cloud by copying its virtual machines with minimal changes. What is this migration strategy called?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Rehost (lift and shift)"
+        },
+        {
+          "key": "b",
+          "text": "Refactor"
+        },
+        {
+          "key": "c",
+          "text": "Replatform"
+        },
+        {
+          "key": "d",
+          "text": "Retire"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Rehost, often called lift and shift, moves a workload to the cloud largely unchanged, which is the fastest but least cloud-optimized approach."
+    },
+    {
+      "reference": "cdl-029",
+      "certification": "cloud-digital-leader",
+      "topic": "Migration strategies",
+      "difficulty": "medium",
+      "prompt": "A company migrates its application to the cloud and, at the same time, breaks it into microservices and adopts managed services. What is this strategy called?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Refactor"
+        },
+        {
+          "key": "b",
+          "text": "Rehost"
+        },
+        {
+          "key": "c",
+          "text": "Retain"
+        },
+        {
+          "key": "d",
+          "text": "Repurchase"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Refactoring re-architects the application during the move, taking full advantage of cloud-native services at the cost of more migration effort."
+    },
+    {
+      "reference": "cdl-030",
+      "certification": "cloud-digital-leader",
+      "topic": "Migration strategies",
+      "difficulty": "hard",
+      "prompt": "A company decides one legacy application is not worth migrating and will be shut down once its replacement is live. What is this strategy called?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Retire"
+        },
+        {
+          "key": "b",
+          "text": "Rehost"
+        },
+        {
+          "key": "c",
+          "text": "Replatform"
+        },
+        {
+          "key": "d",
+          "text": "Refactor"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Retiring a workload means decommissioning it rather than migrating it, which is often the cheapest option for applications nearing end of life."
+    },
+    {
+      "reference": "cdl-031",
+      "certification": "cloud-digital-leader",
+      "topic": "Networking",
+      "difficulty": "medium",
+      "prompt": "What is the purpose of a Virtual Private Cloud (VPC) in Google Cloud?",
+      "options": [
+        {
+          "key": "a",
+          "text": "It provides an isolated, private network for a project's resources"
+        },
+        {
+          "key": "b",
+          "text": "It is a type of database"
+        },
+        {
+          "key": "c",
+          "text": "It is a billing construct"
+        },
+        {
+          "key": "d",
+          "text": "It is a monitoring dashboard"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A VPC is a private, software-defined network where you control IP ranges, subnets, routes and firewall rules for your resources."
+    },
+    {
+      "reference": "cdl-032",
+      "certification": "cloud-digital-leader",
+      "topic": "Networking",
+      "difficulty": "medium",
+      "prompt": "Which Google Cloud service distributes incoming traffic across multiple instances to improve availability and performance?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud Load Balancing"
+        },
+        {
+          "key": "b",
+          "text": "Cloud DNS"
+        },
+        {
+          "key": "c",
+          "text": "Cloud NAT"
+        },
+        {
+          "key": "d",
+          "text": "Cloud VPN"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Cloud Load Balancing spreads traffic across healthy backends, so no single instance is overwhelmed and failures are routed around automatically."
+    },
+    {
+      "reference": "cdl-033",
+      "certification": "cloud-digital-leader",
+      "topic": "Networking",
+      "difficulty": "medium",
+      "prompt": "What does Cloud CDN (Content Delivery Network) primarily improve?",
+      "options": [
+        {
+          "key": "a",
+          "text": "The latency of serving cached content to users close to them"
+        },
+        {
+          "key": "b",
+          "text": "Database query speed"
+        },
+        {
+          "key": "c",
+          "text": "IAM policy evaluation"
+        },
+        {
+          "key": "d",
+          "text": "Billing accuracy"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Cloud CDN caches content at edge locations near users, so it is served with much lower latency than fetching it from the origin every time."
+    },
+    {
+      "reference": "cdl-034",
+      "certification": "cloud-digital-leader",
+      "topic": "Reliability",
+      "difficulty": "medium",
+      "prompt": "A company wants an application to survive the loss of an entire Google Cloud zone. What should the architecture use?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Resources spread across multiple zones in a region"
+        },
+        {
+          "key": "b",
+          "text": "A single zone with a bigger machine"
+        },
+        {
+          "key": "c",
+          "text": "One backup taken once a month"
+        },
+        {
+          "key": "d",
+          "text": "A single point of failure by design"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Distributing resources across multiple zones means the loss of one zone does not take the whole application down."
+    },
+    {
+      "reference": "cdl-035",
+      "certification": "cloud-digital-leader",
+      "topic": "Hybrid and multi-cloud",
+      "difficulty": "medium",
+      "prompt": "Which Google Cloud offering is designed to manage applications consistently across on-premises, Google Cloud and other public clouds?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Anthos"
+        },
+        {
+          "key": "b",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "c",
+          "text": "BigQuery"
+        },
+        {
+          "key": "d",
+          "text": "Cloud Storage"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Anthos extends consistent Kubernetes-based management to workloads running on-premises and across multiple clouds."
+    },
+    {
+      "reference": "cdl-036",
+      "certification": "cloud-digital-leader",
+      "topic": "APIs and integration",
+      "difficulty": "medium",
+      "prompt": "What is the role of an API gateway such as Apigee in a modernized application architecture?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Managing, securing and monitoring access to APIs"
+        },
+        {
+          "key": "b",
+          "text": "Storing large binary files"
+        },
+        {
+          "key": "c",
+          "text": "Training machine learning models"
+        },
+        {
+          "key": "d",
+          "text": "Running virtual machines"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "An API gateway sits in front of backend services to handle authentication, rate limiting, and monitoring for the APIs it exposes."
+    },
+    {
+      "reference": "cdl-037",
+      "certification": "cloud-digital-leader",
+      "topic": "DevOps",
+      "difficulty": "medium",
+      "prompt": "What does CI/CD (continuous integration and continuous delivery) primarily help a team achieve?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Automating the building, testing and releasing of code changes"
+        },
+        {
+          "key": "b",
+          "text": "Automating employee onboarding"
+        },
+        {
+          "key": "c",
+          "text": "Reducing storage costs"
+        },
+        {
+          "key": "d",
+          "text": "Managing IAM roles"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "CI/CD pipelines automatically build, test and deploy code changes, so releases are faster and more consistent than manual processes."
+    },
+    {
+      "reference": "cdl-038",
+      "certification": "cloud-digital-leader",
+      "topic": "IAM",
+      "difficulty": "easy",
+      "prompt": "Which Google Cloud service manages who can do what on which resource?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Identity and Access Management (IAM)"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Monitoring"
+        },
+        {
+          "key": "c",
+          "text": "Cloud Billing"
+        },
+        {
+          "key": "d",
+          "text": "Cloud DNS"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "IAM lets an organization grant specific roles to specific identities on specific resources, following least privilege."
+    },
+    {
+      "reference": "cdl-039",
+      "certification": "cloud-digital-leader",
+      "topic": "IAM",
+      "difficulty": "medium",
+      "prompt": "What is the principle of least privilege?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Granting an identity only the permissions it needs to do its job, nothing more"
+        },
+        {
+          "key": "b",
+          "text": "Granting every user Owner access by default"
+        },
+        {
+          "key": "c",
+          "text": "Disabling IAM entirely"
+        },
+        {
+          "key": "d",
+          "text": "Sharing one account among an entire team"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Least privilege limits the damage a compromised or mistaken account can do, by never granting more access than the task requires."
+    },
+    {
+      "reference": "cdl-040",
+      "certification": "cloud-digital-leader",
+      "topic": "IAM",
+      "difficulty": "medium",
+      "prompt": "What is a service account used for in Google Cloud?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Identity for an application or workload, rather than a human user"
+        },
+        {
+          "key": "b",
+          "text": "The billing contact for an organization"
+        },
+        {
+          "key": "c",
+          "text": "A support ticket queue"
+        },
+        {
+          "key": "d",
+          "text": "A type of virtual machine"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A service account is a non-human identity that applications and services use to authenticate and call Google Cloud APIs."
+    },
+    {
+      "reference": "cdl-041",
+      "certification": "cloud-digital-leader",
+      "topic": "Compliance",
+      "difficulty": "medium",
+      "prompt": "Under the shared responsibility model, who is responsible for configuring IAM permissions correctly on a customer's own resources?",
+      "options": [
+        {
+          "key": "a",
+          "text": "The customer"
+        },
+        {
+          "key": "b",
+          "text": "Google exclusively"
+        },
+        {
+          "key": "c",
+          "text": "No one; it is automatic"
+        },
+        {
+          "key": "d",
+          "text": "A third-party auditor only"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Google secures the infrastructure, but how the customer configures access to their own projects and data is the customer's responsibility."
+    },
+    {
+      "reference": "cdl-042",
+      "certification": "cloud-digital-leader",
+      "topic": "Compliance",
+      "difficulty": "medium",
+      "prompt": "Which term describes rules a company must follow because of industry regulation, such as healthcare or financial data handling?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Compliance requirements"
+        },
+        {
+          "key": "b",
+          "text": "Service level agreements"
+        },
+        {
+          "key": "c",
+          "text": "Load balancing rules"
+        },
+        {
+          "key": "d",
+          "text": "Autoscaling policies"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Compliance requirements come from external regulation or standards a business is legally or contractually obligated to follow."
+    },
+    {
+      "reference": "cdl-043",
+      "certification": "cloud-digital-leader",
+      "topic": "Data protection",
+      "difficulty": "medium",
+      "prompt": "What happens to data stored in Google Cloud by default, both at rest and in transit?",
+      "options": [
+        {
+          "key": "a",
+          "text": "It is encrypted"
+        },
+        {
+          "key": "b",
+          "text": "It is stored in plain text"
+        },
+        {
+          "key": "c",
+          "text": "Encryption is an extra paid add-on"
+        },
+        {
+          "key": "d",
+          "text": "It is only encrypted if the customer writes custom code"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Google Cloud encrypts data at rest and in transit by default, without requiring the customer to configure it."
+    },
+    {
+      "reference": "cdl-044",
+      "certification": "cloud-digital-leader",
+      "topic": "Monitoring",
+      "difficulty": "easy",
+      "prompt": "Which Google Cloud service collects metrics, logs and traces to help teams observe the health of their applications?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Cloud Monitoring"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Storage"
+        },
+        {
+          "key": "c",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "d",
+          "text": "Cloud DNS"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Cloud Monitoring (formerly Stackdriver) gives dashboards, alerts and metrics for the health and performance of cloud resources."
+    },
+    {
+      "reference": "cdl-045",
+      "certification": "cloud-digital-leader",
+      "topic": "Monitoring",
+      "difficulty": "medium",
+      "prompt": "What is the purpose of setting up alerting policies in Cloud Monitoring?",
+      "options": [
+        {
+          "key": "a",
+          "text": "To notify a team automatically when a metric crosses a defined threshold"
+        },
+        {
+          "key": "b",
+          "text": "To automatically fix any application bug"
+        },
+        {
+          "key": "c",
+          "text": "To reduce cloud storage costs"
+        },
+        {
+          "key": "d",
+          "text": "To replace the need for logging"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Alerting policies watch metrics and notify the responsible team the moment something crosses a threshold, instead of relying on someone noticing."
+    },
+    {
+      "reference": "cdl-046",
+      "certification": "cloud-digital-leader",
+      "topic": "Cost management",
+      "difficulty": "medium",
+      "prompt": "Which practice helps a team avoid unexpected cloud bills by capping spending or getting warned early?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Setting budgets and billing alerts"
+        },
+        {
+          "key": "b",
+          "text": "Disabling monitoring"
+        },
+        {
+          "key": "c",
+          "text": "Using only the most expensive machine type"
+        },
+        {
+          "key": "d",
+          "text": "Avoiding tags on resources"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Budgets and billing alerts notify stakeholders as spending approaches a threshold, before a surprise appears on the invoice."
+    },
+    {
+      "reference": "cdl-047",
+      "certification": "cloud-digital-leader",
+      "topic": "Reliability",
+      "difficulty": "medium",
+      "prompt": "What does a Service Level Agreement (SLA) define?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A formal commitment about a service's availability or performance, often with remedies if it is not met"
+        },
+        {
+          "key": "b",
+          "text": "A company's internal org chart"
+        },
+        {
+          "key": "c",
+          "text": "A pricing discount tier"
+        },
+        {
+          "key": "d",
+          "text": "A firewall rule"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "An SLA is Google's contractual promise about a service's uptime or performance, distinct from an SLO (an internal target) or SLI (a measured indicator)."
+    },
+    {
+      "reference": "cdl-048",
+      "certification": "cloud-digital-leader",
+      "topic": "Reliability",
+      "difficulty": "medium",
+      "prompt": "What is the difference between an SLO and an SLI?",
+      "options": [
+        {
+          "key": "a",
+          "text": "An SLI is a measured indicator; an SLO is the target set for that indicator"
+        },
+        {
+          "key": "b",
+          "text": "They are the same thing"
+        },
+        {
+          "key": "c",
+          "text": "An SLO is a type of firewall rule"
+        },
+        {
+          "key": "d",
+          "text": "An SLI is a legal contract"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A Service Level Indicator (SLI) is what you measure, such as request latency; a Service Level Objective (SLO) is the target you aim to hit for it."
+    },
+    {
+      "reference": "cdl-049",
+      "certification": "cloud-digital-leader",
+      "topic": "Sustainability",
+      "difficulty": "medium",
+      "prompt": "Google Cloud publishes data on the carbon footprint of a customer's cloud usage through which type of tool?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Carbon Footprint reporting"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Billing export only"
+        },
+        {
+          "key": "c",
+          "text": "IAM policy analyzer"
+        },
+        {
+          "key": "d",
+          "text": "VPC flow logs"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Carbon Footprint reporting gives customers visibility into the greenhouse gas emissions associated with their Google Cloud usage."
+    },
+    {
+      "reference": "cdl-050",
+      "certification": "cloud-digital-leader",
+      "topic": "Operations",
+      "difficulty": "medium",
+      "prompt": "A company wants to reduce the operational burden of patching operating systems on its virtual machines. Which change would reduce this burden most?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Moving suitable workloads to a managed platform like Cloud Run or App Engine"
+        },
+        {
+          "key": "b",
+          "text": "Buying more Compute Engine instances"
+        },
+        {
+          "key": "c",
+          "text": "Disabling monitoring"
+        },
+        {
+          "key": "d",
+          "text": "Removing IAM roles"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Managed platforms handle the underlying OS and runtime patching for you, removing that operational burden entirely for workloads that fit them."
+    },
+    {
+      "reference": "gail-001",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "easy",
+      "prompt": "What distinguishes generative AI from traditional predictive machine learning?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Generative AI creates new content, such as text or images, rather than only predicting a label"
+        },
+        {
+          "key": "b",
+          "text": "Generative AI cannot use neural networks"
+        },
+        {
+          "key": "c",
+          "text": "Generative AI requires no training data"
+        },
+        {
+          "key": "d",
+          "text": "There is no meaningful difference"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Predictive ML classifies or scores existing input; generative AI produces new content that did not exist before, such as a paragraph or an image."
+    },
+    {
+      "reference": "gail-002",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "easy",
+      "prompt": "What is a foundation model?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A large model pre-trained on broad data, adaptable to many downstream tasks"
+        },
+        {
+          "key": "b",
+          "text": "A model trained only on a single company's private data"
+        },
+        {
+          "key": "c",
+          "text": "A rule-based system with no learning"
+        },
+        {
+          "key": "d",
+          "text": "A database schema"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Foundation models are trained once on broad data at large scale, then adapted (through prompting or fine-tuning) to many different tasks."
+    },
+    {
+      "reference": "gail-003",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "medium",
+      "prompt": "What is a token in the context of a large language model?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A chunk of text, such as a word or part of a word, that the model processes as a unit"
+        },
+        {
+          "key": "b",
+          "text": "A type of encryption key"
+        },
+        {
+          "key": "c",
+          "text": "A billing unit unrelated to text"
+        },
+        {
+          "key": "d",
+          "text": "A user's login credential"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Text is broken into tokens before a model processes it; a token can be a whole word, part of a word, or punctuation."
+    },
+    {
+      "reference": "gail-004",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "medium",
+      "prompt": "What does a model's context window determine?",
+      "options": [
+        {
+          "key": "a",
+          "text": "How much text (in tokens) the model can consider at once when generating a response"
+        },
+        {
+          "key": "b",
+          "text": "The model's training cost"
+        },
+        {
+          "key": "c",
+          "text": "The model's physical server location"
+        },
+        {
+          "key": "d",
+          "text": "The number of users who can query it simultaneously"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "The context window is the amount of input and output text the model can hold in memory during one interaction; exceeding it means earlier content is dropped."
+    },
+    {
+      "reference": "gail-005",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "medium",
+      "prompt": "What is an embedding?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A numerical vector representation of data that captures its meaning for comparison and search"
+        },
+        {
+          "key": "b",
+          "text": "A type of firewall rule"
+        },
+        {
+          "key": "c",
+          "text": "A compressed image file format"
+        },
+        {
+          "key": "d",
+          "text": "A user interface component"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Embeddings turn text, images or other data into vectors of numbers, positioned so that similar meanings end up close together, which enables semantic search."
+    },
+    {
+      "reference": "gail-006",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "medium",
+      "prompt": "What is a hallucination in the context of a generative AI model?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Confident output that is factually incorrect or unsupported by the input"
+        },
+        {
+          "key": "b",
+          "text": "A model crashing"
+        },
+        {
+          "key": "c",
+          "text": "A model refusing to answer"
+        },
+        {
+          "key": "d",
+          "text": "A type of data encryption error"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A hallucination is fluent, plausible-sounding output that is wrong, which is why generated content needs review before being trusted as fact."
+    },
+    {
+      "reference": "gail-007",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "medium",
+      "prompt": "What is multimodal AI?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A model that can understand or generate more than one type of content, such as text and images together"
+        },
+        {
+          "key": "b",
+          "text": "A model trained in multiple programming languages"
+        },
+        {
+          "key": "c",
+          "text": "A model that only works offline"
+        },
+        {
+          "key": "d",
+          "text": "A model with multiple separate user accounts"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Multimodal models accept and produce a combination of content types, such as answering a question about an image, rather than text alone."
+    },
+    {
+      "reference": "gail-008",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "hard",
+      "prompt": "Why do larger foundation models generally require more computational resources to train?",
+      "options": [
+        {
+          "key": "a",
+          "text": "They have more parameters, which means more calculations per training step"
+        },
+        {
+          "key": "b",
+          "text": "Larger models use less data"
+        },
+        {
+          "key": "c",
+          "text": "Larger models skip the training step entirely"
+        },
+        {
+          "key": "d",
+          "text": "Model size has no relation to compute cost"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A model's parameter count roughly determines how much computation each training step takes, so bigger models cost more to train."
+    },
+    {
+      "reference": "gail-009",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "medium",
+      "prompt": "What is the main purpose of a temperature setting when generating text with a model?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Controlling how random or deterministic the output is"
+        },
+        {
+          "key": "b",
+          "text": "Controlling the physical server temperature"
+        },
+        {
+          "key": "c",
+          "text": "Setting the maximum bill for the request"
+        },
+        {
+          "key": "d",
+          "text": "Choosing which language the model responds in"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A low temperature makes output more predictable and focused; a high temperature makes it more varied and creative, at the cost of coherence."
+    },
+    {
+      "reference": "gail-010",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "medium",
+      "prompt": "Which use case is a good fit for generative AI's core strength of producing novel content?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Drafting a first version of marketing copy for a human to refine"
+        },
+        {
+          "key": "b",
+          "text": "Guaranteeing a legally binding contract with zero review"
+        },
+        {
+          "key": "c",
+          "text": "Performing exact arithmetic on large financial ledgers"
+        },
+        {
+          "key": "d",
+          "text": "Storing a company's structured transaction records"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Drafting content that a human then reviews plays to generative AI's strength; tasks that demand exact correctness with no review are a poor fit."
+    },
+    {
+      "reference": "gail-011",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "medium",
+      "prompt": "What is fine-tuning, as distinct from prompting a foundation model?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Further training a model on a smaller, task-specific dataset to adapt its behavior"
+        },
+        {
+          "key": "b",
+          "text": "Changing the wording of a single request"
+        },
+        {
+          "key": "c",
+          "text": "Deleting a model's training data"
+        },
+        {
+          "key": "d",
+          "text": "Increasing a model's context window at query time"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Fine-tuning updates the model's weights using additional, often domain-specific, training data, which changes its behavior more durably than a prompt."
+    },
+    {
+      "reference": "gail-012",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "medium",
+      "prompt": "What does 'zero-shot' mean when describing how a model handles a task?",
+      "options": [
+        {
+          "key": "a",
+          "text": "The model performs the task from an instruction alone, without being shown any examples"
+        },
+        {
+          "key": "b",
+          "text": "The model requires exactly zero training data ever"
+        },
+        {
+          "key": "c",
+          "text": "The model refuses the task"
+        },
+        {
+          "key": "d",
+          "text": "The task costs nothing to run"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Zero-shot means the model attempts a task purely from the instruction, relying on what it learned during pre-training rather than examples in the prompt."
+    },
+    {
+      "reference": "gail-013",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "medium",
+      "prompt": "What does 'few-shot' prompting add compared to zero-shot prompting?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A small number of examples included in the prompt to show the model the desired pattern"
+        },
+        {
+          "key": "b",
+          "text": "Additional model training on company servers"
+        },
+        {
+          "key": "c",
+          "text": "A reduction in the model's context window"
+        },
+        {
+          "key": "d",
+          "text": "Encryption of the request"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Few-shot prompting shows the model a handful of worked examples directly in the prompt, which often improves output quality without any retraining."
+    },
+    {
+      "reference": "gail-014",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "medium",
+      "prompt": "What is the general relationship between a generative model's training data and the quality of what it can produce?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Output quality is strongly shaped by the breadth and quality of the training data"
+        },
+        {
+          "key": "b",
+          "text": "Training data has no effect on output"
+        },
+        {
+          "key": "c",
+          "text": "Only the amount of compute matters, never the data"
+        },
+        {
+          "key": "d",
+          "text": "Training data only matters for image models, never text"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A model reflects patterns in what it was trained on; gaps, biases or errors in that data tend to show up in its output."
+    },
+    {
+      "reference": "gail-015",
+      "certification": "generative-ai-leader",
+      "topic": "Fundamentals",
+      "difficulty": "hard",
+      "prompt": "What risk does training data bias create for a generative AI application?",
+      "options": [
+        {
+          "key": "a",
+          "text": "The model can produce outputs that unfairly favor or disadvantage certain groups"
+        },
+        {
+          "key": "b",
+          "text": "The model will always refuse to respond"
+        },
+        {
+          "key": "c",
+          "text": "The model's context window shrinks"
+        },
+        {
+          "key": "d",
+          "text": "The application automatically becomes non-compliant with all regulations"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "If training data reflects historical or social biases, the model can reproduce or amplify them in its output unless this is specifically addressed."
+    },
+    {
+      "reference": "gail-016",
+      "certification": "generative-ai-leader",
+      "topic": "Vertex AI",
+      "difficulty": "easy",
+      "prompt": "Which Google Cloud platform brings together tools to build, tune, deploy and manage generative AI models?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Vertex AI"
+        },
+        {
+          "key": "b",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "c",
+          "text": "Cloud Storage"
+        },
+        {
+          "key": "d",
+          "text": "Cloud DNS"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Vertex AI is Google Cloud's unified machine learning platform, and it hosts the generative AI tooling including Model Garden and Gemini access."
+    },
+    {
+      "reference": "gail-017",
+      "certification": "generative-ai-leader",
+      "topic": "Gemini",
+      "difficulty": "easy",
+      "prompt": "What is Gemini in the context of Google Cloud's generative AI offerings?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Google's family of multimodal foundation models"
+        },
+        {
+          "key": "b",
+          "text": "A relational database product"
+        },
+        {
+          "key": "c",
+          "text": "A networking service"
+        },
+        {
+          "key": "d",
+          "text": "A billing dashboard"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Gemini is Google's family of large multimodal models, available through Vertex AI for building generative AI applications."
+    },
+    {
+      "reference": "gail-018",
+      "certification": "generative-ai-leader",
+      "topic": "Vertex AI",
+      "difficulty": "medium",
+      "prompt": "What is Vertex AI Model Garden?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A curated catalog of foundation and open models a team can browse and deploy"
+        },
+        {
+          "key": "b",
+          "text": "A physical data center location"
+        },
+        {
+          "key": "c",
+          "text": "A billing report"
+        },
+        {
+          "key": "d",
+          "text": "A type of firewall"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Model Garden lets teams discover, compare and deploy first-party, open-source and third-party models from one place in Vertex AI."
+    },
+    {
+      "reference": "gail-019",
+      "certification": "generative-ai-leader",
+      "topic": "Grounding",
+      "difficulty": "medium",
+      "prompt": "What does 'grounding' a generative AI model's response mean on Google Cloud?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Connecting the model's output to a verifiable, current source of data such as Google Search or a company's own documents"
+        },
+        {
+          "key": "b",
+          "text": "Physically resetting the server hardware"
+        },
+        {
+          "key": "c",
+          "text": "Reducing the model's context window to zero"
+        },
+        {
+          "key": "d",
+          "text": "Disabling the model entirely"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Grounding ties generated answers to real, checkable sources, which reduces hallucination and lets the model reflect information beyond its training cutoff."
+    },
+    {
+      "reference": "gail-020",
+      "certification": "generative-ai-leader",
+      "topic": "RAG",
+      "difficulty": "medium",
+      "prompt": "What does retrieval-augmented generation (RAG) add to a generative AI application?",
+      "options": [
+        {
+          "key": "a",
+          "text": "It retrieves relevant documents at query time and feeds them to the model as context before it generates a response"
+        },
+        {
+          "key": "b",
+          "text": "It permanently retrains the model on every question asked"
+        },
+        {
+          "key": "c",
+          "text": "It removes the need for any prompt"
+        },
+        {
+          "key": "d",
+          "text": "It encrypts the model's weights"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "RAG looks up relevant information from a knowledge base at the moment of the query and includes it in the prompt, so the model answers with current, specific context."
+    },
+    {
+      "reference": "gail-021",
+      "certification": "generative-ai-leader",
+      "topic": "Vector search",
+      "difficulty": "medium",
+      "prompt": "Which Google Cloud service is used to store embeddings and perform fast similarity search over them, a common building block for RAG?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Vertex AI Vector Search"
+        },
+        {
+          "key": "b",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "c",
+          "text": "Cloud DNS"
+        },
+        {
+          "key": "d",
+          "text": "Cloud Build"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Vertex AI Vector Search indexes embeddings and finds the nearest matches quickly, which is what powers the retrieval step in a RAG pipeline."
+    },
+    {
+      "reference": "gail-022",
+      "certification": "generative-ai-leader",
+      "topic": "Pre-built APIs",
+      "difficulty": "easy",
+      "prompt": "A team wants to add text-to-speech to an app without training any model. Which type of Google Cloud offering fits?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A pre-built AI API"
+        },
+        {
+          "key": "b",
+          "text": "A custom-trained model from scratch"
+        },
+        {
+          "key": "c",
+          "text": "A manually configured virtual machine"
+        },
+        {
+          "key": "d",
+          "text": "A relational database schema"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Pre-built APIs (like Text-to-Speech, Translation and Vision) solve common tasks immediately, without any model training."
+    },
+    {
+      "reference": "gail-023",
+      "certification": "generative-ai-leader",
+      "topic": "Conversational AI",
+      "difficulty": "medium",
+      "prompt": "Which Google Cloud product is purpose-built for creating conversational AI agents and chatbots?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Vertex AI Agent Builder / Dialogflow"
+        },
+        {
+          "key": "b",
+          "text": "BigQuery"
+        },
+        {
+          "key": "c",
+          "text": "Cloud Storage"
+        },
+        {
+          "key": "d",
+          "text": "Compute Engine"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Google Cloud provides dedicated tooling (Dialogflow and Vertex AI Agent Builder) for building conversational agents, rather than building one from a raw model."
+    },
+    {
+      "reference": "gail-024",
+      "certification": "generative-ai-leader",
+      "topic": "Image generation",
+      "difficulty": "medium",
+      "prompt": "Which type of Google Cloud model is used to generate new images from a text description?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Imagen"
+        },
+        {
+          "key": "b",
+          "text": "BigQuery ML"
+        },
+        {
+          "key": "c",
+          "text": "Bigtable"
+        },
+        {
+          "key": "d",
+          "text": "Cloud CDN"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Imagen is Google's text-to-image generation model family, available through Vertex AI."
+    },
+    {
+      "reference": "gail-025",
+      "certification": "generative-ai-leader",
+      "topic": "Code generation",
+      "difficulty": "medium",
+      "prompt": "Which Google Cloud offering assists developers by generating and explaining code using generative AI?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Gemini Code Assist"
+        },
+        {
+          "key": "b",
+          "text": "Cloud Armor"
+        },
+        {
+          "key": "c",
+          "text": "Cloud Tasks"
+        },
+        {
+          "key": "d",
+          "text": "Persistent Disk"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Gemini Code Assist uses generative AI to suggest code, explain snippets and help developers move faster inside their IDE."
+    },
+    {
+      "reference": "gail-026",
+      "certification": "generative-ai-leader",
+      "topic": "Vertex AI",
+      "difficulty": "medium",
+      "prompt": "What is the purpose of Vertex AI Studio?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A console for testing prompts, tuning parameters and comparing model responses interactively"
+        },
+        {
+          "key": "b",
+          "text": "A physical hardware store for GPUs"
+        },
+        {
+          "key": "c",
+          "text": "A billing calculator only"
+        },
+        {
+          "key": "d",
+          "text": "A DNS management tool"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Vertex AI Studio provides a UI to experiment with prompts and model settings before wiring a model into an application."
+    },
+    {
+      "reference": "gail-027",
+      "certification": "generative-ai-leader",
+      "topic": "Deployment",
+      "difficulty": "medium",
+      "prompt": "After a generative AI model is tuned for a specific task, what does deploying it to a Vertex AI endpoint provide?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A way to serve predictions over an API for applications to call"
+        },
+        {
+          "key": "b",
+          "text": "Permanent free hosting"
+        },
+        {
+          "key": "c",
+          "text": "Automatic legal compliance"
+        },
+        {
+          "key": "d",
+          "text": "A guarantee of zero hallucinations"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A Vertex AI endpoint exposes a deployed model as a callable API, so applications can request predictions from it in production."
+    },
+    {
+      "reference": "gail-028",
+      "certification": "generative-ai-leader",
+      "topic": "Choosing a product",
+      "difficulty": "hard",
+      "prompt": "A support team wants answers grounded strictly in their own internal documentation, not the open internet. Which approach is most appropriate?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Retrieval-augmented generation over their own document store"
+        },
+        {
+          "key": "b",
+          "text": "An ungrounded zero-shot prompt to a general model"
+        },
+        {
+          "key": "c",
+          "text": "A pre-built Translation API"
+        },
+        {
+          "key": "d",
+          "text": "A relational database with no AI component"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Grounding the model in the company's own documents through RAG keeps answers scoped to that content, rather than the model's general training data."
+    },
+    {
+      "reference": "gail-029",
+      "certification": "generative-ai-leader",
+      "topic": "Choosing a product",
+      "difficulty": "medium",
+      "prompt": "A marketing team wants to generate several ad image variations from a text brief. Which Google Cloud capability is the direct fit?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Imagen text-to-image generation"
+        },
+        {
+          "key": "b",
+          "text": "BigQuery"
+        },
+        {
+          "key": "c",
+          "text": "Cloud SQL"
+        },
+        {
+          "key": "d",
+          "text": "Cloud VPN"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Imagen is designed specifically to turn a text description into generated images, which is exactly this use case."
+    },
+    {
+      "reference": "gail-030",
+      "certification": "generative-ai-leader",
+      "topic": "Responsible AI tooling",
+      "difficulty": "medium",
+      "prompt": "What is the purpose of safety filters available in Vertex AI's generative AI tools?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Automatically flag or block outputs that fall into categories like hate speech or harassment"
+        },
+        {
+          "key": "b",
+          "text": "Reduce the model's storage costs"
+        },
+        {
+          "key": "c",
+          "text": "Speed up training time"
+        },
+        {
+          "key": "d",
+          "text": "Improve network latency"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Safety filters screen generated content against configurable harm categories, helping an application avoid surfacing unsafe output to users."
+    },
+    {
+      "reference": "gail-031",
+      "certification": "generative-ai-leader",
+      "topic": "Multimodal",
+      "difficulty": "medium",
+      "prompt": "A team wants a model that can accept an uploaded photo and answer questions about what is in it. Which capability do they need?",
+      "options": [
+        {
+          "key": "a",
+          "text": "A multimodal model such as Gemini"
+        },
+        {
+          "key": "b",
+          "text": "A text-only embedding model"
+        },
+        {
+          "key": "c",
+          "text": "A relational database"
+        },
+        {
+          "key": "d",
+          "text": "A DNS resolver"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Multimodal models like Gemini can take image and text input together and reason across both in a single response."
+    },
+    {
+      "reference": "gail-032",
+      "certification": "generative-ai-leader",
+      "topic": "Open models",
+      "difficulty": "medium",
+      "prompt": "What is an advantage of using an open model available through Model Garden instead of a proprietary API-only model?",
+      "options": [
+        {
+          "key": "a",
+          "text": "It can typically be downloaded, inspected and self-hosted or fine-tuned with full control"
+        },
+        {
+          "key": "b",
+          "text": "It requires no infrastructure at all"
+        },
+        {
+          "key": "c",
+          "text": "It is always more accurate than any proprietary model"
+        },
+        {
+          "key": "d",
+          "text": "It removes the need for any evaluation"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Open models give teams more control over hosting, customization and inspection of the model, which proprietary API-only models do not offer."
+    },
+    {
+      "reference": "gail-033",
+      "certification": "generative-ai-leader",
+      "topic": "Prompt design",
+      "difficulty": "easy",
+      "prompt": "What is prompt engineering?",
+      "options": [
+        {
+          "key": "a",
+          "text": "The practice of designing inputs to a model to reliably get a desired kind of output"
+        },
+        {
+          "key": "b",
+          "text": "Writing the model's underlying source code"
+        },
+        {
+          "key": "c",
+          "text": "A hardware configuration task"
+        },
+        {
+          "key": "d",
+          "text": "A type of database indexing"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Prompt engineering is iterating on instructions, structure and examples in a prompt to steer a model's output without changing the model itself."
+    },
+    {
+      "reference": "gail-034",
+      "certification": "generative-ai-leader",
+      "topic": "Prompt design",
+      "difficulty": "medium",
+      "prompt": "Which change to a prompt most directly tends to reduce ambiguity in a model's response?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Being specific about the desired format, audience and constraints"
+        },
+        {
+          "key": "b",
+          "text": "Making the prompt as vague as possible"
+        },
+        {
+          "key": "c",
+          "text": "Removing all context"
+        },
+        {
+          "key": "d",
+          "text": "Asking multiple unrelated questions in one prompt"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A specific prompt that states the format, audience and constraints gives the model less room to guess what is actually wanted."
+    },
+    {
+      "reference": "gail-035",
+      "certification": "generative-ai-leader",
+      "topic": "Prompt design",
+      "difficulty": "medium",
+      "prompt": "What is chain-of-thought prompting?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Asking the model to reason step by step before giving a final answer"
+        },
+        {
+          "key": "b",
+          "text": "Chaining multiple unrelated models together randomly"
+        },
+        {
+          "key": "c",
+          "text": "A method for compressing a prompt to a single word"
+        },
+        {
+          "key": "d",
+          "text": "A billing feature"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Chain-of-thought prompting asks the model to show intermediate reasoning steps, which often improves accuracy on multi-step problems."
+    },
+    {
+      "reference": "gail-036",
+      "certification": "generative-ai-leader",
+      "topic": "Evaluation",
+      "difficulty": "medium",
+      "prompt": "Why is human evaluation still important even when a generative AI model can be tested automatically?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Automated metrics often miss nuance, tone and factual correctness that a human reviewer can catch"
+        },
+        {
+          "key": "b",
+          "text": "Automated evaluation is always more accurate"
+        },
+        {
+          "key": "c",
+          "text": "Human evaluation removes the need for any testing"
+        },
+        {
+          "key": "d",
+          "text": "It is required by every cloud provider's terms of service"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Automated scoring can measure some properties well, but subtleties like tone, correctness and appropriateness often still need a human judgment."
+    },
+    {
+      "reference": "gail-037",
+      "certification": "generative-ai-leader",
+      "topic": "Fine-tuning",
+      "difficulty": "medium",
+      "prompt": "When is fine-tuning generally a better choice than prompting alone?",
+      "options": [
+        {
+          "key": "a",
+          "text": "When a task needs a consistent, specialized behavior that prompting cannot reliably achieve"
+        },
+        {
+          "key": "b",
+          "text": "When you want to change the model's behavior for a single one-off request"
+        },
+        {
+          "key": "c",
+          "text": "When you have no task-specific data available"
+        },
+        {
+          "key": "d",
+          "text": "Fine-tuning is always the better choice in every case"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Fine-tuning is worth the extra effort and data requirement when a task needs durable, specialized behavior beyond what prompting alone can reliably deliver."
+    },
+    {
+      "reference": "gail-038",
+      "certification": "generative-ai-leader",
+      "topic": "Grounding",
+      "difficulty": "medium",
+      "prompt": "How does grounding a model's response in a company's own data reduce hallucination?",
+      "options": [
+        {
+          "key": "a",
+          "text": "It gives the model verified, relevant source material to base the answer on instead of relying purely on memorized patterns"
+        },
+        {
+          "key": "b",
+          "text": "It deletes the model's training data"
+        },
+        {
+          "key": "c",
+          "text": "It disables the model's ability to generate text"
+        },
+        {
+          "key": "d",
+          "text": "It has no effect on hallucination"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "When the model is shown real source material at query time, it has something concrete to draw from rather than generating purely from what it memorized during training."
+    },
+    {
+      "reference": "gail-039",
+      "certification": "generative-ai-leader",
+      "topic": "Parameters",
+      "difficulty": "medium",
+      "prompt": "Lowering a model's temperature setting for a customer-facing FAQ bot would most likely have which effect?",
+      "options": [
+        {
+          "key": "a",
+          "text": "More consistent, predictable answers to similar questions"
+        },
+        {
+          "key": "b",
+          "text": "More random and creative answers"
+        },
+        {
+          "key": "c",
+          "text": "Faster network speed"
+        },
+        {
+          "key": "d",
+          "text": "Lower storage costs"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A lower temperature reduces randomness in generation, which is usually desirable when consistency matters more than creative variety."
+    },
+    {
+      "reference": "gail-040",
+      "certification": "generative-ai-leader",
+      "topic": "Evaluation",
+      "difficulty": "medium",
+      "prompt": "What is a benefit of maintaining a golden dataset of example prompts and ideal responses for a generative AI application?",
+      "options": [
+        {
+          "key": "a",
+          "text": "It provides a consistent benchmark for evaluating changes to the model or prompt over time"
+        },
+        {
+          "key": "b",
+          "text": "It replaces the need for any monitoring"
+        },
+        {
+          "key": "c",
+          "text": "It guarantees the model will never make mistakes"
+        },
+        {
+          "key": "d",
+          "text": "It is required to enable multimodal input"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A golden dataset gives a stable reference point, so a team can tell whether a prompt or model change actually improved quality rather than just guessing."
+    },
+    {
+      "reference": "gail-041",
+      "certification": "generative-ai-leader",
+      "topic": "Output structure",
+      "difficulty": "medium",
+      "prompt": "A developer needs a model's response to reliably parse as JSON for downstream code. What is the most direct technique?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Explicitly instruct the model to output valid JSON in a defined schema, and validate the response"
+        },
+        {
+          "key": "b",
+          "text": "Hope the model happens to format it correctly"
+        },
+        {
+          "key": "c",
+          "text": "Disable the model's context window"
+        },
+        {
+          "key": "d",
+          "text": "Increase the temperature to maximum"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Being explicit about the required structure, and validating the output before using it, is the reliable way to get machine-parseable responses."
+    },
+    {
+      "reference": "gail-042",
+      "certification": "generative-ai-leader",
+      "topic": "Iteration",
+      "difficulty": "medium",
+      "prompt": "What is the typical relationship between prompt iteration and output quality?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Testing and refining a prompt against real examples usually improves output quality over the first draft"
+        },
+        {
+          "key": "b",
+          "text": "The first version of a prompt is always optimal"
+        },
+        {
+          "key": "c",
+          "text": "Iterating on a prompt has no effect on output"
+        },
+        {
+          "key": "d",
+          "text": "Prompt iteration only matters for image models"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Prompt engineering is iterative: testing against real examples and adjusting wording, structure or examples typically improves results over time."
+    },
+    {
+      "reference": "gail-043",
+      "certification": "generative-ai-leader",
+      "topic": "Responsible AI",
+      "difficulty": "easy",
+      "prompt": "What is the general goal of a responsible AI framework in a generative AI deployment?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Ensuring AI systems are developed and used fairly, safely and transparently"
+        },
+        {
+          "key": "b",
+          "text": "Maximizing model size regardless of impact"
+        },
+        {
+          "key": "c",
+          "text": "Removing all human oversight from AI systems"
+        },
+        {
+          "key": "d",
+          "text": "Avoiding any documentation of how a model works"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Responsible AI frameworks set principles and practices for fairness, safety, privacy and transparency across the AI system's lifecycle."
+    },
+    {
+      "reference": "gail-044",
+      "certification": "generative-ai-leader",
+      "topic": "Governance",
+      "difficulty": "medium",
+      "prompt": "Why would an organization establish an AI governance review process before deploying a generative AI feature?",
+      "options": [
+        {
+          "key": "a",
+          "text": "To assess risks like bias, privacy and compliance before the feature reaches users"
+        },
+        {
+          "key": "b",
+          "text": "To slow down every project for no reason"
+        },
+        {
+          "key": "c",
+          "text": "It is only relevant for image-generation products"
+        },
+        {
+          "key": "d",
+          "text": "To avoid ever measuring the feature's performance"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A governance review catches foreseeable risks, such as bias or data privacy issues, before they reach real users rather than after."
+    },
+    {
+      "reference": "gail-045",
+      "certification": "generative-ai-leader",
+      "topic": "Data privacy",
+      "difficulty": "medium",
+      "prompt": "What is a key data privacy consideration when feeding customer data into a generative AI model?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Ensuring the data is handled and used according to privacy commitments and regulations, including how it may or may not be used for training"
+        },
+        {
+          "key": "b",
+          "text": "There are no privacy considerations for AI systems"
+        },
+        {
+          "key": "c",
+          "text": "All customer data can be freely used to train any model"
+        },
+        {
+          "key": "d",
+          "text": "Privacy only matters for structured databases, not AI"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Feeding customer data into a model raises the same data-handling obligations as any other use, plus specific questions about whether it may be used for further training."
+    },
+    {
+      "reference": "gail-046",
+      "certification": "generative-ai-leader",
+      "topic": "Measuring value",
+      "difficulty": "medium",
+      "prompt": "Which is the most meaningful way to measure the business value of a generative AI initiative?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Tracking outcomes tied to business goals, such as time saved or conversion improvement, not just model accuracy"
+        },
+        {
+          "key": "b",
+          "text": "Counting the number of parameters in the model"
+        },
+        {
+          "key": "c",
+          "text": "Measuring only how large the training dataset was"
+        },
+        {
+          "key": "d",
+          "text": "Measuring the model's temperature setting"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Business value comes from the outcome the AI enables (time saved, revenue, satisfaction), not from technical properties of the model itself."
+    },
+    {
+      "reference": "gail-047",
+      "certification": "generative-ai-leader",
+      "topic": "Change management",
+      "difficulty": "medium",
+      "prompt": "What is a common organizational risk when rolling out a generative AI tool to employees?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Employees using it without training on its limitations, leading to over-trusting incorrect output"
+        },
+        {
+          "key": "b",
+          "text": "Employees being unable to access the internet"
+        },
+        {
+          "key": "c",
+          "text": "The tool being too slow to ever be adopted"
+        },
+        {
+          "key": "d",
+          "text": "There being no organizational risk at all"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Without training on what the tool gets wrong, employees can treat confident-sounding, incorrect output as reliable, which is a real operational risk."
+    },
+    {
+      "reference": "gail-048",
+      "certification": "generative-ai-leader",
+      "topic": "Use case selection",
+      "difficulty": "medium",
+      "prompt": "When prioritizing generative AI use cases, which combination is generally the strongest starting point?",
+      "options": [
+        {
+          "key": "a",
+          "text": "High business value and low risk, such as an internal drafting assistant with human review"
+        },
+        {
+          "key": "b",
+          "text": "High risk and low value use cases"
+        },
+        {
+          "key": "c",
+          "text": "Any use case, regardless of oversight"
+        },
+        {
+          "key": "d",
+          "text": "Only fully autonomous, unreviewed customer-facing decisions"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "Starting with high-value, lower-risk use cases (especially ones with a human in the loop) builds experience and trust before tackling higher-stakes applications."
+    },
+    {
+      "reference": "gail-049",
+      "certification": "generative-ai-leader",
+      "topic": "Intellectual property",
+      "difficulty": "medium",
+      "prompt": "Why should a business consider the source and licensing of training data used by a generative AI model it adopts?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Because it can affect intellectual property risk and the rights around content the model produces"
+        },
+        {
+          "key": "b",
+          "text": "Licensing has no bearing on generative AI"
+        },
+        {
+          "key": "c",
+          "text": "Only open-source models raise any IP questions"
+        },
+        {
+          "key": "d",
+          "text": "It only matters for image models"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "How a model was trained, and under what license, can affect a business's legal exposure around the content it generates and uses."
+    },
+    {
+      "reference": "gail-050",
+      "certification": "generative-ai-leader",
+      "topic": "Strategy",
+      "difficulty": "medium",
+      "prompt": "What is a sound first step for an organization building a generative AI strategy?",
+      "options": [
+        {
+          "key": "a",
+          "text": "Identifying specific business problems the technology can address, rather than adopting it for its own sake"
+        },
+        {
+          "key": "b",
+          "text": "Deploying the largest available model everywhere immediately"
+        },
+        {
+          "key": "c",
+          "text": "Skipping any pilot phase"
+        },
+        {
+          "key": "d",
+          "text": "Avoiding any measurement of results"
+        }
+      ],
+      "correct_option": "a",
+      "explanation": "A strategy grounded in specific problems worth solving, rather than technology for its own sake, is what turns generative AI into a measurable business outcome."
     }
   ]
 }

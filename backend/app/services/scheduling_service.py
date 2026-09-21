@@ -25,6 +25,7 @@ from app.schemas.scheduling import (
     ExamBookingUpdate,
     ExamCheckout,
 )
+from app.services import challenge_service
 from app.services import email as email_service
 from app.services import pricing
 from app.services.payments import get_payment_provider
@@ -50,14 +51,25 @@ def certification_url(certification: Certification) -> str:
 
 
 async def list_options(db: AsyncSession) -> list[CertificationOption]:
-    """Published certifications, for the scheduling form's picker."""
+    """Published certifications, for the scheduling form's picker.
+
+    When the campaign names specific certifications, only those are offered:
+    the scheduling form and the discount test are two doors into the same
+    offer, so they must agree on which exams it covers.
+    """
     config = await pricing.load_config(db)
-    rows = await db.scalars(
-        select(Certification)
-        .options(selectinload(Certification.provider))
-        .where(Certification.is_published.is_(True))
-        .order_by(Certification.name)
+    campaign = await challenge_service.load_config(db)
+    rows = list(
+        await db.scalars(
+            select(Certification)
+            .options(selectinload(Certification.provider))
+            .where(Certification.is_published.is_(True))
+            .order_by(Certification.name)
+        )
     )
+    if campaign.certification_slugs:
+        by_slug = {row.slug: row for row in rows if row.slug in campaign.certification_slugs}
+        rows = [by_slug[slug] for slug in campaign.certification_slugs if slug in by_slug]
     return [
         CertificationOption(
             id=row.id,

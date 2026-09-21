@@ -72,6 +72,15 @@ class Settings(BaseSettings):
     email_provider_key: str | None = None
     email_from_address: str = "no-reply@example.com"
     email_from_name: str = "Inferacloud"
+    # SMTP transport, used when email_provider is "smtp". Any mailbox with an
+    # SMTP relay works (Google Workspace, Zoho, Outlook, SES, Brevo...).
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: str | None = None
+    # STARTTLS on 587 is the common case; set smtp_use_ssl for implicit TLS on 465.
+    smtp_use_tls: bool = True
+    smtp_use_ssl: bool = False
     # Where a qualified challenge lead is announced so somebody calls it back
     # inside the window the result page promises. Unset means the admin
     # console queue is the only place a lead surfaces.

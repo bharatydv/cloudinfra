@@ -9,7 +9,7 @@ correct answer has no schema that can reach an unsubmitted attempt.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
@@ -30,7 +30,10 @@ class ChallengeTerms(BaseModel):
     question_count: int
     duration_minutes: int
     pass_mark: Decimal
-    reward_discount_percentage: Decimal
+    # The reward scales with the score: the pass mark earns the minimum, a
+    # perfect paper the maximum, and everything between is interpolated.
+    reward_discount_min_percentage: Decimal
+    reward_discount_max_percentage: Decimal
     max_warnings: int
     retake_after_days: int
     response_hours: int
@@ -44,7 +47,11 @@ class ChallengeCertificationOption(BaseModel):
     exam_code: str | None = None
     level: str
     url: str
+    # The paper this certification actually gets: the campaign's size, capped
+    # by the bank, and the campaign's time limit. Quoted per option so the
+    # landing page can say "same length as the real exam" with real numbers.
     question_count: int
+    duration_minutes: int
     # Carried so the start screen can show what the reward is worth in money
     # without a second request per selection. None when the exam has no price.
     pricing: ExamPricing | None = None
@@ -58,12 +65,36 @@ class ChallengeIntro(BaseModel):
     options: list[ChallengeCertificationOption]
 
 
+class ChallengeBookingPreferences(BaseModel):
+    """The slot the applicant asked for on the scheduling form.
+
+    Carried onto the attempt when the test is started from there, so the
+    callback that applies the discount can book the exam without asking again.
+    """
+
+    preferred_date: date | None = None
+    alternate_date: date | None = None
+    preferred_time_slot: str | None = Field(default=None, max_length=40)
+    timezone: str | None = Field(default=None, max_length=80)
+    delivery_mode: str | None = Field(default=None, max_length=40)
+    city: str | None = Field(default=None, max_length=120)
+
+    def as_record(self) -> dict | None:
+        data = {
+            key: (value.isoformat() if isinstance(value, date) else value)
+            for key, value in self.model_dump().items()
+            if value not in (None, "")
+        }
+        return data or None
+
+
 class ChallengeStart(BaseModel):
     full_name: str = Field(min_length=2, max_length=120)
     email: EmailStr
     phone: str = Field(min_length=6, max_length=40)
     country: str | None = Field(default=None, max_length=80)
     certification_id: uuid.UUID
+    booking_preferences: ChallengeBookingPreferences | None = None
     # The applicant has to accept the proctoring rules to sit the paper; the
     # warnings are only defensible if they were disclosed up front.
     accept_rules: bool = False
@@ -112,7 +143,8 @@ class ChallengeSession(BaseModel):
     duration_seconds: int
     max_warnings: int
     pass_mark: Decimal
-    reward_discount_percentage: Decimal
+    reward_discount_min_percentage: Decimal
+    reward_discount_max_percentage: Decimal
     questions: list[ChallengeQuestionPublic]
 
 
@@ -193,6 +225,7 @@ class ChallengeAttemptRead(ORMModel):
     email: EmailStr
     phone: str
     country: str | None = None
+    booking_preferences: dict | None = None
     certification_id: uuid.UUID | None = None
     certification_name: str
     exam_code: str | None = None

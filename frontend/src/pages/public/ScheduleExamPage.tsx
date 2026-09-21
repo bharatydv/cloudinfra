@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import {
+  BadgePercent,
   CalendarCheck,
   CheckCircle2,
   Clock,
@@ -19,7 +20,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Card, Container, Field, Input, Section, Select } from '@/components/ui/primitives'
 import { ErrorState } from '@/components/ui/states'
-import { getCertificationOptions, submitExamBooking } from '@/api/endpoints'
+import { getCertificationOptions, getChallengeIntro, submitExamBooking } from '@/api/endpoints'
 import { ApiError } from '@/api/client'
 import { formatPrice } from '@/lib/format'
 import { siteConfig } from '@/config/brand'
@@ -115,6 +116,7 @@ type ScheduleForm = z.infer<typeof schema>
 
 export default function ScheduleExamPage() {
   const [params] = useSearchParams()
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { promotion, brand } = useSite()
   // Tracks only what the browser can see about payment, never the truth of it.
@@ -143,6 +145,16 @@ export default function ScheduleExamPage() {
   })
 
   const zones = useMemo(() => timezoneOptions(browserTimezone()), [])
+
+  // The picker above already lists only the certifications the discount
+  // campaign covers (the API filters it the same way), so every option here
+  // is eligible for the test -- this just supplies the numbers to quote.
+  const { data: challengeIntro } = useQuery({
+    queryKey: queryKeys.challengeIntro,
+    queryFn: getChallengeIntro,
+    staleTime: 10 * 60_000,
+  })
+  const challengeTerms = challengeIntro?.terms
 
   const {
     register,
@@ -199,6 +211,37 @@ export default function ScheduleExamPage() {
 
   const selectedId = watch('certification_id')
   const selected = options?.find((option) => option.id === selectedId)
+
+  /**
+   * Takes a validated request straight into the discount test instead of
+   * submitting it. The contact details and requested slot travel along as
+   * navigation state, so the challenge page can prefill them and, on a pass,
+   * the callback already knows when to book the exam for.
+   */
+  const startTest = handleSubmit((values) => {
+    track(AnalyticsEvent.CtaClicked, {
+      properties: { cta: 'exam_booking_take_test', certification: selected?.name },
+    })
+    navigate('/challenge', {
+      state: {
+        certificationId: values.certification_id,
+        prefill: {
+          full_name: values.full_name,
+          email: values.email,
+          phone: values.phone,
+          country: values.country,
+        },
+        bookingPreferences: {
+          preferred_date: values.preferred_date || null,
+          alternate_date: values.alternate_date || null,
+          preferred_time_slot: values.preferred_time_slot,
+          timezone: values.timezone,
+          delivery_mode: values.delivery_mode,
+          city: values.city || null,
+        },
+      },
+    })
+  })
 
   /**
    * Opens the provider's modal. `paid` only records that the payer got
@@ -594,13 +637,44 @@ export default function ScheduleExamPage() {
                       />
                     </div>
 
+                    <div className="space-y-3 rounded-xl border border-brand-200 bg-brand-50/60 p-4">
+                      <p className="text-sm font-semibold text-ink-900">
+                        Want a discount before you pay?
+                      </p>
+                      <p className="text-sm leading-relaxed text-ink-700">
+                        Take our free {Number(challengeTerms?.reward_discount_min_percentage ?? 20)}%
+                        &ndash;{Number(challengeTerms?.reward_discount_max_percentage ?? 65)}%
+                        discount test on this exam right now. Score{' '}
+                        {Number(challengeTerms?.pass_mark ?? 70)}% or more and our team calls you
+                        within {challengeTerms?.response_hours ?? 24} hours to apply the discount
+                        and confirm this slot.
+                      </p>
+                      <Button
+                        type="button"
+                        size="lg"
+                        fullWidth
+                        onClick={() => void startTest()}
+                        leadingIcon={<BadgePercent className="h-4 w-4" aria-hidden="true" />}
+                      >
+                        Take the test for a discount
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-ink-400">
+                      <span className="h-px flex-1 bg-ink-200" />
+                      or
+                      <span className="h-px flex-1 bg-ink-200" />
+                    </div>
+
                     <Button
                       type="submit"
                       size="lg"
+                      variant="outline"
+                      fullWidth
                       loading={isSubmitting || mutation.isPending}
                       leadingIcon={<CalendarCheck className="h-4 w-4" aria-hidden="true" />}
                     >
-                      Submit request
+                      Submit request without testing
                     </Button>
                   </form>
                 </>
