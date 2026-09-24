@@ -731,6 +731,7 @@ export interface ChallengeTerms {
   max_warnings: number
   retake_after_days: number
   response_hours: number
+  verification_required: boolean
 }
 
 export interface ChallengeCertificationOption {

@@ -64,20 +64,18 @@ export const siteConfig = {
  */
 export const navigation = [
   { label: 'Certifications', to: '/certifications' },
-  { label: 'Courses', to: '/courses' },
-  { label: 'Deals', to: '/deals' },
+  { label: 'Deals & Discounts', to: '/deals' },
   { label: 'Schedule Exam', to: '/schedule-exam' },
-  { label: 'Win a Discount', to: '/challenge' },
+  { label: 'Courses', to: '/courses' },
   { label: 'Resources', to: '/resources' },
 ] as const
 
 export const footerNavigation = {
   learn: [
-    { label: 'All courses', to: '/courses' },
     { label: 'Certifications', to: '/certifications' },
-    { label: 'Deals and discounts', to: '/deals' },
+    { label: 'Deals & Discounts', to: '/deals' },
     { label: 'Schedule an exam', to: '/schedule-exam' },
-    { label: 'Certification challenge', to: '/challenge' },
+    { label: 'All courses', to: '/courses' },
     { label: 'Resources', to: '/resources' },
     { label: 'Search', to: '/search' },
   ],

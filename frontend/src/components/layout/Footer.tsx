@@ -23,24 +23,24 @@ export function Footer() {
 
   return (
     <footer className="border-t border-ink-200 bg-ink-50">
-      <Container className="py-14">
-        <div className="grid gap-10 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+      <Container className="py-6">
+        <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div>
             <Logo />
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-ink-600">
+            <p className="mt-2 max-w-xs text-sm leading-relaxed text-ink-600">
               {brand.brandDescription}
             </p>
             {contact.email && (
               <a
                 href={`mailto:${contact.email}`}
-                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-ink-700 hover:text-brand-700"
+                className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-ink-700 hover:text-brand-700"
               >
                 <Mail className="h-4 w-4" aria-hidden="true" />
                 {contact.email}
               </a>
             )}
             {socials.length > 0 && (
-              <ul className="mt-5 flex gap-2">
+              <ul className="mt-3 flex gap-2">
                 {socials.map(([key, href]) => {
                   const Icon = SOCIAL_ICONS[key]
                   return (
@@ -49,7 +49,7 @@ export function Footer() {
                         href={href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-ink-200 bg-white text-ink-600 transition hover:text-brand-700"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-ink-200 bg-white text-ink-600 transition hover:text-brand-700"
                         aria-label={key}
                       >
                         <Icon className="h-4 w-4" aria-hidden="true" />
@@ -67,13 +67,13 @@ export function Footer() {
         </div>
 
         {/* Stated plainly, on every page, so the relationship is never ambiguous. */}
-        <p className="mt-12 rounded-xl border border-ink-200 bg-white p-4 text-xs leading-relaxed text-ink-500">
+        <p className="mt-5 rounded-lg border border-ink-200 bg-white p-2.5 text-xs leading-relaxed text-ink-500">
           {siteConfig.independenceNotice} Certification and product names are the trademarks of
           their respective owners and are used only to describe the subject matter of our
           preparation material.
         </p>
 
-        <div className="mt-6 flex flex-col gap-3 border-t border-ink-200 pt-6 text-xs text-ink-500 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-3 flex flex-col gap-1.5 border-t border-ink-200 pt-3 text-xs text-ink-500 sm:flex-row sm:items-center sm:justify-between">
           <p>
             &copy; {year} {brand.brandName}. All rights reserved.
           </p>
@@ -97,7 +97,7 @@ function FooterColumn({
   return (
     <nav aria-label={title}>
       <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-900">{title}</h2>
-      <ul className="mt-4 space-y-2.5">
+      <ul className="mt-2 space-y-1.5">
         {links.map((link) => (
           <li key={link.to}>
             <Link to={link.to} className="text-sm text-ink-600 transition hover:text-brand-700">

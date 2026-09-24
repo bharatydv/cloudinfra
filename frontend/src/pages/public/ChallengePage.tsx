@@ -16,31 +16,26 @@ import {
   XCircle,
 } from 'lucide-react'
 
-import {
-  getChallengeIntro,
-  reportChallengeWarning,
-  startChallenge,
-  submitChallenge,
-} from '@/api/endpoints'
+import { getChallengeIntro, reportChallengeWarning, submitChallenge } from '@/api/endpoints'
 import { ApiError } from '@/api/client'
-import { ExamPriceComparison } from '@/components/cards/ExamPrice'
+import {
+  ChallengeStartForm,
+  type ChallengePrefill,
+} from '@/components/challenge/ChallengeStartForm'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import {
   Badge,
   Card,
   Container,
-  Field,
-  Input,
   ProgressBar,
   Section,
   SectionHeading,
 } from '@/components/ui/primitives'
 import { ErrorState, InlineSpinner } from '@/components/ui/states'
-import { useAuth } from '@/hooks/useAuth'
 import { useProctor } from '@/hooks/useProctor'
 import { useSeo } from '@/hooks/useSeo'
 import { cn } from '@/lib/cn'
-import { formatLevel, formatPrice, pluralize } from '@/lib/format'
+import { formatPrice, pluralize } from '@/lib/format'
 import { queryKeys } from '@/lib/queryClient'
 import type {
   ChallengeBookingPreferences,
@@ -52,20 +47,24 @@ import type {
 
 type Phase = 'intro' | 'test' | 'result'
 
-/** Carried in `location.state` when the test is started from the scheduling
- * form: preselects the certification, prefills the lead form, and threads
- * the requested slot through to the discount callback. */
+/** Carried in `location.state` by the pages that send a visitor here.
+ *
+ * The deals page starts the attempt in its own popup and passes the resulting
+ * `session`, so the paper opens immediately. The scheduling form instead
+ * preselects the certification, prefills the lead form and threads the
+ * requested slot through to the discount callback. */
 interface ChallengeHandoff {
+  session?: ChallengeSession
   certificationId?: string
-  prefill?: { full_name?: string; email?: string; phone?: string; country?: string }
+  prefill?: ChallengePrefill
   bookingPreferences?: ChallengeBookingPreferences
 }
 
 export default function ChallengePage() {
   const location = useLocation()
   const handoff = (location.state as ChallengeHandoff | null) ?? null
-  const [phase, setPhase] = useState<Phase>('intro')
-  const [session, setSession] = useState<ChallengeSession | null>(null)
+  const [session, setSession] = useState<ChallengeSession | null>(handoff?.session ?? null)
+  const [phase, setPhase] = useState<Phase>(handoff?.session ? 'test' : 'intro')
   const [result, setResult] = useState<ChallengeResult | null>(null)
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -77,9 +76,29 @@ export default function ChallengePage() {
     title: 'Google Cloud Certification Challenge',
     description:
       'Take a short proctored test on any Google Cloud certification. Pass it and our team calls you within 24 hours with a discount on your exam.',
-    // Indexed deliberately: this is the campaign's landing page and carries
-    // commercial intent ("google cloud certification discount").
   })
+
+  // A paper that is already open never waits on the intro: the attempt was
+  // started elsewhere and its clock is already running.
+  if (phase === 'test' && session) {
+    return (
+      <TestScreen
+        session={session}
+        onFinished={(finished) => {
+          setResult(finished)
+          setPhase('result')
+        }}
+      />
+    )
+  }
+
+  if (phase === 'result' && result) {
+    return (
+      <ChallengeShell>
+        <ResultScreen result={result} />
+      </ChallengeShell>
+    )
+  }
 
   if (isError) return <ChallengeShell><ErrorState onRetry={() => void refetch()} /></ChallengeShell>
   if (isLoading || !data) {
@@ -99,26 +118,6 @@ export default function ChallengePage() {
             <ButtonLink to="/certifications">Browse certifications</ButtonLink>
           </div>
         </Card>
-      </ChallengeShell>
-    )
-  }
-
-  if (phase === 'test' && session) {
-    return (
-      <TestScreen
-        session={session}
-        onFinished={(finished) => {
-          setResult(finished)
-          setPhase('result')
-        }}
-      />
-    )
-  }
-
-  if (phase === 'result' && result) {
-    return (
-      <ChallengeShell>
-        <ResultScreen result={result} />
       </ChallengeShell>
     )
   }
@@ -155,83 +154,9 @@ function IntroScreen({
   handoff: ChallengeHandoff | null
   onStarted: (session: ChallengeSession) => void
 }) {
-  const { user } = useAuth()
-  const { terms, options } = intro
-  // Held by id rather than by object so the selection survives a refetch that
-  // returns new option instances for the same certifications.
-  const [selectedId, setSelectedId] = useState(() => {
-    if (handoff?.certificationId && options.some((o) => o.id === handoff.certificationId)) {
-      return handoff.certificationId
-    }
-    return options[0]?.id ?? ''
-  })
-  const [form, setForm] = useState({
-    full_name: handoff?.prefill?.full_name ?? '',
-    email: handoff?.prefill?.email ?? '',
-    phone: handoff?.prefill?.phone ?? '',
-    country: handoff?.prefill?.country ?? '',
-    website: '',
-  })
-  const [accepted, setAccepted] = useState(false)
-  const [formError, setFormError] = useState<string | null>(null)
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
-
-  // Prefill from the session when there is one, so a signed-in learner does
-  // not retype what we already know.
-  useEffect(() => {
-    if (!user) return
-    setForm((current) => ({
-      ...current,
-      full_name: current.full_name || user.name,
-      email: current.email || user.email,
-    }))
-  }, [user])
-
-  const mutation = useMutation({
-    mutationFn: startChallenge,
-    onSuccess: onStarted,
-    onError: (error) => {
-      if (error instanceof ApiError) {
-        setFieldErrors(error.fieldErrors)
-        setFormError(error.message)
-      } else {
-        setFormError('The test could not be started. Please try again.')
-      }
-    },
-  })
-
-  // The caller only renders this screen when there is at least one option, so
-  // the fallback is belt and braces rather than a real branch.
-  const selected = options.find((option) => option.id === selectedId) ?? options[0]
-  if (!selected) return null
-  const certificationId = selected.id
-
-  function handleSubmit(event: React.FormEvent) {
-    event.preventDefault()
-    setFormError(null)
-    setFieldErrors({})
-    if (!accepted) {
-      setFormError('Please accept the test rules before starting.')
-      return
-    }
-    mutation.mutate({
-      full_name: form.full_name.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      country: form.country.trim() || null,
-      certification_id: certificationId,
-      accept_rules: accepted,
-      booking_preferences: handoff?.bookingPreferences ?? null,
-      website: form.website,
-    })
-  }
-
+  const { terms } = intro
   const minReward = Number(terms.reward_discount_min_percentage)
   const maxReward = Number(terms.reward_discount_max_percentage)
-  const maxSaving =
-    selected.pricing && maxReward > 0
-      ? (Number(selected.pricing.total_price_amount) * maxReward) / 100
-      : null
 
   return (
     <>
@@ -250,13 +175,9 @@ function IntroScreen({
             your exam
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base text-ink-600">
-            {terms.question_count} questions, {terms.duration_minutes} minutes, on the{' '}
-            {intro.provider_name} certification of your choice &mdash; the same length and
-            question count as the real exam. Score {Number(terms.pass_mark)}% or more and our
-            team calls you within {terms.response_hours} hours to apply your discount and
-            schedule your exam on the date you want. The higher you score, the bigger the
-            discount: {Number(terms.pass_mark)}% earns {minReward}% off, and a perfect paper
-            earns the full {maxReward}%.
+            {terms.question_count} questions in {terms.duration_minutes} minutes. Score{' '}
+            {Number(terms.pass_mark)}%+ to unlock {minReward}%&ndash;{maxReward}% off, and we call
+            you within {terms.response_hours} hours to book it.
           </p>
 
           {handoff?.bookingPreferences && (
@@ -291,201 +212,14 @@ function IntroScreen({
       </Section>
 
       <Section className="pt-0">
-        <Container className="max-w-4xl">
-          <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-5">
-            {/* --- Pick the exam -------------------------------------------- */}
-            <div className="lg:col-span-3">
-              <Card className="p-5 sm:p-6">
-                <h2 className="text-lg font-semibold text-ink-900">
-                  1. Which exam are you aiming for?
-                </h2>
-                <p className="mt-1 text-sm text-ink-600">
-                  Your questions come from this certification&rsquo;s objectives.
-                </p>
-
-                <fieldset className="mt-4 space-y-3">
-                  <legend className="sr-only">Choose a certification</legend>
-                  {options.map((option) => {
-                    const isSelected = option.id === selected.id
-                    return (
-                      <label
-                        key={option.id}
-                        className={cn(
-                          'flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition',
-                          isSelected
-                            ? 'border-brand-500 bg-brand-50/60 ring-1 ring-brand-500'
-                            : 'border-ink-200 hover:border-ink-300 hover:bg-ink-50',
-                        )}
-                      >
-                        <input
-                          type="radio"
-                          name="certification"
-                          value={option.id}
-                          checked={isSelected}
-                          onChange={() => setSelectedId(option.id)}
-                          className="mt-1 h-4 w-4 accent-brand-600"
-                        />
-                        <span className="min-w-0 flex-1">
-                          <span className="flex flex-wrap items-center gap-2">
-                            <span className="font-semibold text-ink-900">{option.name}</span>
-                            {option.exam_code && <Badge tone="outline">{option.exam_code}</Badge>}
-                            <Badge tone="neutral">{formatLevel(option.level)}</Badge>
-                          </span>
-                          <span className="mt-1 block text-xs text-ink-500">
-                            {pluralize(option.question_count, 'question')} in{' '}
-                            {option.duration_minutes} minutes &mdash; same as the real exam
-                          </span>
-                          {option.pricing && (
-                            <ExamPriceComparison
-                              pricing={option.pricing}
-                              size="sm"
-                              className="mt-2"
-                            />
-                          )}
-                        </span>
-                      </label>
-                    )
-                  })}
-                </fieldset>
-              </Card>
-
-              {/* --- Rules ---------------------------------------------------- */}
-              <Card className="mt-6 border-amber-200 bg-amber-50 p-5">
-                <h2 className="flex items-center gap-2 text-base font-semibold text-amber-900">
-                  <ShieldAlert className="h-5 w-5" aria-hidden="true" />
-                  2. Test rules &mdash; please read
-                </h2>
-                <ul className="mt-3 space-y-2 text-sm leading-relaxed text-amber-900">
-                  <li>
-                    <strong>Stay in this window.</strong> Switching tabs or applications is
-                    detected and costs a warning.
-                  </li>
-                  <li>
-                    <strong>No copying or pasting.</strong> The questions cannot be selected,
-                    copied or right-clicked, and trying costs a warning.
-                  </li>
-                  <li>
-                    <strong>{terms.max_warnings} warnings and the test ends.</strong> On the
-                    final warning it submits automatically and is marked on the answers you have
-                    given up to that point.
-                  </li>
-                  <li>
-                    <strong>One sitting.</strong> The timer keeps running if you leave, and you
-                    can retake the test after {pluralize(terms.retake_after_days, 'day')}.
-                  </li>
-                </ul>
-                <p className="mt-3 text-xs leading-relaxed text-amber-800">
-                  These are study questions written from published exam objectives. They are not
-                  real exam questions and are not supplied by the certification provider.
-                </p>
-              </Card>
-            </div>
-
-            {/* --- Details -------------------------------------------------- */}
-            <div className="lg:col-span-2">
-              <Card className="p-5 sm:p-6 lg:sticky lg:top-24">
-                <h2 className="text-lg font-semibold text-ink-900">3. Your details</h2>
-                <p className="mt-1 text-sm text-ink-600">
-                  We email your result here, and call you if you win the discount.
-                </p>
-
-                <div className="mt-4 space-y-4">
-                  <Field label="Full name" htmlFor="full_name" required error={fieldErrors.full_name}>
-                    <Input
-                      id="full_name"
-                      value={form.full_name}
-                      autoComplete="name"
-                      required
-                      invalid={Boolean(fieldErrors.full_name)}
-                      onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-                    />
-                  </Field>
-                  <Field label="Email" htmlFor="email" required error={fieldErrors.email}>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={form.email}
-                      autoComplete="email"
-                      required
-                      invalid={Boolean(fieldErrors.email)}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    />
-                  </Field>
-                  <Field
-                    label="Phone"
-                    htmlFor="phone"
-                    required
-                    hint="With country code, so we can call you."
-                    error={fieldErrors.phone}
-                  >
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={form.phone}
-                      autoComplete="tel"
-                      required
-                      invalid={Boolean(fieldErrors.phone)}
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    />
-                  </Field>
-                  <Field label="Country" htmlFor="country" error={fieldErrors.country}>
-                    <Input
-                      id="country"
-                      value={form.country}
-                      autoComplete="country-name"
-                      onChange={(e) => setForm({ ...form, country: e.target.value })}
-                    />
-                  </Field>
-
-                  {/* Honeypot: hidden from people, irresistible to bots. */}
-                  <div className="hidden" aria-hidden="true">
-                    <label htmlFor="website">Website</label>
-                    <input
-                      id="website"
-                      name="website"
-                      tabIndex={-1}
-                      autoComplete="off"
-                      value={form.website}
-                      onChange={(e) => setForm({ ...form, website: e.target.value })}
-                    />
-                  </div>
-
-                  <label className="flex cursor-pointer items-start gap-2.5 text-sm text-ink-700">
-                    <input
-                      type="checkbox"
-                      checked={accepted}
-                      onChange={(e) => setAccepted(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 accent-brand-600"
-                    />
-                    <span>
-                      I have read the test rules and agree the test may end after{' '}
-                      {terms.max_warnings} warnings.
-                    </span>
-                  </label>
-
-                  {maxSaving !== null && selected.pricing && (
-                    <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
-                      Pass and save {minReward}%&ndash;{maxReward}% on {selected.name} &mdash; up
-                      to {formatPrice(maxSaving, selected.pricing.currency)} for a perfect score.
-                    </p>
-                  )}
-
-                  {formError && (
-                    <p role="alert" className="text-sm font-medium text-rose-700">
-                      {formError}
-                    </p>
-                  )}
-
-                  <Button type="submit" fullWidth size="lg" loading={mutation.isPending}>
-                    Start the test
-                  </Button>
-                  <p className="text-center text-xs text-ink-500">
-                    The timer starts as soon as you press this.
-                  </p>
-                </div>
-              </Card>
-            </div>
-          </form>
+        <Container className="max-w-2xl">
+          <ChallengeStartForm
+            intro={intro}
+            certificationId={handoff?.certificationId}
+            prefill={handoff?.prefill}
+            bookingPreferences={handoff?.bookingPreferences}
+            onStarted={onStarted}
+          />
         </Container>
       </Section>
     </>

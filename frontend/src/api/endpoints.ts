@@ -477,6 +477,28 @@ export interface ChallengeStartPayload {
 
 export const getChallengeIntro = () => api.get<ChallengeIntro>('/challenge', { auth: false })
 
+export type ContactChannel = 'email' | 'phone'
+
+/** Sends a one-time code; `target` comes back in the canonical form the
+ * server will compare against when the paper is started. */
+export const requestContactCode = (payload: { channel: ContactChannel; target: string }) =>
+  api.post<{ channel: ContactChannel; target: string; expires_in_minutes: number }>(
+    '/challenge/verification/request',
+    payload,
+    { auth: false },
+  )
+
+export const confirmContactCode = (payload: {
+  channel: ContactChannel
+  target: string
+  code: string
+}) =>
+  api.post<{ channel: ContactChannel; target: string; verified: boolean }>(
+    '/challenge/verification/confirm',
+    payload,
+    { auth: false },
+  )
+
 /**
  * Open a paper. The token in the response is the only copy -- it authorises
  * the warning and submit calls, and the server keeps only its hash.

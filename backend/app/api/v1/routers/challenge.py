@@ -12,8 +12,12 @@ from app.schemas.campaign import (
     ChallengeSubmit,
     ChallengeWarningReceipt,
     ChallengeWarningReport,
+    ContactVerificationConfirm,
+    ContactVerificationReceipt,
+    ContactVerificationRequest,
+    ContactVerificationStatus,
 )
-from app.services import challenge_service
+from app.services import challenge_service, verification_service
 
 router = APIRouter(prefix="/challenge", tags=["Certification challenge"])
 
@@ -22,6 +26,39 @@ router = APIRouter(prefix="/challenge", tags=["Certification challenge"])
 async def challenge_intro(db: DbSession) -> ChallengeIntro:
     """Campaign terms and the certifications the test can be sat for."""
     return await challenge_service.build_intro(db)
+
+
+@router.post("/verification/request", response_model=ContactVerificationReceipt)
+@limiter.limit("5/minute")
+async def request_contact_code(
+    request: Request,
+    payload: ContactVerificationRequest,
+    db: DbSession,
+    ip: str | None = Depends(client_ip),
+) -> ContactVerificationReceipt:
+    """Send a one-time code to an email address or phone number.
+
+    A guest proves both before a paper is issued; a fresh request retires any
+    code still pending for the same address.
+    """
+    target = verification_service.normalize_target(payload.channel, payload.target)
+    minutes = await verification_service.request_code(
+        db, payload.channel, target, source_ip=ip
+    )
+    return ContactVerificationReceipt(
+        channel=payload.channel, target=target, expires_in_minutes=minutes
+    )
+
+
+@router.post("/verification/confirm", response_model=ContactVerificationStatus)
+@limiter.limit("10/minute")
+async def confirm_contact_code(
+    request: Request, payload: ContactVerificationConfirm, db: DbSession
+) -> ContactVerificationStatus:
+    """Check a code against the latest one sent to that address."""
+    target = verification_service.normalize_target(payload.channel, payload.target)
+    await verification_service.confirm_code(db, payload.channel, target, payload.code)
+    return ContactVerificationStatus(channel=payload.channel, target=target, verified=True)
 
 
 @router.post(

@@ -28,6 +28,7 @@ from app.models.engagement import (
 from app.models.scheduling import ExamBooking
 from app.models.system import AnalyticsEvent, ContactMessage, MediaAsset, SiteSetting
 from app.models.user import PasswordResetToken, RefreshToken, User
+from app.models.verification import ContactVerification
 
 __all__ = [
     "AnalyticsEvent",
@@ -41,6 +42,7 @@ __all__ = [
     "ChallengeAttempt",
     "ChallengeQuestion",
     "ContactMessage",
+    "ContactVerification",
     "Course",
     "CourseCategory",
     "CourseModule",

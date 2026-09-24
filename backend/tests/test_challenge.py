@@ -13,17 +13,37 @@ from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
 import pytest
-from httpx import AsyncClient
 from sqlalchemy import select
 
 from app.models.campaign import ChallengeAttempt, ChallengeQuestion
 from app.models.system import SiteSetting
-from app.services import challenge_service
+from app.models.verification import ContactVerification
+from app.services import challenge_service, verification_service
 from tests.factories import make_certification, make_provider
 
 pytestmark = pytest.mark.asyncio
 
 PROVIDER_SLUG = "google-cloud"
+# The guest every paper is sat by. A fixed address (rather than a random one
+# per payload) lets `_setup` verify it once for the whole test.
+GUEST_EMAIL = "asha@example.com"
+GUEST_PHONE = "+91 9000000000"
+
+
+async def _verify_contacts(db, email: str, phone: str) -> None:
+    """Record both addresses as confirmed, as the OTP flow would."""
+    now = datetime.now(UTC)
+    for channel, target in (("email", email), ("phone", phone)):
+        db.add(
+            ContactVerification(
+                channel=channel,
+                target=verification_service.normalize_target(channel, target),
+                code_hash="verified-in-test",
+                expires_at=now,
+                verified_at=now,
+            )
+        )
+    await db.commit()
 
 
 async def _terms(db, **overrides):
@@ -83,14 +103,15 @@ async def _setup(db, **terms):
     )
     await _questions(db, certification)
     await _terms(db, **terms)
+    await _verify_contacts(db, GUEST_EMAIL, GUEST_PHONE)
     return provider, certification
 
 
 def _start_payload(certification_id, **overrides) -> dict:
     body = {
         "full_name": "Asha Rao",
-        "email": f"asha-{uuid.uuid4().hex[:8]}@example.com",
-        "phone": "+91 9000000000",
+        "email": GUEST_EMAIL,
+        "phone": GUEST_PHONE,
         "country": "India",
         "certification_id": str(certification_id),
         "accept_rules": True,
@@ -109,6 +130,86 @@ async def _answer_key(db, attempt_id) -> tuple[list[str], dict[str, str]]:
         )
     )
     return list(attempt.question_ids), {str(row.id): row.correct_option for row in rows}
+
+
+# --- Proving the contact details ----------------------------------------------
+async def test_a_guest_cannot_start_with_unverified_contact_details(client, db_session):
+    _, certification = await _setup(db_session)
+
+    response = await client.post(
+        "/api/challenge/attempts",
+        json=_start_payload(
+            certification.id, email="stranger@example.com", phone="+91 9555555555"
+        ),
+    )
+    assert response.status_code == 422
+    fields = {item["field"] for item in response.json()["error"]["details"]}
+    assert fields == {"email", "phone"}
+    assert await db_session.scalar(select(ChallengeAttempt)) is None
+
+
+async def test_verification_can_be_switched_off(client, db_session, monkeypatch):
+    _, certification = await _setup(db_session)
+    monkeypatch.setattr(challenge_service.settings, "contact_verification_required", False)
+
+    intro = (await client.get("/api/challenge")).json()
+    assert intro["terms"]["verification_required"] is False
+    response = await client.post(
+        "/api/challenge/attempts",
+        json=_start_payload(
+            certification.id, email="unverified@example.com", phone="+91 9444444444"
+        ),
+    )
+    assert response.status_code == 201, response.text
+
+
+async def test_codes_are_checked_and_then_unlock_the_start(client, db_session, monkeypatch):
+    _, certification = await _setup(db_session)
+    monkeypatch.setattr(verification_service, "generate_numeric_code", lambda: "246810")
+    email, phone = "new@example.com", "+91 91111-11111"
+
+    for channel, target in (("email", email), ("phone", phone)):
+        sent = await client.post(
+            "/api/challenge/verification/request", json={"channel": channel, "target": target}
+        )
+        assert sent.status_code == 200, sent.text
+        wrong = await client.post(
+            "/api/challenge/verification/confirm",
+            json={"channel": channel, "target": target, "code": "000000"},
+        )
+        assert wrong.status_code == 422
+        right = await client.post(
+            "/api/challenge/verification/confirm",
+            json={"channel": channel, "target": target, "code": "246810"},
+        )
+        assert right.status_code == 200, right.text
+        assert right.json()["verified"] is True
+
+    # The phone was typed with spaces and a dash; the start payload must still
+    # match the number that was verified.
+    assert (await client.post("/api/challenge/verification/request",
+        json={"channel": "phone", "target": phone})).json()["target"] == "+919111111111"
+
+    started = await client.post(
+        "/api/challenge/attempts",
+        json=_start_payload(certification.id, email=email, phone=phone),
+    )
+    assert started.status_code == 201, started.text
+
+
+async def test_a_code_stops_working_after_too_many_wrong_guesses(client, db_session, monkeypatch):
+    await _setup(db_session)
+    monkeypatch.setattr(verification_service, "generate_numeric_code", lambda: "135790")
+    body = {"channel": "email", "target": "guess@example.com"}
+    await client.post("/api/challenge/verification/request", json=body)
+
+    for _ in range(5):
+        await client.post("/api/challenge/verification/confirm", json={**body, "code": "000000"})
+    blocked = await client.post(
+        "/api/challenge/verification/confirm", json={**body, "code": "135790"}
+    )
+    assert blocked.status_code == 422
+    assert "Too many" in blocked.json()["error"]["message"]
 
 
 # --- Landing -----------------------------------------------------------------
@@ -477,3 +578,74 @@ async def test_the_promised_discount_is_snapshotted_onto_the_attempt(client, db_
     )
     # A 100% score at the default terms earned the maximum, 65%.
     assert attempt.discount_percentage == Decimal("65.00")
+
+
+# --- Result email -------------------------------------------------------------
+async def _capture_mail(monkeypatch) -> list[dict]:
+    sent: list[dict] = []
+
+    async def fake_send(
+        to: str, subject: str, body: str, html: str | None = None, *, sender: str | None = None
+    ) -> None:
+        sent.append({"to": to, "subject": subject, "body": body, "html": html, "sender": sender})
+
+    monkeypatch.setattr(challenge_service.email_service, "send_email", fake_send)
+    monkeypatch.setattr(challenge_service.settings, "sales_notification_email", "sales@example.com")
+    monkeypatch.setattr(challenge_service.settings, "email_contact_address", "contact@example.com")
+    return sent
+
+
+async def _sit_paper(client, db_session, *, option: str | None) -> dict:
+    """Start and submit a paper; `option=None` answers every question correctly."""
+    _, certification = await _setup(db_session)
+    session = (
+        await client.post("/api/challenge/attempts", json=_start_payload(certification.id))
+    ).json()
+    qids, key = await _answer_key(db_session, session["attempt_id"])
+    response = await client.post(
+        f"/api/challenge/attempts/{session['attempt_id']}/submit",
+        json={
+            "token": session["token"],
+            "answers": [{"question_id": q, "option_key": option or key[q]} for q in qids],
+        },
+    )
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+async def test_passing_emails_the_score_and_a_callback_promise(client, db_session, monkeypatch):
+    sent = await _capture_mail(monkeypatch)
+    result = await _sit_paper(client, db_session, option=None)
+
+    candidate = next(mail for mail in sent if mail["to"] == GUEST_EMAIL)
+    assert "100%" in candidate["subject"]
+    assert "65% off" in candidate["subject"]
+    assert result["reference_code"] in candidate["body"]
+    assert "within 24 hours" in candidate["body"]
+    # A styled copy goes alongside the plain text.
+    assert candidate["html"] and "<html" in candidate["html"]
+    assert "100%" in candidate["html"] and "within 24 hours" in candidate["html"]
+    # Results come from the contact mailbox so a reply reaches a person.
+    assert candidate["sender"] == "contact@example.com"
+
+    sales = next(mail for mail in sent if mail["to"] == "sales@example.com")
+    assert "qualified" in sales["subject"]
+    assert sales["sender"] == "contact@example.com"
+
+
+async def test_failing_still_emails_the_score_and_a_callback_promise(
+    client, db_session, monkeypatch
+):
+    sent = await _capture_mail(monkeypatch)
+    result = await _sit_paper(client, db_session, option="b")
+
+    candidate = next(mail for mail in sent if mail["to"] == GUEST_EMAIL)
+    assert "0%" in candidate["subject"]
+    assert result["reference_code"] in candidate["body"]
+    assert "within 24 hours" in candidate["body"]
+    assert "below the mark" in candidate["body"]
+    assert "within 24 hours" in candidate["html"]
+
+    # The team is told about everyone it has promised to call.
+    sales = next(mail for mail in sent if mail["to"] == "sales@example.com")
+    assert "not passed" in sales["subject"]

@@ -8,6 +8,8 @@ first seeded. This script only touches what the campaign actually needs:
   * the two campaign certifications (added if missing, left alone if present)
   * their question bank (matched on `reference`, safe to re-run)
   * the `challenge` site setting (replaced with the campaign's current terms)
+  * every certification's `discount_percentage`, as certifications.json sets it
+  * the promotion banner text and the site-wide discount, from site.json
 
 Nothing else -- no other certification, course, article or setting -- is
 read or written.
@@ -58,6 +60,12 @@ CHALLENGE_SETTING_DESCRIPTION = (
     "at the pass mark, maximum for a perfect score), and how many proctoring "
     "warnings are allowed before the test auto-submits."
 )
+
+# Setting fields the campaign owns, copied from site.json.
+SETTING_FIELDS = {
+    "promotion": ["message", "badge"],
+    "pricing": ["discountPercentage"],
+}
 
 
 def load(name: str) -> dict:
@@ -173,6 +181,47 @@ async def main() -> None:
             setting.value = CHALLENGE_SETTING_VALUE
             setting.description = CHALLENGE_SETTING_DESCRIPTION
             print("updated 'challenge' setting")
+
+        # --- Discounts -------------------------------------------------------
+        # Every certification's discount follows the seed JSON: the campaign
+        # certifications carry the headline discount, the rest none.
+        providers = {
+            p.slug: p.id for p in (await db.scalars(select(CertificationProvider))).all()
+        }
+        for row in certifications:
+            provider_id = providers.get(row["provider"])
+            if provider_id is None:
+                continue
+            existing = await db.scalar(
+                select(Certification).where(
+                    Certification.provider_id == provider_id,
+                    Certification.slug == row["slug"],
+                )
+            )
+            if existing is None:
+                continue
+            discount = row.get("discount_percentage")
+            if existing.discount_percentage != discount:
+                print(
+                    f"discount {row['slug']}: {existing.discount_percentage} -> {discount}"
+                )
+                existing.discount_percentage = discount
+
+        # --- Promotion and pricing ---------------------------------------------
+        # Only the campaign's fields are merged in; anything else in these
+        # settings (benefits, tax, ...) keeps whatever Admin last saved.
+        seed_settings = {s["key"]: s["value"] for s in load("site.json")["settings"]}
+        for key, fields in SETTING_FIELDS.items():
+            setting = await db.scalar(select(SiteSetting).where(SiteSetting.key == key))
+            if setting is None:
+                print(f"no '{key}' setting in this database, skipped")
+                continue
+            value = dict(setting.value or {})
+            for field in fields:
+                value[field] = seed_settings[key][field]
+            if value != setting.value:
+                setting.value = value
+                print(f"updated '{key}' setting: {', '.join(fields)}")
 
         await db.commit()
         print(

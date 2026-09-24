@@ -130,17 +130,63 @@ async def submit(
     await db.commit()
     await db.refresh(booking)
 
-    subject, body = email_service.exam_booking_email(
-        booking.full_name,
-        booking.certification_name,
-        booking.reference_code,
-        booking.preferred_date.isoformat(),
-    )
-    await email_service.send_email(booking.email, subject, body)
+    campaign = await challenge_service.load_config(db)
+    await _send_request_emails(booking, campaign.response_hours)
 
     config = await pricing.load_config(db)
     checkout = await _start_checkout(db, booking, certification, config)
     return booking, certification_url(certification), checkout
+
+
+async def _send_request_emails(booking: ExamBooking, response_hours: int) -> None:
+    """Receipt to the applicant, and an alert to the team promised to call.
+
+    The request is already committed, so a mail provider outage is logged
+    rather than turned into an error on the form.
+    """
+    try:
+        subject, body, html = email_service.exam_booking_email(
+            name=booking.full_name,
+            certification_name=booking.certification_name,
+            exam_code=booking.exam_code,
+            reference_code=booking.reference_code,
+            preferred_date=booking.preferred_date.isoformat(),
+            alternate_date=(
+                booking.alternate_date.isoformat() if booking.alternate_date else None
+            ),
+            preferred_time_slot=booking.preferred_time_slot,
+            timezone=booking.timezone,
+            delivery_mode=booking.delivery_mode,
+            city=booking.city,
+            country=booking.country,
+            response_hours=response_hours,
+        )
+        await email_service.send_email(
+            booking.email, subject, body, html=html, sender=email_service.contact_sender()
+        )
+    except Exception:
+        logger.exception("Could not email the exam request receipt for %s", booking.reference_code)
+
+    if not settings.sales_notification_email:
+        return
+    try:
+        subject, body = email_service.exam_booking_alert_email(
+            name=booking.full_name,
+            email=booking.email,
+            phone=booking.phone,
+            certification_name=booking.certification_name,
+            reference_code=booking.reference_code,
+            preferred_date=booking.preferred_date.isoformat(),
+            response_hours=response_hours,
+        )
+        await email_service.send_email(
+            settings.sales_notification_email,
+            subject,
+            body,
+            sender=email_service.contact_sender(),
+        )
+    except Exception:
+        logger.exception("Could not notify the team about exam request %s", booking.reference_code)
 
 
 async def _start_checkout(

@@ -2,8 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import { ArrowRight } from 'lucide-react'
 
 import { ArticleCard } from '@/components/cards/ArticleCard'
-import { CertificationCard } from '@/components/cards/CertificationCard'
-import { CourseCard } from '@/components/cards/CourseCard'
 import { TestimonialCard } from '@/components/cards/misc'
 import { Hero } from '@/components/marketing/Hero'
 import {
@@ -21,7 +19,7 @@ import {
 import { Accordion } from '@/components/ui/Accordion'
 import { ButtonLink } from '@/components/ui/Button'
 import { Container, Section, SectionHeading } from '@/components/ui/primitives'
-import { CardGridSkeleton, ErrorState } from '@/components/ui/states'
+import { ErrorState } from '@/components/ui/states'
 import { getHome } from '@/api/endpoints'
 import { siteConfig } from '@/config/brand'
 import { useServerSeo } from '@/hooks/useSeo'
@@ -31,7 +29,7 @@ import { queryKeys } from '@/lib/queryClient'
 export default function HomePage() {
   const { learningPath } = useSite()
   // One aggregate request keeps the landing page to a single round trip.
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isError, refetch } = useQuery({
     queryKey: queryKeys.home,
     queryFn: getHome,
   })
@@ -63,65 +61,7 @@ export default function HomePage() {
 
           <ProviderSpotlightSection providers={data?.providers ?? []} />
 
-          {/* Featured certifications */}
-          <Section tone="muted">
-            <Container>
-              <SectionHeading
-                eyebrow="Certifications"
-                title="Popular certifications and what they cost"
-                description="Exam codes, levels and current prices for the certifications people prepare for most."
-                action={
-                  <ButtonLink
-                    to="/certifications"
-                    variant="outline"
-                    trailingIcon={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
-                  >
-                    View all
-                  </ButtonLink>
-                }
-              />
-              {isLoading ? (
-                <CardGridSkeleton />
-              ) : (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {data?.featured_certifications.map((certification) => (
-                    <CertificationCard key={certification.id} certification={certification} />
-                  ))}
-                </div>
-              )}
-            </Container>
-          </Section>
-
           <CertificationPathsSection providers={data?.providers ?? []} />
-
-          {/* Popular courses */}
-          <Section>
-            <Container>
-              <SectionHeading
-                eyebrow="Courses"
-                title="Courses that prepare you for the exam"
-                description="Self-paced, structured courses across cloud, AI, data, DevOps and marketing."
-                action={
-                  <ButtonLink
-                    to="/courses"
-                    variant="outline"
-                    trailingIcon={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
-                  >
-                    Browse all courses
-                  </ButtonLink>
-                }
-              />
-              {isLoading ? (
-                <CardGridSkeleton />
-              ) : (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {data?.featured_courses.map((course) => (
-                    <CourseCard key={course.id} course={course} />
-                  ))}
-                </div>
-              )}
-            </Container>
-          </Section>
 
           <TrustSection categories={data?.categories ?? []} />
 

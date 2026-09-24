@@ -1,18 +1,16 @@
-import { useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { Tag } from 'lucide-react'
+import { Tag, Trophy } from 'lucide-react'
 
 import { DealCard } from '@/components/cards/DealCard'
+import { ChallengeStartModal } from '@/components/challenge/ChallengeStartForm'
 import { FilterPanel, type FilterDefinition } from '@/components/forms/FilterPanel'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { SearchBar } from '@/components/layout/SearchBar'
 import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
-import { Container, Section } from '@/components/ui/primitives'
+import { Container, Section, SectionHeading } from '@/components/ui/primitives'
 import { CardGridSkeleton, EmptyState, ErrorState } from '@/components/ui/states'
-import { getDeals, getProviders } from '@/api/endpoints'
-import { siteConfig } from '@/config/brand'
+import { getChallengeIntro, getDeals, getProviders } from '@/api/endpoints'
 import { useSeo } from '@/hooks/useSeo'
 import { pluralize } from '@/lib/format'
 import { queryKeys } from '@/lib/queryClient'
@@ -48,15 +46,17 @@ const SORT_OPTIONS = [
 ]
 
 /**
- * Everything currently discounted, in one place.
+ * Unified Deals and Test Qualification Page.
  *
- * The listing is assembled entirely from prices an operator has entered: an
- * exam with no quoted vendor fee and a course with no recorded list price are
- * absent rather than padded in at a notional saving, which is why an empty
- * result here says "no offers" rather than "no matches".
+ * Displays active certification offers and embeds the skill test qualification engine.
+ * Passing the skill qualification test earns an instant 65% discount code on the exam.
  */
 export default function DealsPage() {
+  const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
+  // The popup is open whenever this is set; the certification inside is
+  // optional, since the teaser button starts without picking a deal.
+  const [testFor, setTestFor] = useState<{ certificationId?: string } | null>(null)
 
   const page = Number(params.get('page') ?? '1')
   const kind = params.get('kind') ?? ''
@@ -66,11 +66,9 @@ export default function DealsPage() {
   const sort = params.get('sort') ?? 'discount'
 
   useSeo({
-    title: 'Certification and course deals',
+    title: 'Certification Deals & Qualification Test',
     description:
-      'Current discounts on cloud certification exams and courses, ranked by how much they save, each with the date the price was last verified.',
-    // A filtered view is a slice of the same offers, so only the bare listing
-    // is worth indexing.
+      'Compare active certification exam deals and take the skill qualification test to unlock up to 65% discount vouchers.',
     robots: params.toString() ? 'noindex,follow' : 'index,follow',
   })
 
@@ -79,6 +77,31 @@ export default function DealsPage() {
     queryFn: getProviders,
     staleTime: 10 * 60_000,
   })
+
+  // The provider filter only offers providers with a live deal: the catalogue
+  // is small, so one unfiltered page covers it.
+  const allDealsFilters = { page: 1, page_size: 60 }
+  const { data: allDeals } = useQuery({
+    queryKey: queryKeys.deals(allDealsFilters),
+    queryFn: () => getDeals(allDealsFilters),
+    staleTime: 10 * 60_000,
+  })
+  const providersWithDeals = useMemo(
+    () => new Set((allDeals?.items ?? []).map((deal) => deal.provider_slug).filter(Boolean)),
+    [allDeals],
+  )
+
+  // Which certifications the challenge campaign actually covers, so the
+  // "Take Test to Qualify" CTA only appears on deals it can honour.
+  const { data: challengeIntro } = useQuery({
+    queryKey: queryKeys.challengeIntro,
+    queryFn: getChallengeIntro,
+    staleTime: 10 * 60_000,
+  })
+  const campaignCertIds = useMemo(
+    () => new Set((challengeIntro?.options ?? []).map((option) => option.id)),
+    [challengeIntro],
+  )
 
   const filters = useMemo(
     () => ({
@@ -107,6 +130,10 @@ export default function DealsPage() {
     setParams(next)
   }
 
+  function handleQualifyForDeal(dealId: string) {
+    setTestFor({ certificationId: dealId })
+  }
+
   const activeCount = [kind, provider, level, minDiscount].filter(Boolean).length
 
   const filterDefinitions: FilterDefinition[] = [
@@ -123,7 +150,9 @@ export default function DealsPage() {
       value: provider,
       options: [
         { value: '', label: 'All providers' },
-        ...(providers ?? []).map((item) => ({ value: item.slug, label: item.name })),
+        ...(providers ?? [])
+          .filter((item) => providersWithDeals.has(item.slug))
+          .map((item) => ({ value: item.slug, label: item.name })),
       ],
       onChange: (value) => update('provider', value),
     },
@@ -145,24 +174,36 @@ export default function DealsPage() {
 
   return (
     <>
-      <PageHeader
-        title="Certification and course deals"
-        description="Every certification exam and course we currently list at a reduced price, deepest discount first. Each offer shows what it normally costs, what it costs now and when the price was last verified."
-        breadcrumbs={[
-          { name: 'Home', url: '/' },
-          { name: 'Deals', url: '/deals' },
-        ]}
-      >
-        <div className="mt-8 max-w-2xl">
-          <SearchBar placeholder="Search certifications, exam codes or courses" />
-        </div>
-        <p className="mt-6 max-w-3xl rounded-lg border border-ink-200 bg-white p-3.5 text-xs leading-relaxed text-ink-500">
-          {siteConfig.independenceNotice}
-        </p>
-      </PageHeader>
+      {/* Test Qualification teaser -- the test itself runs on its own page */}
+      <div className="border-b border-ink-200 bg-white py-12">
+        <Container className="max-w-5xl">
+          <SectionHeading
+            eyebrow="Test Qualification"
+            title="Skill Qualification Engine"
+            description="Take the short proctored test on your target certification. Pass with 70%+ score to instantly earn your personalized 65% discount code!"
+            align="center"
+          />
+        </Container>
+      </div>
 
+      {/* Rules and details in a popup; the paper itself opens on its own page
+          so the proctoring has a clean window to watch. */}
+      <ChallengeStartModal
+        open={testFor !== null}
+        certificationId={testFor?.certificationId}
+        onClose={() => setTestFor(null)}
+        onStarted={(session) => navigate('/challenge', { state: { session } })}
+      />
+
+      {/* Active Certification Deals Grid, below the qualification test */}
       <Section tone="muted" className="py-12">
         <Container>
+          <SectionHeading
+            eyebrow="Active Offers"
+            title="Certification Deals Available Right Now"
+            description="Select an exam deal below and complete the 10-minute skill test qualification to claim your 65% discount code."
+          />
+
           <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
             <FilterPanel
               filters={filterDefinitions}
@@ -173,7 +214,7 @@ export default function DealsPage() {
 
             <div className="min-w-0">
               <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-ink-600" aria-live="polite">
+                <p className="text-sm font-medium text-ink-700" aria-live="polite">
                   {isLoading ? 'Loading offers...' : `${pluralize(data?.total ?? 0, 'offer')} available`}
                 </p>
                 <label className="flex items-center gap-2 text-sm text-ink-600">
@@ -199,9 +240,32 @@ export default function DealsPage() {
               ) : data && data.items.length > 0 ? (
                 <>
                   <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                    {data.items.map((deal) => (
-                      <DealCard key={`${deal.kind}-${deal.id}`} deal={deal} />
-                    ))}
+                    {data.items.map((deal) => {
+                      const isCampaignEligible =
+                        Boolean(challengeIntro?.terms.enabled) &&
+                        deal.kind === 'certification' &&
+                        campaignCertIds.has(deal.id)
+                      return (
+                        <div key={`${deal.kind}-${deal.id}`} className="flex flex-col">
+                          <DealCard
+                            deal={deal}
+                            onQualify={
+                              isCampaignEligible ? () => handleQualifyForDeal(deal.id) : undefined
+                            }
+                          />
+                          {isCampaignEligible && (
+                            <Button
+                              variant="primary"
+                              className="mt-3 w-full justify-center bg-brand-600 font-semibold shadow-sm hover:bg-brand-700"
+                              onClick={() => handleQualifyForDeal(deal.id)}
+                            >
+                              <Trophy className="mr-2 h-4 w-4" aria-hidden="true" />
+                              Take Test to Qualify ({deal.discount_percentage}% Off)
+                            </Button>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                   <Pagination
                     page={data.page}
@@ -214,11 +278,7 @@ export default function DealsPage() {
                 <EmptyState
                   icon={<Tag className="h-6 w-6" aria-hidden="true" />}
                   title={activeCount > 0 ? 'No offers match these filters' : 'No offers right now'}
-                  description={
-                    activeCount > 0
-                      ? 'Try a smaller discount threshold, or a different provider.'
-                      : 'We list a discount only once the price behind it has been checked. Browse the full certification catalogue in the meantime.'
-                  }
+                  description="We list a discount only once the price behind it has been checked."
                   action={
                     activeCount > 0 ? (
                       <Button variant="outline" onClick={() => setParams(new URLSearchParams())}>

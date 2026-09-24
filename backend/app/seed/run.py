@@ -41,7 +41,13 @@ from app.utils.text import build_excerpt, reading_minutes, slugify
 logging.basicConfig(level=logging.INFO, format="%(levelname)-8s %(message)s")
 logger = logging.getLogger("seed")
 
-SEED_DIR = Path(__file__).resolve().parents[3] / "database" / "seed"
+SEED_DIR_CANDIDATES = [
+    Path(__file__).resolve().parents[3] / "database" / "seed",
+    Path(__file__).resolve().parents[2] / "database" / "seed",
+    Path(__file__).resolve().parents[1] / "database" / "seed",
+    Path("/app/database/seed"),
+]
+SEED_DIR = next((p for p in SEED_DIR_CANDIDATES if p.is_dir()), SEED_DIR_CANDIDATES[0])
 
 
 def load(name: str) -> dict[str, Any]:

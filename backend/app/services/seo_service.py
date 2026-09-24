@@ -214,7 +214,7 @@ def organization_schema() -> dict[str, Any]:
         "@type": "Organization",
         "name": settings.email_from_name,
         "url": settings.public_site_url,
-        "email": settings.email_from_address,
+        "email": settings.email_contact_address or settings.email_from_address,
     }
 
 

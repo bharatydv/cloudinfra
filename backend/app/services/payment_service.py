@@ -134,7 +134,9 @@ async def handle_webhook(db: AsyncSession, payload: bytes, signature: str | None
             subject, body = email_service.exam_payment_confirmation_email(
                 booking.full_name, booking.certification_name, amount, booking.reference_code
             )
-            await email_service.send_email(booking.email, subject, body)
+            await email_service.send_email(
+                booking.email, subject, body, sender=email_service.contact_sender()
+            )
             return "booking_paid"
 
         user = await db.get(User, payment.user_id) if payment.user_id else None

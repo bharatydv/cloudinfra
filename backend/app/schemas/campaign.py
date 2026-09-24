@@ -11,6 +11,7 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
@@ -37,6 +38,9 @@ class ChallengeTerms(BaseModel):
     max_warnings: int
     retake_after_days: int
     response_hours: int
+    # Whether a guest must confirm their email and phone with one-time codes
+    # before starting, so the form only asks when the server will check.
+    verification_required: bool = True
 
 
 class ChallengeCertificationOption(BaseModel):
@@ -86,6 +90,33 @@ class ChallengeBookingPreferences(BaseModel):
             if value not in (None, "")
         }
         return data or None
+
+
+ContactChannel = Literal["email", "phone"]
+
+
+class ContactVerificationRequest(BaseModel):
+    """Ask for a one-time code on one address."""
+
+    channel: ContactChannel
+    target: str = Field(min_length=3, max_length=255)
+
+
+class ContactVerificationConfirm(ContactVerificationRequest):
+    code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$")
+
+
+class ContactVerificationReceipt(BaseModel):
+    channel: ContactChannel
+    # Echoed in canonical form so the client sends the same value at start.
+    target: str
+    expires_in_minutes: int
+
+
+class ContactVerificationStatus(BaseModel):
+    channel: ContactChannel
+    target: str
+    verified: bool
 
 
 class ChallengeStart(BaseModel):

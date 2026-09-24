@@ -42,6 +42,17 @@ def _certification_deal(
     if breakdown is None or breakdown.savings_percentage is None:
         return None
 
+    original_price = (
+        pricing._money(breakdown.exam_fee_amount * (1 + config.tax_rate / 100))
+        if config.tax_enabled and config.tax_rate > 0
+        else breakdown.exam_fee_amount
+    )
+    savings_amount = (
+        pricing._money(original_price - breakdown.total_price_amount)
+        if config.tax_enabled and config.tax_rate > 0
+        else breakdown.discount_amount
+    )
+
     provider = certification.provider
     return DealCard(
         kind="certification",
@@ -60,9 +71,9 @@ def _certification_deal(
         level=certification.level,
         category=certification.category,
         currency=breakdown.currency,
-        original_price=breakdown.exam_fee_amount,
+        original_price=original_price,
         sale_price=breakdown.total_price_amount,
-        savings_amount=breakdown.discount_amount,
+        savings_amount=savings_amount,
         discount_percentage=breakdown.savings_percentage,
         tax_label=breakdown.tax_label if breakdown.tax_amount > 0 else None,
         tax_amount=breakdown.tax_amount if breakdown.tax_amount > 0 else None,

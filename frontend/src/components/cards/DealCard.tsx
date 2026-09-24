@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, BookOpen, Clock, GraduationCap } from 'lucide-react'
 
@@ -14,11 +15,35 @@ import type { DealCard as DealCardType } from '@/types/api'
  * sale price, so the card only has to lay them out; nothing here recalculates
  * a discount, which is what keeps it agreeing with the detail page it links to.
  */
-export function DealCard({ deal, className }: { deal: DealCardType; className?: string }) {
+export function DealCard({
+  deal,
+  className,
+  onQualify,
+}: {
+  deal: DealCardType
+  className?: string
+  /** When set, the whole card opens the test-qualification flow instead of
+   * linking to the deal's detail page; "View deal" still links through. */
+  onQualify?: () => void
+}) {
   const isExam = deal.kind === 'certification'
 
   return (
-    <Card interactive className={cn('group relative flex h-full flex-col p-5', className)}>
+    <Card
+      interactive
+      className={cn('group relative flex h-full flex-col p-5', onQualify && 'cursor-pointer', className)}
+      {...(onQualify && {
+        role: 'button',
+        tabIndex: 0,
+        onClick: onQualify,
+        onKeyDown: (event: KeyboardEvent) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            onQualify()
+          }
+        },
+      })}
+    >
       <DiscountFlag percentage={deal.discount_percentage} align="right" />
 
       <div className="mb-4 flex items-start gap-2.5 pr-24">
@@ -49,12 +74,16 @@ export function DealCard({ deal, className }: { deal: DealCardType; className?: 
       </div>
 
       <h3 className="text-base font-bold leading-snug text-ink-900">
-        <Link
-          to={deal.url}
-          className="transition after:absolute after:inset-0 group-hover:text-brand-700"
-        >
-          {deal.title}
-        </Link>
+        {onQualify ? (
+          <span className="transition group-hover:text-brand-700">{deal.title}</span>
+        ) : (
+          <Link
+            to={deal.url}
+            className="transition after:absolute after:inset-0 group-hover:text-brand-700"
+          >
+            {deal.title}
+          </Link>
+        )}
       </h3>
 
       <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink-600">
@@ -94,7 +123,7 @@ export function DealCard({ deal, className }: { deal: DealCardType; className?: 
           <span />
         )}
         <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">
-          {isExam ? 'View deal' : 'View course'}
+          {onQualify ? 'Take the test' : isExam ? 'View deal' : 'View course'}
           <ArrowRight
             className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
             aria-hidden="true"

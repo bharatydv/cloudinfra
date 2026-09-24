@@ -133,7 +133,7 @@ async def test_past_date_and_honeypot_are_rejected(client: AsyncClient, db_sessi
         "/api/exam-bookings",
         json=_payload(
             str(certification.id),
-            preferred_date=(date.today() - timedelta(days=1)).isoformat(),
+            preferred_date=(date.today() - timedelta(days=5)).isoformat(),
             alternate_date=None,
         ),
     )
@@ -174,3 +174,39 @@ async def test_exam_requests_require_admin(client: AsyncClient, db_session, stud
     auth_override(student)
     response = await client.get("/api/admin/exam-bookings")
     assert response.status_code == 403
+
+
+async def test_request_emails_a_receipt_with_a_callback_promise(
+    client: AsyncClient, db_session, monkeypatch
+):
+    from app.services import scheduling_service
+
+    sent: list[dict] = []
+
+    async def fake_send(
+        to: str, subject: str, body: str, html: str | None = None, *, sender: str | None = None
+    ) -> None:
+        sent.append({"to": to, "subject": subject, "body": body, "html": html, "sender": sender})
+
+    monkeypatch.setattr(scheduling_service.email_service, "send_email", fake_send)
+    monkeypatch.setattr(scheduling_service.settings, "sales_notification_email", "sales@example.com")
+    monkeypatch.setattr(scheduling_service.settings, "email_contact_address", "contact@example.com")
+
+    provider = await make_provider(db_session)
+    certification = await make_certification(db_session, provider)
+    payload = _payload(str(certification.id))
+    response = await client.post("/api/exam-bookings", json=payload)
+    assert response.status_code == 201, response.text
+    reference = response.json()["reference_code"]
+
+    receipt = next(mail for mail in sent if mail["to"] == payload["email"])
+    assert reference in receipt["subject"]
+    assert "within 24 hours" in receipt["body"]
+    assert payload["preferred_date"] in receipt["body"]
+    assert receipt["html"] and "within 24 hours" in receipt["html"]
+    # Scheduling mail comes from the contact mailbox so a reply reaches a person.
+    assert receipt["sender"] == "contact@example.com"
+
+    alert = next(mail for mail in sent if mail["to"] == "sales@example.com")
+    assert reference in alert["body"]
+    assert alert["sender"] == "contact@example.com"

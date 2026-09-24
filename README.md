@@ -474,6 +474,7 @@ committed.**
 | `REDIS_URL` | Shares rate-limit buckets across workers when set |
 | `PAYMENT_PROVIDER` / `_KEY` / `_SECRET` / `PAYMENT_WEBHOOK_SECRET` | `noop` until configured |
 | `EMAIL_PROVIDER` / `EMAIL_PROVIDER_KEY` / `EMAIL_FROM_*` | `console` logs instead of sending |
+| `EMAIL_CONTACT_ADDRESS` | Sender for test results and exam scheduling mail; blank uses `EMAIL_FROM_ADDRESS` |
 | `STORAGE_PROVIDER` / `STORAGE_*` | `local` in development, `s3` in production |
 | `ANALYTICS_PROVIDER` / `ANALYTICS_SITE_ID` | Events are always stored first-party |
 

@@ -59,7 +59,7 @@ from app.schemas.campaign import (
     ChallengeWarningReceipt,
 )
 from app.services import email as email_service
-from app.services import pricing
+from app.services import pricing, verification_service
 
 logger = logging.getLogger(__name__)
 
@@ -154,6 +154,7 @@ class ChallengeConfig:
             max_warnings=self.max_warnings,
             retake_after_days=self.retake_after_days,
             response_hours=self.response_hours,
+            verification_required=settings.contact_verification_required,
         )
 
     def covers(self, slug: str) -> bool:
@@ -380,6 +381,10 @@ async def start(
         raise NotFoundError("That certification is not part of this challenge.")
 
     email = str(payload.email).strip().lower()
+    if user is None and settings.contact_verification_required:
+        # A guest's contact details *are* the lead, and the callback is the
+        # reward: both have to be proven before a paper is issued.
+        await verification_service.require_verified(db, email=email, phone=payload.phone)
     await _guard_retake(db, email, config)
 
     pool = await campaign_repo.pool_for(
@@ -744,32 +749,36 @@ async def _send_result_emails(
     Delivery must not decide whether a graded attempt counts: the score is
     already committed, so a provider outage is logged and swallowed.
     """
+    discount = (
+        f"{_plain(attempt.discount_percentage)}%" if attempt.discount_percentage else None
+    )
     try:
-        subject, body = email_service.challenge_result_email(
+        subject, body, html = email_service.challenge_result_email(
             name=attempt.full_name,
             certification_name=attempt.certification_name,
             reference_code=attempt.reference_code,
             score=f"{_plain(result.score_percentage)}%",
+            pass_mark=f"{_plain(result.pass_mark)}%",
             correct_count=result.correct_count,
             question_count=result.question_count,
             passed=result.passed,
-            discount_percentage=(
-                f"{_plain(attempt.discount_percentage)}%"
-                if attempt.discount_percentage
-                else None
-            ),
+            timed_out=attempt.status == ChallengeAttemptStatus.EXPIRED.value,
+            discount_percentage=discount,
             response_hours=config.response_hours,
             retake_after_days=config.retake_after_days,
             warnings=attempt.warnings,
             booking_preferences=attempt.booking_preferences,
         )
-        await email_service.send_email(attempt.email, subject, body)
+        await email_service.send_email(
+            attempt.email, subject, body, html=html, sender=email_service.contact_sender()
+        )
     except Exception:
         logger.exception(
             "Could not email the challenge result for %s", attempt.reference_code
         )
 
-    if not settings.sales_notification_email or not result.passed:
+    # Every candidate is promised a call, so every attempt is a lead.
+    if not settings.sales_notification_email:
         return
     try:
         subject, body = email_service.challenge_lead_email(
@@ -778,13 +787,17 @@ async def _send_result_emails(
             phone=attempt.phone,
             certification_name=attempt.certification_name,
             score=f"{_plain(result.score_percentage)}%",
-            discount_percentage=f"{_plain(attempt.discount_percentage)}%",
+            passed=result.passed,
+            discount_percentage=discount,
             reference_code=attempt.reference_code,
             response_hours=config.response_hours,
             booking_preferences=attempt.booking_preferences,
         )
         await email_service.send_email(
-            settings.sales_notification_email, subject, body
+            settings.sales_notification_email,
+            subject,
+            body,
+            sender=email_service.contact_sender(),
         )
     except Exception:
         logger.exception(

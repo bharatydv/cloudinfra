@@ -125,7 +125,10 @@ ENV_DOMAIN="$(az_ containerapp env show -g "$RESOURCE_GROUP" -n "$ENV_NAME" \
 # The hostname is predictable from the environment, so the frontend can be
 # built with its own final URL before the app that serves it exists.
 APP_FQDN="${APP_NAME}.${ENV_DOMAIN}"
-SITE_URL="https://${APP_FQDN}"
+# Once a custom domain is bound, PUBLIC_SITE_URL (from .env.production) is the
+# address that links in emails and canonical tags should carry, not the
+# *.azurecontainerapps.io hostname the app answers on underneath.
+SITE_URL="${PUBLIC_SITE_URL:-https://${APP_FQDN}}"
 note "Site URL will be $SITE_URL"
 
 # --- Uploads share ----------------------------------------------------------
@@ -254,6 +257,24 @@ spec_path() {
     printf '%s' "$1"
   fi
 }
+# Optional secrets. Container Apps rejects a secret with an empty value, so
+# each is declared and referenced only when set; the app then falls back to
+# its console provider for that channel.
+SMTP_SECRET="" SMTP_SECRET_REF=""
+if [ -n "${SMTP_PASSWORD:-}" ]; then
+  SMTP_SECRET="      - name: smtp-password
+        value: \"${SMTP_PASSWORD}\""
+  SMTP_SECRET_REF="          - name: SMTP_PASSWORD
+            secretRef: smtp-password"
+fi
+SMS_SECRET="" SMS_SECRET_REF=""
+if [ -n "${SMS_AUTH_TOKEN:-}" ]; then
+  SMS_SECRET="      - name: sms-auth-token
+        value: \"${SMS_AUTH_TOKEN}\""
+  SMS_SECRET_REF="          - name: SMS_AUTH_TOKEN
+            secretRef: sms-auth-token"
+fi
+
 cat > "$SPEC" <<YAML
 location: ${LOCATION}
 type: Microsoft.App/containerApps
@@ -275,6 +296,8 @@ properties:
         value: "${SEED_ADMIN_PASSWORD}"
       - name: acr-password
         value: "${ACR_PASSWORD}"
+${SMTP_SECRET}
+${SMS_SECRET}
     registries:
       - server: ${ACR_SERVER}
         username: ${ACR_USER}
@@ -321,8 +344,30 @@ properties:
             value: "${EMAIL_FROM_ADDRESS:-no-reply@example.com}"
           - name: EMAIL_FROM_NAME
             value: "${EMAIL_FROM_NAME:-Inferacloud}"
+          - name: EMAIL_CONTACT_ADDRESS
+            value: "${EMAIL_CONTACT_ADDRESS:-}"
           - name: SALES_NOTIFICATION_EMAIL
             value: "${SALES_NOTIFICATION_EMAIL:-}"
+          - name: SMTP_HOST
+            value: "${SMTP_HOST:-}"
+          - name: SMTP_PORT
+            value: "${SMTP_PORT:-587}"
+          - name: SMTP_USERNAME
+            value: "${SMTP_USERNAME:-}"
+          - name: SMTP_USE_TLS
+            value: "${SMTP_USE_TLS:-true}"
+          - name: SMTP_USE_SSL
+            value: "${SMTP_USE_SSL:-false}"
+${SMTP_SECRET_REF}
+          - name: SMS_PROVIDER
+            value: "${SMS_PROVIDER:-console}"
+          - name: SMS_ACCOUNT_SID
+            value: "${SMS_ACCOUNT_SID:-}"
+          - name: SMS_FROM_NUMBER
+            value: "${SMS_FROM_NUMBER:-}"
+${SMS_SECRET_REF}
+          - name: CONTACT_VERIFICATION_REQUIRED
+            value: "${CONTACT_VERIFICATION_REQUIRED:-false}"
           - name: PAYMENT_PROVIDER
             value: "${PAYMENT_PROVIDER:-noop}"
           - name: PAYMENT_CURRENCY

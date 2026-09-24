@@ -15,7 +15,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=(".env", "../.env"),
+        # Later files win in pydantic-settings, so the backend's own .env is
+        # listed last: it overrides the repo-root .env that docker-compose uses.
+        env_file=("../.env", ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=False,
@@ -70,8 +72,13 @@ class Settings(BaseSettings):
 
     email_provider: Literal["console", "smtp", "resend"] = "console"
     email_provider_key: str | None = None
+    # Default sender: verification codes, password resets and other mail nobody
+    # should reply to.
     email_from_address: str = "no-reply@example.com"
     email_from_name: str = "Inferacloud"
+    # Sender for mail a person follows up on: test results, exam scheduling
+    # receipts and the internal alerts about them. Falls back to the default.
+    email_contact_address: str | None = None
     # SMTP transport, used when email_provider is "smtp". Any mailbox with an
     # SMTP relay works (Google Workspace, Zoho, Outlook, SES, Brevo...).
     smtp_host: str | None = None
@@ -85,6 +92,20 @@ class Settings(BaseSettings):
     # inside the window the result page promises. Unset means the admin
     # console queue is the only place a lead surfaces.
     sales_notification_email: str | None = None
+
+    sms_provider: Literal["console", "twilio"] = "console"
+    sms_account_sid: str | None = None
+    sms_auth_token: str | None = None
+    sms_from_number: str | None = None
+
+    # --- Contact verification (guest sign-up for the challenge) ----------
+    # Off where email or SMS cannot actually be delivered: a guest asked for a
+    # code that never arrives cannot start the test at all.
+    contact_verification_required: bool = True
+    contact_verification_code_expire_minutes: int = 10
+    # How long a confirmed address stays usable for starting a paper.
+    contact_verification_valid_minutes: int = 60
+    contact_verification_max_attempts: int = 5
 
     storage_provider: Literal["local", "s3"] = "local"
     storage_endpoint_url: str | None = None
