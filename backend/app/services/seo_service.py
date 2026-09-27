@@ -300,7 +300,9 @@ async def build_sitemap_xml(db: AsyncSession) -> str:
     entries: list[str] = [
         _url_entry(absolute_url("/"), now, "daily", "1.0"),
         _url_entry(absolute_url("/certifications"), now, "daily", "0.9"),
-        _url_entry(absolute_url("/courses"), now, "daily", "0.9"),
+        # /courses is a "coming soon" placeholder that serves noindex; it goes
+        # back in here when the catalogue opens. Published course detail pages
+        # are still listed below.
         _url_entry(absolute_url("/deals"), now, "daily", "0.9"),
         _url_entry(absolute_url("/resources"), now, "daily", "0.9"),
         _url_entry(absolute_url("/schedule-exam"), now, "weekly", "0.9"),

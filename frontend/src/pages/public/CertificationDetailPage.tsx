@@ -491,7 +491,7 @@ export default function CertificationDetailPage() {
         title="Ready to sit this exam?"
         description="Work the roadmap, use the practice resources, then tell us when you want to sit it."
         primary={{ label: 'Schedule this exam', to: scheduleExamPath(data.id) }}
-        secondary={{ label: 'Browse Courses', to: '/courses' }}
+        secondary={{ label: 'Explore Deals', to: '/deals' }}
       />
 
       <StickyExamCta

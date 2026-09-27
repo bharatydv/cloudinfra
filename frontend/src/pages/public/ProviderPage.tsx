@@ -6,7 +6,6 @@ import { CertificationCard } from '@/components/cards/CertificationCard'
 import { CourseCard } from '@/components/cards/CourseCard'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Accordion } from '@/components/ui/Accordion'
-import { ButtonLink } from '@/components/ui/Button'
 import { Card, Container, Section, SectionHeading } from '@/components/ui/primitives'
 import { CardGridSkeleton, ErrorState } from '@/components/ui/states'
 import { getProvider } from '@/api/endpoints'
@@ -121,11 +120,6 @@ export default function ProviderPage() {
             <SectionHeading
               eyebrow="Courses"
               title="Courses that build the underlying skills"
-              action={
-                <ButtonLink to="/courses" variant="outline">
-                  All courses
-                </ButtonLink>
-              }
             />
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {data?.related_courses.map((course) => (

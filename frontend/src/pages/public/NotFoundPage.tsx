@@ -7,8 +7,8 @@ import { useSeo } from '@/hooks/useSeo'
 import { NOINDEX } from '@/lib/seo'
 
 const SUGGESTIONS = [
-  { to: '/courses', label: 'Browse all courses' },
   { to: '/certifications', label: 'Explore certifications' },
+  { to: '/deals', label: 'See current deals' },
   { to: '/resources', label: 'Read guides and roadmaps' },
 ]
 

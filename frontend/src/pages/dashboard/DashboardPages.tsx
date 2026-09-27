@@ -121,7 +121,7 @@ export function DashboardOverviewPage() {
             icon={<BookOpen className="h-6 w-6" aria-hidden="true" />}
             title="No enrolled courses"
             description="Enroll in a course and it will appear here with your progress."
-            action={<ButtonLink to="/courses">Browse courses</ButtonLink>}
+            action={<ButtonLink to="/certifications">Browse certifications</ButtonLink>}
           />
         ) : (
           <ul className="space-y-3">
@@ -171,7 +171,7 @@ export function MyCoursesPage() {
         icon={<BookOpen className="h-6 w-6" aria-hidden="true" />}
         title="No enrolled courses"
         description="Courses you enroll in will appear here, with your progress saved automatically."
-        action={<ButtonLink to="/courses">Browse courses</ButtonLink>}
+        action={<ButtonLink to="/certifications">Browse certifications</ButtonLink>}
       />
     )
   }
@@ -222,7 +222,7 @@ export function ProgressPage() {
         icon={<TrendingUp className="h-6 w-6" aria-hidden="true" />}
         title="No progress yet"
         description="Once you start a course, your lesson-level progress appears here."
-        action={<ButtonLink to="/courses">Find a course</ButtonLink>}
+        action={<ButtonLink to="/certifications">Browse certifications</ButtonLink>}
       />
     )
   }

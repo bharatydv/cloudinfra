@@ -22,8 +22,9 @@ export function DealCard({
 }: {
   deal: DealCardType
   className?: string
-  /** When set, the whole card opens the test-qualification flow instead of
-   * linking to the deal's detail page; "View deal" still links through. */
+  /** When set, clicking the card opens the test-qualification flow. The title
+   * stays a real link to the deal's detail page so the certification remains
+   * reachable (and crawlable) from the listing. */
   onQualify?: () => void
 }) {
   const isExam = deal.kind === 'certification'
@@ -74,16 +75,19 @@ export function DealCard({
       </div>
 
       <h3 className="text-base font-bold leading-snug text-ink-900">
-        {onQualify ? (
-          <span className="transition group-hover:text-brand-700">{deal.title}</span>
-        ) : (
-          <Link
-            to={deal.url}
-            className="transition after:absolute after:inset-0 group-hover:text-brand-700"
-          >
-            {deal.title}
-          </Link>
-        )}
+        {/* Without onQualify the link's ::after overlay makes the whole card the
+            link. With it, the card itself is the button, so the overlay is
+            dropped and the title link stops the click reaching the card. */}
+        <Link
+          to={deal.url}
+          onClick={onQualify ? (event) => event.stopPropagation() : undefined}
+          className={cn(
+            'relative transition group-hover:text-brand-700',
+            !onQualify && 'after:absolute after:inset-0',
+          )}
+        >
+          {deal.title}
+        </Link>
       </h3>
 
       <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink-600">

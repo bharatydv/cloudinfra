@@ -10,6 +10,9 @@ import { SiteProvider } from '@/hooks/useSite'
 import { ToastProvider } from '@/hooks/useToast'
 import { queryClient } from '@/lib/queryClient'
 
+// Self-hosted variable Inter (one woff2 per script subset, latin only for
+// most visitors) instead of a render-blocking Google Fonts stylesheet.
+import '@fontsource-variable/inter'
 import '@/index.css'
 
 const container = document.getElementById('root')

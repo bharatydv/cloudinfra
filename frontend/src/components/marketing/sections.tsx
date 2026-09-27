@@ -37,7 +37,7 @@ export function TrustSection({ categories }: { categories: CourseCategory[] }) {
           {categories.slice(0, 6).map((category) => (
             <li key={category.id}>
               <Link
-                to={`/courses?category=${category.slug}`}
+                to={`/certifications?q=${encodeURIComponent(category.name)}`}
                 className="group flex h-full flex-col items-center gap-3 rounded-xl border border-ink-200 bg-white p-5 text-center transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card"
               >
                 <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition group-hover:bg-brand-100">
@@ -229,7 +229,7 @@ export function HowItWorksSection() {
 export function CTASection({
   title = 'Ready to build your next skill?',
   description = 'Start learning today and take the next step toward your professional goals.',
-  primary = { label: 'Explore Courses', to: '/courses' },
+  primary = { label: 'Explore Deals', to: '/deals' },
   secondary = { label: 'Explore Certifications', to: '/certifications' },
   className,
 }: {

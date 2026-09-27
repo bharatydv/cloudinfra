@@ -46,20 +46,29 @@ const DELIVERY_MODES = [
   { value: 'test_center', label: 'At a test centre' },
 ]
 
-/** `yyyy-mm-dd` in the visitor's own timezone, for the date inputs' `min`. */
+/**
+ * `yyyy-mm-dd` from a Date's *local* calendar fields. `toISOString()` would
+ * convert to UTC first, which east of Greenwich turns local midnight into the
+ * previous day.
+ */
+function toDateInputValue(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+/** Today in the visitor's own timezone, for the date inputs' `min`. */
 function today(): string {
-  const now = new Date()
-  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60_000)
-  return local.toISOString().slice(0, 10)
+  return toDateInputValue(new Date())
 }
 
 /** The day after `date`, so the alternate picker cannot offer the same day. */
 function dayAfter(date: string): string {
   if (!date) return ''
-  const next = new Date(`${date}T00:00:00`)
-  if (Number.isNaN(next.getTime())) return ''
-  next.setDate(next.getDate() + 1)
-  return next.toISOString().slice(0, 10)
+  const [y, m, d] = date.split('-').map(Number)
+  if (!y || !m || !d) return ''
+  return toDateInputValue(new Date(y, m - 1, d + 1))
 }
 
 function browserTimezone(): string {

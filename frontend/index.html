@@ -5,38 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#4f46e5" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    />
-    <title>Learn. Get Certified. Build Your Future.</title>
+    <!-- Inter is self-hosted (see src/main.tsx), so there is no render-blocking
+         cross-origin stylesheet and the font is cached with the other assets. -->
+    <title>Cloud Certifications &amp; Courses at Discounted Prices | Inferacloud</title>
     <meta
       name="description"
-      content="Build job-ready skills and prepare for professional certifications with structured courses, practical resources and guided learning paths."
+      content="Discover AWS, Microsoft Azure, Google Cloud and other certification courses, exam preparation and learning resources at discounted prices."
     />
 
     <!--
       Static social card. The app overwrites these per route once React mounts,
       but most social crawlers (LinkedIn, Slack, WhatsApp, Facebook) never run
       the JavaScript, so without these a shared link has no preview at all.
+      The copy mirrors the homepage meta the API serves, and %SITE_URL% is
+      filled at build time from VITE_SITE_URL (vite.config.ts): crawlers reject
+      relative image URLs, so the origin has to be baked in.
     -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Inferacloud" />
-    <meta property="og:title" content="Learn. Get Certified. Build Your Future." />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:title" content="Cloud Certifications &amp; Courses at Discounted Prices" />
     <meta
       property="og:description"
-      content="Build job-ready skills and prepare for professional certifications with structured courses, practical resources and guided learning paths."
+      content="Discover AWS, Microsoft Azure, Google Cloud and other certification courses, exam preparation and learning resources at discounted prices."
     />
-    <meta property="og:image" content="/og-default.png" />
+    <meta property="og:image" content="%SITE_URL%/og-default.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Learn. Get Certified. Build Your Future." />
+    <meta name="twitter:title" content="Cloud Certifications &amp; Courses at Discounted Prices" />
     <meta
       name="twitter:description"
-      content="Build job-ready skills and prepare for professional certifications with structured courses, practical resources and guided learning paths."
+      content="Discover AWS, Microsoft Azure, Google Cloud and other certification courses, exam preparation and learning resources at discounted prices."
     />
-    <meta name="twitter:image" content="/og-default.png" />
+    <meta name="twitter:image" content="%SITE_URL%/og-default.png" />
   </head>
   <body>
     <div id="root"></div>

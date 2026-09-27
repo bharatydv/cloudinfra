@@ -67,8 +67,8 @@ export default function AboutPage() {
           <ul className="mt-6 grid gap-3 sm:grid-cols-3">
             {[
               { to: '/certifications', label: 'Browse certifications' },
-              { to: '/courses', label: 'Browse courses' },
               { to: '/deals', label: 'See current deals' },
+              { to: '/resources', label: 'Read guides and roadmaps' },
             ].map((link) => (
               <li key={link.to}>
                 <Link

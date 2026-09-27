@@ -175,8 +175,10 @@ export default function DealsPage() {
   return (
     <>
       {/* Test Qualification teaser -- the test itself runs on its own page */}
-      <div className="border-b border-ink-200 bg-white py-12">
-        <Container className="max-w-5xl">
+      <div className="border-b border-ink-200 bg-white py-8">
+        {/* The heading carries a bottom margin meant for content below it;
+            nothing follows here, so it is cancelled to keep the strip tight. */}
+        <Container className="max-w-5xl [&>div]:mb-0">
           <SectionHeading
             eyebrow="Test Qualification"
             title="Skill Qualification Engine"
@@ -196,7 +198,7 @@ export default function DealsPage() {
       />
 
       {/* Active Certification Deals Grid, below the qualification test */}
-      <Section tone="muted" className="py-12">
+      <Section tone="muted" className="pb-12 pt-8">
         <Container>
           <SectionHeading
             eyebrow="Active Offers"

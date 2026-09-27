@@ -29,8 +29,18 @@ if ! az_ containerapp show -g "$RESOURCE_GROUP" -n "$APP_NAME" >/dev/null 2>&1; 
 fi
 
 ACR_SERVER="$(az_ acr show -n "$ACR_NAME" --query loginServer -o tsv | tr -d '\r')"
-SITE_URL="https://$(az_ containerapp show -g "$RESOURCE_GROUP" -n "$APP_NAME" \
+
+# The frontend bakes VITE_SITE_URL into its canonical tags and the static
+# social card, so it has to be the public domain, not the
+# *.azurecontainerapps.io hostname the app answers on underneath. Same rule as
+# deploy.sh: PUBLIC_SITE_URL from .env.production wins when it is set.
+if [ -f .env.production ]; then
+  load_env_file .env.production
+fi
+APP_FQDN="$(az_ containerapp show -g "$RESOURCE_GROUP" -n "$APP_NAME" \
   --query properties.configuration.ingress.fqdn -o tsv | tr -d '\r')"
+SITE_URL="${PUBLIC_SITE_URL:-https://${APP_FQDN}}"
+note "Site URL will be $SITE_URL"
 
 BACKEND_IMAGE="${ACR_SERVER}/${BACKEND_REPO}:${IMAGE_TAG}"
 FRONTEND_IMAGE="${ACR_SERVER}/${FRONTEND_REPO}:${IMAGE_TAG}"

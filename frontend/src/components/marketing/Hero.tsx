@@ -1,16 +1,10 @@
-import { ArrowRight, BadgePercent, CheckCircle2, GraduationCap, Layers, Target } from 'lucide-react'
+import { ArrowRight, BadgePercent, GraduationCap, Layers, Target } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { SearchBar } from '@/components/layout/SearchBar'
 import { ButtonLink } from '@/components/ui/Button'
 import { Container } from '@/components/ui/primitives'
 import { AnalyticsEvent, track } from '@/lib/analytics'
-
-const HIGHLIGHTS = [
-  'Exam fees and course prices shown side by side with the discount',
-  'Mapped to published exam objectives, with the exam code on every listing',
-  'Every price carries the date it was last verified',
-]
 
 /** Worked examples, so the search box explains itself without placeholder prose. */
 const SEARCH_EXAMPLES = [
@@ -80,18 +74,6 @@ export function Hero({ topDiscount }: { topDiscount?: number | null }) {
               </p>
             </div>
 
-            <ul className="mt-8 space-y-2.5">
-              {HIGHLIGHTS.map((item) => (
-                <li key={item} className="flex items-start gap-2.5 text-sm text-ink-700">
-                  <CheckCircle2
-                    className="mt-0.5 h-4 w-4 shrink-0 text-brand-600"
-                    aria-hidden="true"
-                  />
-                  {item}
-                </li>
-              ))}
-            </ul>
-
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <ButtonLink
                 to="/deals"
@@ -115,14 +97,14 @@ export function Hero({ topDiscount }: { topDiscount?: number | null }) {
                 Browse Certifications
               </ButtonLink>
               <ButtonLink
-                to="/courses"
+                to="/schedule-exam"
                 size="lg"
                 variant="ghost"
                 onClick={() =>
-                  track(AnalyticsEvent.CtaClicked, { properties: { cta: 'hero_courses' } })
+                  track(AnalyticsEvent.CtaClicked, { properties: { cta: 'hero_schedule_exam' } })
                 }
               >
-                Browse Courses
+                Schedule an Exam
               </ButtonLink>
             </div>
           </div>

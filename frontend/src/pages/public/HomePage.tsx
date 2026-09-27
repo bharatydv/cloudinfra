@@ -19,7 +19,7 @@ import {
 import { Accordion } from '@/components/ui/Accordion'
 import { ButtonLink } from '@/components/ui/Button'
 import { Container, Section, SectionHeading } from '@/components/ui/primitives'
-import { ErrorState } from '@/components/ui/states'
+import { CardSkeleton, ErrorState, Skeleton } from '@/components/ui/states'
 import { getHome } from '@/api/endpoints'
 import { siteConfig } from '@/config/brand'
 import { useServerSeo } from '@/hooks/useSeo'
@@ -29,7 +29,7 @@ import { queryKeys } from '@/lib/queryClient'
 export default function HomePage() {
   const { learningPath } = useSite()
   // One aggregate request keeps the landing page to a single round trip.
-  const { data, isError, refetch } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: queryKeys.home,
     queryFn: getHome,
   })
@@ -44,16 +44,25 @@ export default function HomePage() {
     <>
       <Hero topDiscount={topDiscount} />
 
-      {isError ? (
-        <Section>
-          <Container>
-            <ErrorState
-              title="We could not load the homepage"
-              description="The content service did not respond. Please try again."
-              onRetry={() => void refetch()}
-            />
-          </Container>
-        </Section>
+      {/* The closing CTA is rendered only once the content above it has
+          resolved. Rendering it during the load would put it directly under
+          the hero and then push it down the page when the sections arrive,
+          which is a large layout shift on every first visit. */}
+      {isPending ? (
+        <HomeSkeleton />
+      ) : isError ? (
+        <>
+          <Section>
+            <Container>
+              <ErrorState
+                title="We could not load the homepage"
+                description="The content service did not respond. Please try again."
+                onRetry={() => void refetch()}
+              />
+            </Container>
+          </Section>
+          <HomeCta />
+        </>
       ) : (
         <>
           {/* Deals lead: price is what a visitor came to compare. */}
@@ -143,15 +152,62 @@ export default function HomePage() {
               </p>
             </Container>
           </Section>
+
+          <HomeCta />
         </>
       )}
-
-      <CTASection
-        title="Ready to sit your certification exam?"
-        description="Tell us which exam you want and when suits you. Our team confirms your slot by email."
-        primary={{ label: 'Schedule an Exam', to: '/schedule-exam' }}
-        secondary={{ label: 'Explore Deals', to: '/deals' }}
-      />
     </>
+  )
+}
+
+function HomeCta() {
+  return (
+    <CTASection
+      title="Ready to sit your certification exam?"
+      description="Tell us which exam you want and when suits you. Our team confirms your slot by email."
+      primary={{ label: 'Schedule an Exam', to: '/schedule-exam' }}
+      secondary={{ label: 'Explore Deals', to: '/deals' }}
+    />
+  )
+}
+
+/**
+ * Stand-in for the first two data-driven sections (top deals, provider
+ * spotlight) at roughly their real height, so the viewport below the hero is
+ * occupied from the first paint and the content swaps in place rather than
+ * pushing everything down.
+ */
+function HomeSkeleton() {
+  return (
+    <div aria-busy="true" aria-live="polite">
+      <span className="sr-only">Loading the latest deals and certifications</span>
+      <Section tone="muted">
+        <Container>
+          <div className="mb-10">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="mt-3 h-8 w-80 max-w-full" />
+            <Skeleton className="mt-3 h-4 w-96 max-w-full" />
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 3 }, (_, i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+        </Container>
+      </Section>
+      <Section>
+        <Container>
+          <div className="mb-10">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="mt-3 h-8 w-72 max-w-full" />
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }, (_, i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+        </Container>
+      </Section>
+    </div>
   )
 }

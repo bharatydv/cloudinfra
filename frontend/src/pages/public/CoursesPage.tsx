@@ -5,17 +5,21 @@ import { ButtonLink } from '@/components/ui/Button'
 import { Container, Section } from '@/components/ui/primitives'
 import { EmptyState } from '@/components/ui/states'
 import { useSeo } from '@/hooks/useSeo'
+import { NOINDEX } from '@/lib/seo'
 
 /**
  * The course catalogue is not open yet. The page keeps its URL, title and
- * breadcrumbs so links and search listings stay valid, and sends visitors to
- * what is live today: certifications and exam booking.
+ * breadcrumbs so existing links stay valid, and sends visitors to what is live
+ * today: certifications and exam booking. It is `noindex,follow` and absent
+ * from the sitemap until there is a catalogue to index; individual published
+ * course pages are still listed.
  */
 export default function CoursesPage() {
   useSeo({
     title: 'Online technology courses',
     description:
       'Structured, self-paced courses across cloud computing, AI, machine learning, data science, DevOps and digital marketing are on their way.',
+    robots: NOINDEX,
   })
 
   return (
