@@ -24,6 +24,8 @@ const PARTNER_TYPES = [
   'Blogger or content creator',
   'YouTube or social media channel',
   'Training institute or coaching centre',
+  'School',
+  'University or college',
   'Student or tech community',
   'Company upskilling its team',
   'Other',
