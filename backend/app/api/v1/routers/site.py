@@ -125,6 +125,11 @@ async def page_seo(path: str = Query("/"), title: str | None = None) -> SeoMeta:
             "Contact",
             "Get in touch with our team for support, partnerships or feedback.",
         ),
+        "/affiliate": (
+            "Affiliate partnership",
+            "Refer learners to discounted cloud certifications and earn commission "
+            "on the bookings you send us.",
+        ),
         "/courses": (
             "Cloud and certification courses",
             "Structured, self-paced courses for AWS, Microsoft Azure and Google Cloud "

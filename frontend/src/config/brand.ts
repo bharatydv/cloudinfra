@@ -82,6 +82,7 @@ export const footerNavigation = {
   company: [
     { label: 'About', to: '/about' },
     { label: 'Contact', to: '/contact' },
+    { label: 'Affiliate partnership', to: '/affiliate' },
   ],
   legal: [
     { label: 'Privacy policy', to: '/privacy' },

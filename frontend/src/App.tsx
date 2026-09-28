@@ -22,6 +22,7 @@ const ArticlePage = lazyImport(() => import('@/pages/public/ArticlePage'))
 const SearchPage = lazyImport(() => import('@/pages/public/SearchPage'))
 const AboutPage = lazyImport(() => import('@/pages/public/AboutPage'))
 const ContactPage = lazyImport(() => import('@/pages/public/ContactPage'))
+const AffiliatePage = lazyImport(() => import('@/pages/public/AffiliatePage'))
 const LegalPage = lazyImport(() => import('@/pages/public/LegalPage'))
 const NotFoundPage = lazyImport(() => import('@/pages/public/NotFoundPage'))
 
@@ -146,6 +147,7 @@ export default function App() {
             <Route path="search" element={<SearchPage />} />
             <Route path="about" element={<AboutPage />} />
             <Route path="contact" element={<ContactPage />} />
+            <Route path="affiliate" element={<AffiliatePage />} />
             <Route path="privacy" element={<LegalPage />} />
             <Route path="terms" element={<LegalPage />} />
             <Route path="refund-policy" element={<LegalPage />} />

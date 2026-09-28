@@ -308,6 +308,7 @@ async def build_sitemap_xml(db: AsyncSession) -> str:
         _url_entry(absolute_url("/schedule-exam"), now, "weekly", "0.9"),
         _url_entry(absolute_url("/about"), now, "monthly", "0.5"),
         _url_entry(absolute_url("/contact"), now, "monthly", "0.5"),
+        _url_entry(absolute_url("/affiliate"), now, "monthly", "0.5"),
         _url_entry(absolute_url("/privacy"), now, "yearly", "0.3"),
         _url_entry(absolute_url("/terms"), now, "yearly", "0.3"),
         _url_entry(absolute_url("/refund-policy"), now, "yearly", "0.3"),
