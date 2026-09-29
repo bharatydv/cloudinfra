@@ -156,6 +156,8 @@ export interface Lesson extends LessonSummary {
   video_url: string | null
   content: string
   resources: Array<Record<string, unknown>>
+  /** Present only for a free preview lesson, which renders on a public page. */
+  seo: SeoMeta | null
 }
 
 export interface CourseModule {
@@ -185,11 +187,25 @@ export interface CertificationCardRef {
   exam_code: string | null
 }
 
+export interface RoadmapWeek {
+  week: number
+  title: string
+  topics: string[]
+}
+
+export interface CourseCertificationLevel {
+  level: number
+  title: string
+  focus: string
+}
+
 export interface CourseDetail extends CourseCard {
   description: string
   language: string
   learning_outcomes: string[]
   requirements: string[]
+  roadmap: RoadmapWeek[]
+  certification_levels: CourseCertificationLevel[]
   is_featured: boolean
   created_at: string
   updated_at: string

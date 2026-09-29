@@ -24,6 +24,7 @@ export const queryKeys = {
   faqs: (category?: string) => ['faqs', category ?? 'all'] as const,
   courses: (filters: unknown) => ['courses', filters] as const,
   course: (slug: string) => ['course', slug] as const,
+  lessonPreview: (id: string) => ['lesson-preview', id] as const,
   courseCategories: ['course-categories'] as const,
   certifications: (filters: unknown) => ['certifications', filters] as const,
   certification: (provider: string, slug: string) => ['certification', provider, slug] as const,

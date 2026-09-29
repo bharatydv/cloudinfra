@@ -1,0 +1,183 @@
+{
+  "_note": "Split across one file per module because a 14-module course is unreviewable as a single blob. The seeder reads course.json plus module-NN.json in filename order; see load_course_dirs() in backend/app/seed/run.py. Authoring rules live in CLAUDE.md at the repository root.",
+  "title": "Generative AI for Beginners",
+  "slug": "generative-ai-for-beginners",
+  "category": "artificial-intelligence",
+  "level": "beginner",
+  "icon": "sparkles",
+  "price": "0",
+  "currency": "USD",
+  "is_featured": true,
+  "is_published": false,
+  "duration_minutes": 0,
+  "certifications": [],
+  "short_description": "A practical, hands-on introduction to generative AI for students, freshers and non-technical professionals. No prior AI experience needed.",
+  "description": "Generative AI has gone from a research curiosity to something people use at work every day, and most introductions to it are either marketing or mathematics. This course is neither.\n\nIt is built around doing. Roughly seventy per cent of your time is spent with the tools open in front of you: writing prompts, comparing what different models produce, generating images, building a small Python application and finishing with a project you can show someone. The remaining thirty per cent is the concepts you need so the hands-on work makes sense rather than being a sequence of magic incantations.\n\nFourteen modules take you from what artificial intelligence actually is through prompt engineering, the major AI tools, images, video and audio, coding assistants, ethics, AI agents, retrieval-augmented generation, and a capstone project of your choosing. Every module ends the same way: practice questions with a full answer key, a hands-on lab, and an assignment marked against a published rubric.\n\nThe course does not assume you can program. The modules that involve code introduce Python gently, give you starter code, hints and a complete worked solution, and never ask you to write something from a blank page.",
+  "meta_title": "Generative AI for Beginners | Free Hands-On Course",
+  "meta_description": "A free, hands-on generative AI course for students, MBA students, freshers and non-technical professionals. 14 modules, an 8-week plan and three certification levels.",
+  "learning_outcomes": [
+    "Explain what generative AI is and how it differs from traditional software",
+    "Describe in plain language how large language models produce their output",
+    "Write clear, reliable prompts using zero-shot, few-shot and role techniques",
+    "Choose the right AI tool for a given task and know where each one falls short",
+    "Use AI to speed up research, writing, spreadsheets, email and presentations",
+    "Generate and edit images, video and audio with generative tools",
+    "Use an AI assistant to write, explain and debug code",
+    "Recognise hallucination, bias, privacy and copyright risks, and act on them",
+    "Explain what an AI agent is and how tool calling, memory and planning fit together",
+    "Build and deploy a small generative AI application in Python with Streamlit",
+    "Explain retrieval-augmented generation and build a document question-answering app",
+    "Plan, build and present a working generative AI project of your own"
+  ],
+  "requirements": [
+    "No programming experience required; the coding modules start from the beginning",
+    "A computer with a web browser and a stable internet connection",
+    "Free accounts on a few AI tools, which the lessons walk you through creating",
+    "Curiosity and a willingness to try things and get them wrong",
+    "Suitable for college students, MBA students, freshers, non-technical professionals and technical learners wanting a practical start"
+  ],
+  "roadmap": [
+    {
+      "week": 1,
+      "title": "AI and generative AI fundamentals",
+      "topics": [
+        "What AI is",
+        "Generative AI vs traditional AI",
+        "The five kinds of generative output",
+        "Real applications and real limits"
+      ]
+    },
+    {
+      "week": 2,
+      "title": "LLMs and how generative AI works",
+      "topics": [
+        "Neural networks",
+        "Tokens and context",
+        "Embeddings",
+        "Transformers and attention",
+        "The main model families"
+      ]
+    },
+    {
+      "week": 3,
+      "title": "Prompt engineering",
+      "topics": [
+        "Anatomy of a prompt",
+        "Zero-shot and few-shot",
+        "Role prompting",
+        "Structured output",
+        "Evaluating prompts"
+      ]
+    },
+    {
+      "week": 4,
+      "title": "ChatGPT, Gemini, Copilot and AI for productivity",
+      "topics": [
+        "The major tools compared",
+        "Research and study",
+        "Spreadsheets and documents",
+        "Email and meetings"
+      ]
+    },
+    {
+      "week": 5,
+      "title": "Image, video and audio generation",
+      "topics": [
+        "Text-to-image",
+        "Prompting for style and composition",
+        "Text-to-video",
+        "AI voice and music"
+      ]
+    },
+    {
+      "week": 6,
+      "title": "AI coding and AI agents",
+      "topics": [
+        "Coding assistants",
+        "Generating and debugging code",
+        "What an agent is",
+        "Tools, memory and planning"
+      ]
+    },
+    {
+      "week": 7,
+      "title": "RAG and building GenAI applications",
+      "topics": [
+        "Calling an LLM API",
+        "System and user prompts",
+        "Streamlit",
+        "Retrieval-augmented generation",
+        "Vector databases"
+      ]
+    },
+    {
+      "week": 8,
+      "title": "Capstone project and presentation",
+      "topics": [
+        "Choosing a project",
+        "Scoping and building",
+        "Testing and documenting",
+        "Presenting your work"
+      ]
+    }
+  ],
+  "certification_levels": [
+    {
+      "level": 1,
+      "title": "GenAI Fundamentals",
+      "focus": "AI and generative AI concepts, large language models, the major GenAI tools, and prompting. Earned by completing modules 1 to 5 and passing the Level 1 exam at the end of module 5."
+    },
+    {
+      "level": 2,
+      "title": "GenAI Practitioner",
+      "focus": "Productivity workflows, image, video and audio generation, AI-assisted coding, agents and retrieval-augmented generation. Earned by completing modules 6 to 13 and passing the Level 2 exam at the end of module 13."
+    },
+    {
+      "level": 3,
+      "title": "GenAI Project",
+      "focus": "Building and presenting a working generative AI application. Earned by completing the module 14 capstone and its presentation."
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Do I need to know how to code to take this course?",
+      "answer": "No. The course is written for people with no programming background, and most modules involve no code at all. The seven modules that do use Python introduce it gradually and give you starter code, hints and a complete worked solution for every exercise, so you are never asked to write something from a blank page.",
+      "position": 1
+    },
+    {
+      "question": "How long does the course take?",
+      "answer": "There is a suggested eight-week plan of a few hours a week, which suits someone fitting it around study or a job. The course is self-paced, so you can move faster or slower. Your progress is saved, so you can stop and come back.",
+      "position": 2
+    },
+    {
+      "question": "Which AI tools do I need, and do they cost anything?",
+      "answer": "The lessons use widely available tools such as ChatGPT, Google Gemini, Microsoft Copilot, Claude, Perplexity and NotebookLM. Each of these has offered a free tier, but features, limits and pricing change often, so check what each tool currently offers before you start a lesson. Where a lesson needs an API key, it uses the smallest amount of usage that demonstrates the idea.",
+      "position": 3
+    },
+    {
+      "question": "What are the three certification levels?",
+      "answer": "Level 1, GenAI Fundamentals, covers modules 1 to 5. Level 2, GenAI Practitioner, covers modules 6 to 13. Level 3, GenAI Project, is awarded for the capstone in module 14. These are completion certificates from this platform recording what you finished here. They are not vendor certifications from OpenAI, Google, Microsoft or Anthropic.",
+      "position": 4
+    },
+    {
+      "question": "What do I actually build by the end?",
+      "answer": "Module 12 has you build and deploy an AI study assistant in Python with a Streamlit interface. Module 13 adds a document question-answering application using retrieval-augmented generation. Module 14 is a capstone you choose from six briefs, which you plan, build and present.",
+      "position": 5
+    },
+    {
+      "question": "Is this course kept up to date?",
+      "answer": "Generative AI tools change quickly. The course teaches the concepts and techniques that stay stable, and deliberately avoids quoting fixed prices, usage limits or feature lists that would be wrong within months. Where a lesson names a tool, it tells you to check the tool's current features for yourself.",
+      "position": 6
+    },
+    {
+      "question": "Is there a syllabus, and are there cheat sheets?",
+      "answer": "Yes. The course reference section contains the full syllabus, a glossary of every term the course introduces, and four cheat sheets covering prompt engineering, image and video prompting, code and APIs, and responsible use. All of them are free to read without enrolling.",
+      "position": 7
+    },
+    {
+      "question": "How are the certification levels assessed?",
+      "answer": "Level 1 and Level 2 each end with an exam: twenty questions plus two applied tasks, marked out of 40 with a pass mark of 28. The Level 1 exam sits at the end of module 5 and the Level 2 exam at the end of module 13. Level 3 is the module 14 capstone, which is a working application, a written evaluation and a ten-minute presentation. The practice questions that close every module are ungraded and are there for you.",
+      "position": 8
+    }
+  ]
+}

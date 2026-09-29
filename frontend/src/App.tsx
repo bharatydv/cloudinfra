@@ -11,6 +11,7 @@ import { AnalyticsEvent, track } from '@/lib/analytics'
 /* Route-level code splitting: the homepage ships on its own. */
 const CoursesPage = lazyImport(() => import('@/pages/public/CoursesPage'))
 const CourseDetailPage = lazyImport(() => import('@/pages/public/CourseDetailPage'))
+const LessonPreviewPage = lazyImport(() => import('@/pages/public/LessonPreviewPage'))
 const CertificationsPage = lazyImport(() => import('@/pages/public/CertificationsPage'))
 const DealsPage = lazyImport(() => import('@/pages/public/DealsPage'))
 const ProviderPage = lazyImport(() => import('@/pages/public/ProviderPage'))
@@ -136,6 +137,7 @@ export default function App() {
             <Route index element={<HomePage />} />
             <Route path="courses" element={<CoursesPage />} />
             <Route path="courses/:slug" element={<CourseDetailPage />} />
+            <Route path="courses/:slug/preview/:lessonSlug" element={<LessonPreviewPage />} />
             <Route path="certifications" element={<CertificationsPage />} />
             <Route path="deals" element={<DealsPage />} />
             <Route path="certifications/:provider" element={<ProviderPage />} />

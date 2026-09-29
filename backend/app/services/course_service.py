@@ -12,6 +12,7 @@ from app.models.user import User
 from app.repositories import certification_repo, course_repo, engagement_repo, misc_repo
 from app.schemas.catalog import (
     CourseCategoryWrite,
+    CourseCertificationLevel,
     CourseDetail,
     CourseModuleUpdate,
     CourseModuleWrite,
@@ -21,6 +22,7 @@ from app.schemas.catalog import (
     LessonUpdate,
     LessonWrite,
     ReorderRequest,
+    RoadmapWeek,
 )
 from app.schemas.common import Breadcrumb
 from app.services import seo_service, serializers
@@ -105,6 +107,10 @@ async def build_course_detail(
         language=course.language,
         learning_outcomes=course.learning_outcomes or [],
         requirements=course.requirements or [],
+        roadmap=[RoadmapWeek(**week) for week in course.roadmap or []],
+        certification_levels=[
+            CourseCertificationLevel(**level) for level in course.certification_levels or []
+        ],
         is_featured=course.is_featured,
         created_at=course.created_at,
         updated_at=course.updated_at,

@@ -57,6 +57,33 @@ def load(name: str) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def load_course_dirs() -> list[dict[str, Any]]:
+    """Read courses that are split across a directory, one file per module.
+
+    A large course is unreviewable as a single JSON blob, so each one gets a
+    folder under database/seed/courses/<slug>/ holding course.json plus
+    module-NN.json files. Modules are ordered by filename, which is why they
+    are zero-padded. Courses in courses.json are unaffected.
+    """
+    root = SEED_DIR / "courses"
+    if not root.is_dir():
+        return []
+
+    rows: list[dict[str, Any]] = []
+    for folder in sorted(p for p in root.iterdir() if p.is_dir()):
+        manifest = folder / "course.json"
+        if not manifest.is_file():
+            logger.warning("skipping %s: no course.json", folder.name)
+            continue
+        row = json.loads(manifest.read_text(encoding="utf-8"))
+        row["modules"] = [
+            json.loads(path.read_text(encoding="utf-8"))
+            for path in sorted(folder.glob("module-*.json"))
+        ]
+        rows.append(row)
+    return rows
+
+
 async def get_or_create(session: AsyncSession, model, *, match: dict, defaults: dict):
     """Fetch a row by its natural key, creating or updating it in place."""
     stmt = select(model)
@@ -136,11 +163,11 @@ async def seed_taxonomy(session: AsyncSession):
             CourseCategory,
             match={"slug": row["slug"]},
             defaults={
-                "name": row["name"],
-                "description": row.get("description"),
-                "icon": row.get("icon"),
-                "position": row.get("position", 0),
-                "is_published": True,
+            "name": row["name"],
+            "description": row.get("description"),
+            "icon": row.get("icon"),
+            "position": row.get("position", 0),
+            "is_published": True,
             },
         )
         course_categories[row["slug"]] = category
@@ -152,10 +179,10 @@ async def seed_taxonomy(session: AsyncSession):
             ArticleCategory,
             match={"slug": row["slug"]},
             defaults={
-                "name": row["name"],
-                "description": row.get("description"),
-                "icon": row.get("icon"),
-                "position": row.get("position", 0),
+            "name": row["name"],
+            "description": row.get("description"),
+            "icon": row.get("icon"),
+            "position": row.get("position", 0),
             },
         )
         article_categories[row["slug"]] = category
@@ -190,16 +217,16 @@ async def seed_certifications(session: AsyncSession):
             CertificationProvider,
             match={"slug": row["slug"]},
             defaults={
-                "name": row["name"],
-                "short_description": row.get("short_description"),
-                "description": row.get("description"),
-                "website_url": row.get("website_url"),
-                "accent_color": row.get("accent_color"),
-                "position": row.get("position", 0),
-                "is_published": True,
-                # Never claim a partnership in seed data.
-                "is_official_partner": False,
-                "meta_title": row.get("meta_title"),
+            "name": row["name"],
+            "short_description": row.get("short_description"),
+            "description": row.get("description"),
+            "website_url": row.get("website_url"),
+            "accent_color": row.get("accent_color"),
+            "position": row.get("position", 0),
+            "is_published": True,
+            # Never claim a partnership in seed data.
+            "is_official_partner": False,
+            "meta_title": row.get("meta_title"),
                 "meta_description": row.get("meta_description"),
             },
         )
@@ -274,32 +301,41 @@ async def seed_courses(
     certifications: dict[str, Certification],
     instructor: User,
 ):
-    data = load("courses.json")
+    rows = load("courses.json")["courses"] + load_course_dirs()
     courses: dict[str, Course] = {}
 
-    for row in data["courses"]:
+    for row in rows:
         category = categories.get(row["category"])
+        defaults = {
+            "title": row["title"],
+            "short_description": row["short_description"],
+            "description": row.get("description", ""),
+            "icon": row.get("icon"),
+            "category_id": category.id if category else None,
+            "instructor_id": instructor.id,
+            "level": row["level"],
+            "duration_minutes": row.get("duration_minutes", 0),
+            "price": Decimal(str(row.get("price", "0"))),
+            "currency": row.get("currency", "USD"),
+            "learning_outcomes": row.get("learning_outcomes", []),
+            "requirements": row.get("requirements", []),
+            "roadmap": row.get("roadmap", []),
+            "certification_levels": row.get("certification_levels", []),
+            # A course still being written stays unpublished, so it is
+            # absent from the catalogue and the sitemap until it is ready.
+            "is_published": row.get("is_published", True),
+            "is_featured": row.get("is_featured", False),
+            "meta_description": row.get("meta_description", row["short_description"]),
+        }
+        # Only set meta_title when the seed row actually carries one. Every key
+        # in `defaults` is written on every re-seed, so including it
+        # unconditionally would null out a title an operator set in the admin
+        # console for a course whose seed row has none.
+        if row.get("meta_title"):
+            defaults["meta_title"] = row["meta_title"]
+
         course, _ = await get_or_create(
-            session,
-            Course,
-            match={"slug": row["slug"]},
-            defaults={
-                "title": row["title"],
-                "short_description": row["short_description"],
-                "description": row.get("description", ""),
-                "icon": row.get("icon"),
-                "category_id": category.id if category else None,
-                "instructor_id": instructor.id,
-                "level": row["level"],
-                "duration_minutes": row.get("duration_minutes", 0),
-                "price": Decimal(str(row.get("price", "0"))),
-                "currency": row.get("currency", "USD"),
-                "learning_outcomes": row.get("learning_outcomes", []),
-                "requirements": row.get("requirements", []),
-                "is_published": True,
-                "is_featured": row.get("is_featured", False),
-                "meta_description": row["short_description"],
-            },
+            session, Course, match={"slug": row["slug"]}, defaults=defaults
         )
         courses[row["slug"]] = course
 
@@ -345,6 +381,19 @@ async def seed_courses(
                     },
                 )
         course.duration_minutes = total_minutes or course.duration_minutes
+
+        for faq_index, faq_row in enumerate(row.get("faqs", []), start=1):
+            await get_or_create(
+                session,
+                Faq,
+                match={"question": faq_row["question"]},
+                defaults={
+                    "answer": faq_row["answer"],
+                    "category": f"course:{row['slug']}",
+                    "position": faq_row.get("position", faq_index),
+                    "is_published": faq_row.get("is_published", True),
+                },
+            )
 
     logger.info("courses: %d", len(courses))
     return courses

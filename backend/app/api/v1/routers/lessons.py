@@ -14,9 +14,9 @@ from app.schemas.catalog import (
     LessonWrite,
     ReorderRequest,
 )
-from app.schemas.common import Message
+from app.schemas.common import Breadcrumb, Message
 from app.schemas.engagement import LessonProgressRead, LessonProgressUpdate
-from app.services import course_service, enrollment_service
+from app.services import course_service, enrollment_service, seo_service
 
 router = APIRouter(tags=["Lessons"])
 
@@ -39,7 +39,28 @@ async def get_lesson(lesson_id: uuid.UUID, db: DbSession, viewer: OptionalUser) 
     if lesson is None:
         raise NotFoundError("Lesson not found.")
     if lesson.is_preview:
-        return LessonRead.model_validate(lesson)
+        # A preview lesson is a public page, so it needs the same head tags
+        # every other public page gets.
+        read = LessonRead.model_validate(lesson)
+        course = await course_repo.get_by_id(db, lesson.module.course_id)
+        if course is not None:
+            read.seo = seo_service.build_meta(
+                title=f"{lesson.title} | {course.title}",
+                description=lesson.description or course.short_description,
+                path=f"/courses/{course.slug}/preview/{lesson.slug}",
+                og_image=course.thumbnail,
+                breadcrumbs=[
+                    Breadcrumb(name="Home", url="/"),
+                    Breadcrumb(name="Courses", url="/courses"),
+                    Breadcrumb(name=course.title, url=f"/courses/{course.slug}"),
+                    Breadcrumb(
+                        name=lesson.title,
+                        url=f"/courses/{course.slug}/preview/{lesson.slug}",
+                    ),
+                ],
+                structured_data=[seo_service.lesson_schema(course, lesson)],
+            )
+        return read
     if viewer is None:
         raise PermissionDeniedError("Sign in and enroll to view this lesson.")
     course = await course_repo.get_by_id(db, lesson.module.course_id)

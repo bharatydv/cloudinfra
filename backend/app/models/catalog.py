@@ -82,6 +82,15 @@ class Course(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         JSONB, default=list, nullable=False
     )
     requirements: Mapped[list[str]] = mapped_column(JSONB, default=list, nullable=False)
+    # A week-by-week study plan, as [{"week": 1, "title": ..., "topics": [...]}].
+    # Empty for courses that are simply worked through at the learner's own pace;
+    # the detail page hides the section rather than inventing a schedule.
+    roadmap: Mapped[list[dict]] = mapped_column(JSONB, default=list, nullable=False)
+    # Certification tiers a course leads to, as [{"level": ..., "title": ...,
+    # "focus": ...}]. These are this platform's own levels, not vendor exams.
+    certification_levels: Mapped[list[dict]] = mapped_column(
+        JSONB, default=list, nullable=False
+    )
     is_published: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False, index=True
     )

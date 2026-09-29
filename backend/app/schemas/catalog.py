@@ -51,6 +51,9 @@ class LessonRead(LessonSummary):
     video_url: str | None = None
     content: str
     resources: list[dict] = []
+    # Populated only for a free preview lesson, which is the one case this is
+    # rendered on a public page that needs head tags.
+    seo: SeoMeta | None = None
 
 
 class LessonWrite(BaseModel):
@@ -179,11 +182,29 @@ class CourseReviewRead(ORMModel):
     user: UserPublic
 
 
+class RoadmapWeek(BaseModel):
+    """One week of a course's suggested study plan."""
+
+    week: int = Field(ge=1, le=104)
+    title: str = Field(min_length=1, max_length=200)
+    topics: list[str] = []
+
+
+class CourseCertificationLevel(BaseModel):
+    """One tier of a course's own certification ladder."""
+
+    level: int = Field(ge=1, le=10)
+    title: str = Field(min_length=1, max_length=200)
+    focus: str = Field(min_length=1, max_length=500)
+
+
 class CourseDetail(CourseCard):
     description: str
     language: str
     learning_outcomes: list[str] = []
     requirements: list[str] = []
+    roadmap: list[RoadmapWeek] = []
+    certification_levels: list[CourseCertificationLevel] = []
     is_featured: bool
     created_at: datetime
     updated_at: datetime
@@ -226,6 +247,8 @@ class CourseWrite(BaseModel):
     language: str = "en"
     learning_outcomes: list[str] = []
     requirements: list[str] = []
+    roadmap: list[RoadmapWeek] = []
+    certification_levels: list[CourseCertificationLevel] = []
     is_published: bool = False
     is_featured: bool = False
     meta_title: str | None = Field(default=None, max_length=200)
@@ -251,6 +274,8 @@ class CourseUpdate(BaseModel):
     language: str | None = None
     learning_outcomes: list[str] | None = None
     requirements: list[str] | None = None
+    roadmap: list[RoadmapWeek] | None = None
+    certification_levels: list[CourseCertificationLevel] | None = None
     is_published: bool | None = None
     is_featured: bool | None = None
     meta_title: str | None = Field(default=None, max_length=200)

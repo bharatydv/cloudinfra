@@ -11,10 +11,11 @@ from typing import Any
 from xml.sax.saxutils import escape
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.models.catalog import Course
+from app.models.catalog import Course, CourseModule, Lesson
 from app.models.certification import Certification, CertificationProvider
 from app.models.content import Article
 from app.repositories.article_repo import published_filter
@@ -129,6 +130,36 @@ def course_schema(course: Course) -> dict[str, Any]:
             "url": absolute_url(f"/courses/{course.slug}"),
         }
     return data
+
+
+def lesson_schema(course: Course, lesson: Lesson) -> dict[str, Any]:
+    """Structured data for a free preview lesson.
+
+    LearningResource rather than Course: this is one lesson, part of a course,
+    and `isPartOf` is what tells a crawler how the two relate.
+    """
+    return {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": lesson.title,
+        "description": lesson.description or course.short_description,
+        "url": absolute_url(f"/courses/{course.slug}/preview/{lesson.slug}"),
+        "learningResourceType": "Lesson",
+        "inLanguage": course.language,
+        "educationalLevel": course.level,
+        "timeRequired": f"PT{max(lesson.duration_minutes, 1)}M",
+        "isAccessibleForFree": True,
+        "isPartOf": {
+            "@type": "Course",
+            "name": course.title,
+            "url": absolute_url(f"/courses/{course.slug}"),
+        },
+        "provider": {
+            "@type": "Organization",
+            "name": settings.email_from_name,
+            "url": settings.public_site_url,
+        },
+    }
 
 
 def article_schema(article: Article) -> dict[str, Any]:
@@ -300,9 +331,7 @@ async def build_sitemap_xml(db: AsyncSession) -> str:
     entries: list[str] = [
         _url_entry(absolute_url("/"), now, "daily", "1.0"),
         _url_entry(absolute_url("/certifications"), now, "daily", "0.9"),
-        # /courses is a "coming soon" placeholder that serves noindex; it goes
-        # back in here when the catalogue opens. Published course detail pages
-        # are still listed below.
+        _url_entry(absolute_url("/courses"), now, "daily", "0.9"),
         _url_entry(absolute_url("/deals"), now, "daily", "0.9"),
         _url_entry(absolute_url("/resources"), now, "daily", "0.9"),
         _url_entry(absolute_url("/schedule-exam"), now, "weekly", "0.9"),
@@ -321,8 +350,27 @@ async def build_sitemap_xml(db: AsyncSession) -> str:
     # canonicalise back to the unfiltered listing, so advertising them here
     # would only spend crawl budget on pages that turn the crawler away.
 
-    courses = await db.scalars(select(Course).where(Course.is_published.is_(True)))
+    courses = (
+        await db.scalars(
+            select(Course)
+            .where(Course.is_published.is_(True))
+            .options(selectinload(Course.modules).selectinload(CourseModule.lessons))
+        )
+    ).all()
     for course in courses:
+        # Free preview lessons are public, substantial and unique, so they are
+        # indexable. Gated lessons are not listed.
+        for module in course.modules:
+            for lesson in module.lessons:
+                if lesson.is_preview:
+                    entries.append(
+                        _url_entry(
+                            absolute_url(f"/courses/{course.slug}/preview/{lesson.slug}"),
+                            lesson.updated_at,
+                            "monthly",
+                            "0.5",
+                        )
+                    )
         entries.append(
             _url_entry(
                 absolute_url(f"/courses/{course.slug}"), course.updated_at, "weekly", "0.8"

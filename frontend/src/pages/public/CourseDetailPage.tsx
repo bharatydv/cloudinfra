@@ -4,10 +4,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Award,
   BookOpen,
+  CalendarRange,
   CheckCircle2,
   ChevronDown,
   Clock,
   Globe,
+  GraduationCap,
   Lock,
   PlayCircle,
   Users,
@@ -329,34 +331,131 @@ export default function CourseDetailPage() {
                           </button>
                         </h3>
                         <ul id={`module-${module.id}`} hidden={!isOpen} className="pb-2">
-                          {module.lessons.map((lesson) => (
-                            <li
-                              key={lesson.id}
-                              className="flex items-center gap-3 px-5 py-2.5 text-sm text-ink-700"
-                            >
-                              {lesson.is_preview || course.is_enrolled ? (
-                                <PlayCircle
-                                  className="h-4 w-4 shrink-0 text-brand-600"
-                                  aria-hidden="true"
-                                />
-                              ) : (
-                                <Lock className="h-4 w-4 shrink-0 text-ink-400" aria-hidden="true" />
-                              )}
-                              <span className="flex-1">{lesson.title}</span>
-                              {lesson.is_preview && !course.is_enrolled && (
-                                <Badge tone="brand">Preview</Badge>
-                              )}
-                              <span className="text-xs text-ink-500">
-                                {lesson.duration_minutes} min
-                              </span>
-                            </li>
-                          ))}
+                          {module.lessons.map((lesson) => {
+                            // An enrolled learner opens the lesson itself; a
+                            // visitor can open only the lessons marked as a
+                            // preview. Everything else is plain text, because a
+                            // link that leads to a permission error is worse
+                            // than no link.
+                            const href = course.is_enrolled
+                              ? `/learn/${course.slug}/${lesson.slug}`
+                              : lesson.is_preview
+                                ? `/courses/${course.slug}/preview/${lesson.slug}`
+                                : null
+
+                            return (
+                              <li
+                                key={lesson.id}
+                                className="flex items-center gap-3 px-5 py-2.5 text-sm text-ink-700"
+                              >
+                                {lesson.is_preview || course.is_enrolled ? (
+                                  <PlayCircle
+                                    className="h-4 w-4 shrink-0 text-brand-600"
+                                    aria-hidden="true"
+                                  />
+                                ) : (
+                                  <Lock
+                                    className="h-4 w-4 shrink-0 text-ink-400"
+                                    aria-hidden="true"
+                                  />
+                                )}
+                                {href ? (
+                                  <Link
+                                    to={href}
+                                    className="flex-1 rounded transition hover:text-brand-700 hover:underline"
+                                  >
+                                    {lesson.title}
+                                  </Link>
+                                ) : (
+                                  <span className="flex-1">{lesson.title}</span>
+                                )}
+                                {lesson.is_preview && !course.is_enrolled && (
+                                  <Badge tone="brand">Preview</Badge>
+                                )}
+                                <span className="text-xs text-ink-500">
+                                  {lesson.duration_minutes} min
+                                </span>
+                              </li>
+                            )
+                          })}
                         </ul>
                       </div>
                     )
                   })}
                 </div>
               </section>
+
+              {/* A suggested pace, for learners who want one. Self-paced access
+                  does not change; this is a plan, not a schedule with dates. */}
+              {course.roadmap.length > 0 && (
+                <section aria-labelledby="roadmap">
+                  <h2 id="roadmap" className="text-heading text-ink-900">
+                    Suggested study plan
+                  </h2>
+                  <p className="mt-2 text-sm text-ink-600">
+                    A comfortable pace for finishing in {pluralize(course.roadmap.length, 'week')}.
+                    The course is self-paced, so go faster or slower as it suits you.
+                  </p>
+
+                  <ol className="mt-5 space-y-3">
+                    {course.roadmap.map((week) => (
+                      <li key={week.week}>
+                        <Card className="flex gap-4 p-4 sm:p-5">
+                          <span
+                            className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-lg bg-brand-50 text-brand-700"
+                            aria-hidden="true"
+                          >
+                            <CalendarRange className="h-4 w-4" />
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold uppercase tracking-wider text-ink-500">
+                              Week {week.week}
+                            </p>
+                            <p className="mt-0.5 text-sm font-semibold text-ink-900">
+                              {week.title}
+                            </p>
+                            {week.topics.length > 0 && (
+                              <p className="mt-1.5 text-sm leading-relaxed text-ink-600">
+                                {week.topics.join(' · ')}
+                              </p>
+                            )}
+                          </div>
+                        </Card>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )}
+
+              {course.certification_levels.length > 0 && (
+                <section aria-labelledby="levels">
+                  <h2 id="levels" className="text-heading text-ink-900">
+                    Certification levels
+                  </h2>
+                  <p className="mt-2 text-sm text-ink-600">
+                    Three levels, each earned by finishing the work it covers. These are
+                    certificates from this platform, not vendor certifications.
+                  </p>
+
+                  <ol className="mt-5 grid gap-4 sm:grid-cols-3">
+                    {course.certification_levels.map((tier) => (
+                      <li key={tier.level}>
+                        <Card className="flex h-full flex-col p-5">
+                          <GraduationCap
+                            className="h-5 w-5 text-brand-600"
+                            aria-hidden="true"
+                          />
+                          <p className="mt-3 text-xs font-bold uppercase tracking-wider text-ink-500">
+                            Level {tier.level}
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-ink-900">{tier.title}</p>
+                          <p className="mt-2 text-sm leading-relaxed text-ink-600">{tier.focus}</p>
+                        </Card>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )}
 
               {/* Reviews */}
               <section aria-labelledby="reviews">
