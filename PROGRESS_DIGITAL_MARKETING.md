@@ -79,6 +79,31 @@ outline. Every lesson is a preview, so all of it is free to read.
       were written from the topic map, so a question could test something the
       finished module words differently.
 
+## Deployed to production, 2026-10-05
+
+- [x] Image `20261005-225807`, revision `learnbase-web--0000024`
+- [x] Rollback tag if needed: `20260930-013646`
+- [x] Both courses applied with `apply-course.sh <slug> --publish`; the other
+      seven courses were reported untouched by the script on both runs
+- [x] Live: 8 courses, Digital Marketing 21 modules / 352 lessons, GenAI
+      unchanged at 15 / 163
+- [x] All existing public pages return 200
+- [x] Sitemap: 76 urls, 18 for Digital Marketing, 11 for GenAI
+- [x] Byline reads "Platform Admin — Platform administrator", which is fine.
+      The script's demo-account warning fired on the email domain, not the
+      display name
+
+### Known, and not fixed here
+
+- [ ] **Per-page meta and og tags are applied client-side.** Search engines that
+      render JavaScript see them correctly, but social crawlers do not run JS,
+      so every shared link previews as the site's default card. This is how the
+      SPA has always worked and affects every page, not just the new ones.
+      Fixing it means prerendering or server-rendering the head.
+- [ ] Modules 2 to 20 are scaffolds and are now publicly visible and in the
+      sitemap. Either finish them or run
+      `apply-course.sh digital-marketing-beginner-to-advanced --unpublish`.
+
 ## SEO
 
 - [x] Every new page emits title, description, canonical, robots, og:title,
