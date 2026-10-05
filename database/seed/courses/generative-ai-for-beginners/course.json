@@ -8,7 +8,7 @@
   "price": "0",
   "currency": "USD",
   "is_featured": true,
-  "is_published": false,
+  "is_published": true,
   "duration_minutes": 0,
   "certifications": [],
   "short_description": "A practical, hands-on introduction to generative AI for students, freshers and non-technical professionals. No prior AI experience needed.",

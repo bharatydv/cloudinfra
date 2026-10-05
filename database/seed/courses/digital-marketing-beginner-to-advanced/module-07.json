@@ -1,0 +1,158 @@
+{
+  "title": "Google Ads / PPC",
+  "description": "Buying intent instead of attention: campaign types, match types, Quality Score and what to change when it underperforms.",
+  "lessons": [
+    {
+      "title": "What PPC is",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: What is PPC?.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **What is PPC?**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "The Google Ads ecosystem",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Google Ads ecosystem.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Google Ads ecosystem**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Search campaigns",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Search campaigns.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Search campaigns**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Display campaigns",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Display campaigns.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Display campaigns**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Video campaigns",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Video campaigns.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Video campaigns**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Shopping campaigns",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Shopping campaigns.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Shopping campaigns**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Performance Max",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Performance Max.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Performance Max**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Keyword match types",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Keyword match types.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Keyword match types**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Negative keywords",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Negative keywords.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Negative keywords**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Ad extensions and assets",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Ad extensions/assets.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Ad extensions/assets**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Bidding strategies in Google Ads",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Bidding strategies.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Bidding strategies**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Quality Score",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Quality Score.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Quality Score**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Conversion tracking in Google Ads",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Conversion tracking.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Conversion tracking**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Remarketing in Google Ads",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Remarketing.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Remarketing**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Optimising a Google Ads campaign",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Campaign optimization.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Campaign optimization**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\n## Demo\n\nA worked example for **Bright Mile Dental**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Practice questions: Google Ads and PPC",
+      "duration_minutes": 15,
+      "is_preview": false,
+      "description": "Seven to ten questions on Google Ads and PPC, with an answer key.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. One sample question is written so the format is clear; the remaining\n> questions are not written yet.\n\n## Practice questions\n\nSeven to ten questions covering everything in Google Ads / PPC, each with an answer key\nthat explains why the right answer is right.\n\n:::quiz\nQ. Why add negative keywords to a search campaign?\n+ To stop ads showing for searches that will never convert\n- To lower the cost of every click\n- To push the ad into the top position\n= Negatives remove irrelevant traffic, so the budget goes to searches that carry intent.\n:::\n\n## Where to look if you got one wrong\n\nA pointer back to the lesson each question came from.\n",
+      "resources": []
+    },
+    {
+      "title": "Hands-on lab: build a Google Search Ads campaign",
+      "duration_minutes": 60,
+      "is_preview": false,
+      "description": "Build build a Google Search Ads campaign with the tools open.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## What you will build\n\nBuild a Google Search Ads campaign for Bright Mile Dental. This lab is the practical listed for this module in the course outline.\n\n## Before you start\n\nThe accounts, tools or files needed, and roughly how long it takes. Tool interfaces change,\nso check the current interface before following any click path.\n\n## Steps\n\nNumbered steps the learner works through with the tool open.\n\n:::checklist Lab checklist\n- Inputs gathered\n- Draft built\n- Checked against the standard below\n- Saved to your portfolio folder\n:::\n\n## What good looks like\n\nA described standard the learner can hold their own work against.\n",
+      "resources": []
+    },
+    {
+      "title": "Assignment: a Google Ads plan for Bright Mile Dental",
+      "duration_minutes": 90,
+      "is_preview": false,
+      "description": "Produce a Google Ads plan for Bright Mile Dental, marked out of 100.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## The brief\n\nA Google Ads plan for Bright Mile Dental. What is being asked for, and the constraints it has to work inside.\n\n## What to submit\n\nThe file, the format and anything that must be shown alongside it.\n\n:::template Submission cover sheet\nName:\nBrand:\nModule: Google Ads / PPC\nDeliverable:\nTime spent:\nWhat I would do differently with more budget:\n:::\n\n## Marking rubric\n\nMarked out of 100. The bands below are placeholders until the assignment is written.\n\n- Research and understanding of the audience — 20 marks\n- Correct use of the method taught in this module — 30 marks\n- Quality and realism of the deliverable — 30 marks\n- Clarity of presentation and reasoning — 20 marks\n\nA pass is 50. Anything that invents data about a real company scores zero on realism.\n",
+      "resources": []
+    },
+    {
+      "title": "Assessment: Google Ads and PPC",
+      "duration_minutes": 15,
+      "is_preview": false,
+      "description": "A short closing quiz on Google Ads and PPC.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Assessment\n\nA short closing quiz on Google Ads and PPC, separate from the practice questions earlier in this\nmodule. Five to seven questions in a `:::quiz` block, drawn from the whole module rather\nthan a single lesson.\n\n## Before you move on\n\nThe one thing from Google Ads / PPC that the next module assumes you already know.\n",
+      "resources": []
+    }
+  ]
+}

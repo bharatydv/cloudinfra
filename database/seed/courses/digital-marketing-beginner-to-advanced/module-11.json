@@ -1,0 +1,166 @@
+{
+  "title": "Analytics & Measurement",
+  "description": "Proving what worked: UTMs, GA4, attribution, the four money metrics and a dashboard someone will actually read.",
+  "lessons": [
+    {
+      "title": "The metrics that matter",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Marketing metrics.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Marketing metrics**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Traffic sources",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Traffic sources.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Traffic sources**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "UTM parameters",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: UTM parameters.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **UTM parameters**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Google Analytics 4",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Google Analytics 4.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Google Analytics 4**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Events in GA4",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Events.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Events**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Conversions in GA4",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Conversions.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Conversions**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "User acquisition reports",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: User acquisition.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **User acquisition**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Engagement reports",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Engagement.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Engagement**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Attribution",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Attribution.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Attribution**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Funnel analysis",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Funnel analysis.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Funnel analysis**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Cohort analysis",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Cohort analysis.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Cohort analysis**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Campaign reporting",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Campaign reporting.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Campaign reporting**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "ROI and ROAS",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: ROI / ROAS.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **ROI / ROAS**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "CAC and LTV",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: CAC / LTV.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **CAC / LTV**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Building a dashboard",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Dashboard creation.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Dashboard creation**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "The analytics toolkit",
+      "duration_minutes": 20,
+      "is_preview": false,
+      "description": "Outline topic: Tools: GA4, Search Console, Looker Studio, Excel/Google Sheets.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Learn\n\nOutline topic: **Tools: GA4, Search Console, Looker Studio, Excel/Google Sheets**. Written in plain English for someone who has not seen it before, with a real\nexample rather than a definition.\n\nThis module includes coding work: UTM builder and spreadsheet formulas for ROI, ROAS, CAC, LTV and cohorts. Any exercise here carries starter code, a `:::hint`, a full `:::solution`, expected output and a debugging exercise.\n\n## Demo\n\nA worked example for **Petal & Pine**, the fictional brand this module follows.\n\n## Practice\n\nSomething the learner does before moving on, using the worksheet or template for this module.\n\n## What to remember\n\nFour or five bullets, each one sentence.\n",
+      "resources": []
+    },
+    {
+      "title": "Practice questions: analytics and measurement",
+      "duration_minutes": 15,
+      "is_preview": false,
+      "description": "Seven to ten questions on analytics and measurement, with an answer key.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. One sample question is written so the format is clear; the remaining\n> questions are not written yet.\n\n## Practice questions\n\nSeven to ten questions covering everything in Analytics & Measurement, each with an answer key\nthat explains why the right answer is right.\n\n:::quiz\nQ. What does a UTM parameter do?\n+ Tags a link so analytics can report which campaign the visit came from\n- Speeds up the page it points to\n- Stops other sites linking to you\n= UTMs are how a click is attributed to a source, a medium and a campaign.\n:::\n\n## Where to look if you got one wrong\n\nA pointer back to the lesson each question came from.\n",
+      "resources": []
+    },
+    {
+      "title": "Hands-on lab: build a digital marketing dashboard",
+      "duration_minutes": 60,
+      "is_preview": false,
+      "description": "Build build a digital marketing dashboard with the tools open.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## What you will build\n\nBuild a digital marketing dashboard for Petal & Pine. This lab is the practical listed for this module in the course outline.\n\n## Before you start\n\nThe accounts, tools or files needed, and roughly how long it takes. Tool interfaces change,\nso check the current interface before following any click path.\n\n## Steps\n\nNumbered steps the learner works through with the tool open.\n\n:::checklist Lab checklist\n- Inputs gathered\n- Draft built\n- Checked against the standard below\n- Saved to your portfolio folder\n:::\n\n## What good looks like\n\nA described standard the learner can hold their own work against.\n",
+      "resources": []
+    },
+    {
+      "title": "Assignment: a monthly performance report for Petal & Pine",
+      "duration_minutes": 90,
+      "is_preview": false,
+      "description": "Produce a monthly performance report for Petal & Pine, marked out of 100.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## The brief\n\nA monthly performance report for Petal & Pine. What is being asked for, and the constraints it has to work inside.\n\n## What to submit\n\nThe file, the format and anything that must be shown alongside it.\n\n:::template Submission cover sheet\nName:\nBrand:\nModule: Analytics & Measurement\nDeliverable:\nTime spent:\nWhat I would do differently with more budget:\n:::\n\n## Marking rubric\n\nMarked out of 100. The bands below are placeholders until the assignment is written.\n\n- Research and understanding of the audience — 20 marks\n- Correct use of the method taught in this module — 30 marks\n- Quality and realism of the deliverable — 30 marks\n- Clarity of presentation and reasoning — 20 marks\n\nA pass is 50. Anything that invents data about a real company scores zero on realism.\n",
+      "resources": []
+    },
+    {
+      "title": "Assessment: analytics and measurement",
+      "duration_minutes": 15,
+      "is_preview": false,
+      "description": "A short closing quiz on analytics and measurement.",
+      "content": "<!-- scaffold -->\n\n> Scaffold. The structure, title and position of this lesson are final; the body\n> is not written yet.\n\n## Assessment\n\nA short closing quiz on analytics and measurement, separate from the practice questions earlier in this\nmodule. Five to seven questions in a `:::quiz` block, drawn from the whole module rather\nthan a single lesson.\n\n## Before you move on\n\nThe one thing from Analytics & Measurement that the next module assumes you already know.\n",
+      "resources": []
+    }
+  ]
+}

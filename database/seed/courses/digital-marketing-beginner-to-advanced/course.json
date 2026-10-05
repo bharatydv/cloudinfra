@@ -1,0 +1,286 @@
+{
+  "_note": "Split across one file per module, the same shape as generative-ai-for-beginners. The seeder reads course.json plus module-NN.json in filename order; see load_course_dirs() in backend/app/seed/run.py. Authoring rules live in COURSE_DIGITAL_MARKETING.md at the repository root.",
+  "title": "Digital Marketing — Beginner to Advanced",
+  "slug": "digital-marketing-beginner-to-advanced",
+  "category": "digital-marketing",
+  "level": "beginner",
+  "icon": "megaphone",
+  "price": "0",
+  "currency": "USD",
+  "is_featured": true,
+  "is_published": true,
+  "duration_minutes": 0,
+  "certifications": [],
+  "short_description": "A practical digital marketing course that starts at what a funnel is and ends with a complete campaign you can show a client. No marketing background needed.",
+  "description": "Most digital marketing courses teach you where the buttons are. Buttons move. This one teaches the reasoning underneath them, then puts you in the tool to do the work.\n\nYou start with the fundamentals — what digital marketing is, who you are selling to, and how a funnel, a persona and a KPI relate. Then you build: a landing page, an SEO audit, a content calendar, a social strategy, a Meta Ads structure, a Google Search campaign, a YouTube growth plan, an email programme, a WhatsApp funnel, a GA4 dashboard and a conversion test.\n\nThe advanced half covers what the field has actually added lately: influencer and affiliate programmes, e-commerce, generative AI in marketing work, answer and generative engine optimisation for AI search, marketing automation, and the strategy layer that decides where the budget goes.\n\nIt closes with the part that gets you hired: a career and freelancing module, and a capstone where you run one fictional brand through every channel in the course and present the result as a KPI and ROI report.\n\nEvery module is roughly 30% theory and 70% practical. You finish each one with a worksheet or template you filled in, a lab you worked through, and an assignment marked against a published rubric. All case studies use fictional brands, so nothing here invents data about a real company.",
+  "meta_title": "Digital Marketing Course — Beginner to Advanced",
+  "meta_description": "A free, practical digital marketing course: SEO, content, social, Meta and Google Ads, YouTube, email, WhatsApp, analytics, CRO, AI marketing, AEO and GEO, automation, strategy, freelancing and a full capstone project.",
+  "learning_outcomes": [
+    "Build a buyer persona, a marketing funnel and a KPI set for a real business",
+    "Plan and build a landing page, and wire up Analytics and Search Console behind it",
+    "Run a full SEO audit: keywords, search intent, on-page, technical, local and schema",
+    "Produce a content strategy, pillars and a 30-day calendar you can publish from",
+    "Choose social platforms deliberately and run them to a calendar",
+    "Structure a Meta Ads campaign: objectives, audiences, creative, pixel and budget",
+    "Build a Google Search campaign with the right match types, negatives and bidding",
+    "Grow a YouTube channel using video SEO, titles, thumbnails and analytics",
+    "Run an email programme end to end, from lead magnet to deliverability",
+    "Design a WhatsApp and conversational funnel that nurtures a lead to a booking",
+    "Measure anything: UTMs, GA4, attribution, cohorts, ROI, ROAS, CAC and LTV",
+    "Test and improve a page instead of redesigning it on instinct",
+    "Use generative AI in marketing work without publishing something you cannot defend",
+    "Optimise for AI search and answer engines, not just the classic ten blue links",
+    "Automate lead scoring, nurture sequences and CRM hand-offs across tools",
+    "Set a strategy: positioning, channel mix, budget allocation and attribution",
+    "Price freelance work, write a proposal, report to a client and build a portfolio",
+    "Deliver a complete campaign for one brand and present it as a KPI and ROI report"
+  ],
+  "requirements": [
+    "No marketing experience required; the course starts from the beginning",
+    "No coding experience required; the few coding sections give you the full solution",
+    "A computer with a web browser and a stable internet connection",
+    "A free account on the tools you want to practise in, which you can create as you go",
+    "Around eight to ten hours a week if you want to follow the suggested plan"
+  ],
+  "roadmap": [
+    {
+      "week": 1,
+      "title": "Digital marketing fundamentals",
+      "topics": [
+        "What digital marketing is",
+        "Funnels and the customer journey",
+        "Personas and segmentation",
+        "Objectives and KPIs"
+      ]
+    },
+    {
+      "week": 2,
+      "title": "Websites and landing pages",
+      "topics": [
+        "Site structure and hosting",
+        "Landing pages and CTAs",
+        "Lead forms",
+        "Analytics and Search Console setup"
+      ]
+    },
+    {
+      "week": 3,
+      "title": "SEO foundations",
+      "topics": [
+        "How search engines work",
+        "Keyword research",
+        "Search intent",
+        "On-page and off-page SEO"
+      ]
+    },
+    {
+      "week": 4,
+      "title": "SEO in depth",
+      "topics": [
+        "Technical SEO and Core Web Vitals",
+        "Local and international SEO",
+        "Schema markup",
+        "Audits and the SEO toolkit"
+      ]
+    },
+    {
+      "week": 5,
+      "title": "Content marketing",
+      "topics": [
+        "Content pillars and calendars",
+        "Copywriting and storytelling",
+        "Lead magnets",
+        "Distribution and repurposing"
+      ]
+    },
+    {
+      "week": 6,
+      "title": "Social media marketing",
+      "topics": [
+        "Platform strategy",
+        "Short-form video, Reels and Shorts",
+        "Community and engagement",
+        "Social analytics"
+      ]
+    },
+    {
+      "week": 7,
+      "title": "Social media advertising",
+      "topics": [
+        "Meta Ads structure",
+        "Custom and lookalike audiences",
+        "Creative and ad copy",
+        "Pixel and conversion tracking"
+      ]
+    },
+    {
+      "week": 8,
+      "title": "Google Ads and PPC",
+      "topics": [
+        "Search, Display, Video, Shopping",
+        "Performance Max",
+        "Match types and negatives",
+        "Quality Score and bidding"
+      ]
+    },
+    {
+      "week": 9,
+      "title": "YouTube marketing",
+      "topics": [
+        "The algorithm",
+        "Video SEO",
+        "Titles and thumbnails",
+        "Shorts, ads and analytics"
+      ]
+    },
+    {
+      "week": 10,
+      "title": "Email marketing",
+      "topics": [
+        "List building and lead magnets",
+        "Copywriting and design",
+        "Automation and drip campaigns",
+        "Deliverability and analytics"
+      ]
+    },
+    {
+      "week": 11,
+      "title": "WhatsApp and conversational marketing",
+      "topics": [
+        "WhatsApp Business and broadcasts",
+        "Chatbots and automated replies",
+        "Conversational funnels",
+        "The WhatsApp API"
+      ]
+    },
+    {
+      "week": 12,
+      "title": "Analytics and measurement",
+      "topics": [
+        "UTMs and traffic sources",
+        "GA4 events and conversions",
+        "Attribution, funnels and cohorts",
+        "ROI, ROAS, CAC, LTV and dashboards"
+      ]
+    },
+    {
+      "week": 13,
+      "title": "CRO, influencer and affiliate",
+      "topics": [
+        "Conversion funnels and A/B tests",
+        "Heatmaps and experiments",
+        "Influencer selection and briefs",
+        "Affiliate networks and commissions"
+      ]
+    },
+    {
+      "week": 14,
+      "title": "E-commerce and AI in marketing",
+      "topics": [
+        "Product pages and Shopping feeds",
+        "Cart recovery and retention",
+        "AI content, images and video",
+        "Prompt engineering for marketers"
+      ]
+    },
+    {
+      "week": 15,
+      "title": "AI search and automation",
+      "topics": [
+        "AEO, GEO and AI answers",
+        "Entity optimisation",
+        "Lead scoring and nurture flows",
+        "CRM integration and webhooks"
+      ]
+    },
+    {
+      "week": 16,
+      "title": "Strategy, career and capstone",
+      "topics": [
+        "Market research and positioning",
+        "Budget and channel mix",
+        "Portfolio, proposals and pricing",
+        "The capstone project"
+      ]
+    }
+  ],
+  "certification_levels": [
+    {
+      "level": 1,
+      "title": "Beginner",
+      "focus": "Digital marketing fundamentals, websites and landing pages, SEO, content and social media. Earned by completing modules 1 to 5."
+    },
+    {
+      "level": 2,
+      "title": "Intermediate",
+      "focus": "Google Ads, Meta Ads, YouTube, email, WhatsApp, analytics and conversion rate optimisation. Earned by completing modules 6 to 12."
+    },
+    {
+      "level": 3,
+      "title": "Advanced",
+      "focus": "Influencer and affiliate marketing, e-commerce, AI in marketing, AEO and GEO, automation and strategy. Earned by completing modules 13 to 18."
+    },
+    {
+      "level": 4,
+      "title": "Professional",
+      "focus": "Career paths, freelancing, client work, pricing, reporting and a portfolio you can show. Earned by completing module 19."
+    },
+    {
+      "level": 5,
+      "title": "Capstone",
+      "focus": "A complete digital marketing project for one brand, from research to a presented KPI and ROI report. Earned by completing module 20."
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Do I need marketing experience to take the Digital Marketing course?",
+      "answer": "No. The course starts at what digital marketing is and builds from there. It is written for college students, MBA students, freshers, career changers, entrepreneurs and freelancers, and it defines every term the first time it appears.",
+      "position": 1
+    },
+    {
+      "question": "How long does the Digital Marketing course take to finish?",
+      "answer": "There is a suggested sixteen-week plan at roughly eight to ten hours a week, which includes the labs and assignments. The course is self-paced, so you can move faster or slower, and your progress is saved if you stop and come back.",
+      "position": 2
+    },
+    {
+      "question": "Is the Digital Marketing course really free?",
+      "answer": "Yes. Every lesson, lab, worksheet and assignment is free once you create an account. The first three lessons are readable without an account at all.",
+      "position": 3
+    },
+    {
+      "question": "Do I need to pay for Semrush, Ahrefs or other paid marketing tools?",
+      "answer": "No. The labs are written so they can be completed with free tools, and where a paid tool is the industry standard we explain what it does and what the free alternative gives up. Tool pricing and free tiers change often, so check the current terms before you rely on any of them.",
+      "position": 4
+    },
+    {
+      "question": "Does the Digital Marketing course include coding?",
+      "answer": "Only where a marketer genuinely needs it. Module 2 has a HTML and CSS landing page, module 3 has JSON-LD schema markup, module 11 has spreadsheet formulas for ROI, ROAS, CAC and LTV, module 15 has prompt templates with optional Python, and module 17 has automation blueprints and webhooks. Each one comes with starter code, a hint, a full solution and the expected output.",
+      "position": 5
+    },
+    {
+      "question": "What is the Digital Marketing capstone project?",
+      "answer": "You pick one fictional brand and take it through everything in the course: market research, a persona, a competitor analysis, a landing page, an SEO and content strategy, a social calendar, Meta and Google Ads campaigns, an email campaign, analytics, a dashboard, a budget, and a final KPI and ROI report you present. It is the piece of work you show an employer or a first client.",
+      "position": 6
+    },
+    {
+      "question": "What certificate do I get from the Digital Marketing course?",
+      "answer": "There are five completion levels, from Beginner through to Capstone, each earned by finishing the modules it covers. These are completion certificates from this platform. They are not Google, Meta or HubSpot certifications, and nothing in the course should be read as implying otherwise.",
+      "position": 7
+    },
+    {
+      "question": "Will the Digital Marketing course get me a job or guarantee results?",
+      "answer": "No course can promise that, and we do not. What this one gives you is a portfolio of finished work, a capstone you can present, and a career module covering the roles, proposals, pricing and client reporting that the job actually involves. The hiring, the ranking and the revenue depend on your market and your effort.",
+      "position": 8
+    },
+    {
+      "question": "Do the brands used in the Digital Marketing examples exist?",
+      "answer": "No, and that is deliberate. Every case study uses one of four fictional brands — a D2C skincare brand, a local dental clinic, a B2B SaaS tool and an online course seller — so no example invents data or performance figures about a real company.",
+      "position": 9
+    },
+    {
+      "question": "How does this differ from the Generative AI for Beginners course?",
+      "answer": "They overlap by one module and otherwise sit side by side. Generative AI for Beginners teaches how the models work and how to build with them. This course teaches marketing, and module 15 covers the slice of AI a marketer uses day to day. You can take either first.",
+      "position": 10
+    }
+  ]
+}

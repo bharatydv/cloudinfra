@@ -3,6 +3,12 @@
 This file governs the **Generative AI for Beginners** course only. Everything
 else in this repository follows the conventions already in `README.md`.
 
+> The second course, **Digital Marketing — Beginner to Advanced**, has its own
+> authoring guide in [COURSE_DIGITAL_MARKETING.md](COURSE_DIGITAL_MARKETING.md)
+> and its own checklist in
+> [PROGRESS_DIGITAL_MARKETING.md](PROGRESS_DIGITAL_MARKETING.md). Nothing in
+> this file applies to it.
+
 The course lives in the database like every other course on the site. It is
 authored as JSON seed files and loaded by the seeder. There is no separate
 content system, no new framework, and no change to the site design.

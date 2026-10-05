@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Award,
   BookOpen,
+  BookMarked,
   CalendarRange,
   CheckCircle2,
   ChevronDown,
@@ -101,6 +102,17 @@ export default function CourseDetailPage() {
     { name: 'Courses', url: '/courses' },
     { name: course.title, url: `/courses/${course.slug}` },
   ]
+
+  // A reference pack is a module whose lessons are every one of them free. A
+  // module with a few preview lessons among locked ones is a teaching module
+  // with tasters, and belongs in the curriculum rather than here.
+  const referenceModules = course.modules.filter(
+    (module) => module.lessons.length > 0 && module.lessons.every((lesson) => lesson.is_preview),
+  )
+  const referenceLessonCount = referenceModules.reduce(
+    (total, module) => total + module.lessons.length,
+    0,
+  )
 
   function toggleModule(id: string) {
     setOpenModules((current) =>
@@ -387,6 +399,53 @@ export default function CourseDetailPage() {
 
               {/* A suggested pace, for learners who want one. Self-paced access
                   does not change; this is a plan, not a schedule with dates. */}
+              {/* A module whose every lesson is a preview is a reference pack:
+                  a syllabus, glossary, templates, cheat sheets. Those pages are
+                  the most useful thing on the page for someone deciding whether
+                  to enroll, and they are buried inside the curriculum accordion,
+                  so they get their own section. Driven entirely by is_preview,
+                  so any course gains it by marking a module's lessons free. */}
+              {referenceModules.length > 0 && (
+                <section aria-labelledby="reference">
+                  <h2 id="reference" className="text-heading text-ink-900">
+                    Free to read, no account needed
+                  </h2>
+                  <p className="mt-2 text-sm text-ink-600">
+                    {pluralize(referenceLessonCount, 'reference page')} you can open right
+                    now, and keep using after the course.
+                  </p>
+
+                  {referenceModules.map((module) => (
+                    <ul key={module.id} className="mt-5 grid gap-3 sm:grid-cols-2">
+                      {module.lessons.map((lesson) => (
+                        <li key={lesson.id}>
+                          <Link
+                            to={`/courses/${course.slug}/preview/${lesson.slug}`}
+                            className="hover-lift flex h-full gap-3 rounded-xl border border-ink-200 bg-white p-4"
+                          >
+                            <BookMarked
+                              className="mt-0.5 h-4 w-4 shrink-0 text-brand-600"
+                              aria-hidden="true"
+                            />
+                            {/* Title and duration only: the course detail
+                                endpoint returns LessonSummary, which carries no
+                                description. */}
+                            <span className="min-w-0">
+                              <span className="block text-sm font-semibold text-ink-900">
+                                {lesson.title}
+                              </span>
+                              <span className="mt-1 block text-sm text-ink-500">
+                                {lesson.duration_minutes} min read
+                              </span>
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ))}
+                </section>
+              )}
+
               {course.roadmap.length > 0 && (
                 <section aria-labelledby="roadmap">
                   <h2 id="roadmap" className="text-heading text-ink-900">
@@ -433,8 +492,11 @@ export default function CourseDetailPage() {
                     Certification levels
                   </h2>
                   <p className="mt-2 text-sm text-ink-600">
-                    Three levels, each earned by finishing the work it covers. These are
-                    certificates from this platform, not vendor certifications.
+                    {/* Counted, not spelled out: courses do not all have three
+                        levels, and a wrong number here reads as carelessness. */}
+                    {pluralize(course.certification_levels.length, 'level')}, each earned by
+                    finishing the work it covers. These are certificates from this platform,
+                    not vendor certifications.
                   </p>
 
                   <ol className="mt-5 grid gap-4 sm:grid-cols-3">

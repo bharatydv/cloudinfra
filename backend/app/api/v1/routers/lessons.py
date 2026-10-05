@@ -45,7 +45,12 @@ async def get_lesson(lesson_id: uuid.UUID, db: DbSession, viewer: OptionalUser) 
         course = await course_repo.get_by_id(db, lesson.module.course_id)
         if course is not None:
             read.seo = seo_service.build_meta(
-                title=f"{lesson.title} | {course.title}",
+                # Lesson title only. The frontend appends the brand name, and
+                # the course title as well pushed every one of these past 90
+                # characters, which search results truncate. The course is
+                # still named in the description, the breadcrumbs and the
+                # JSON-LD.
+                title=lesson.title,
                 description=lesson.description or course.short_description,
                 path=f"/courses/{course.slug}/preview/{lesson.slug}",
                 og_image=course.thumbnail,

@@ -1,4 +1,7 @@
-"""Add the Generative AI for Beginners course to an already-seeded database.
+"""Add a split-directory course to an already-seeded database.
+
+Defaults to Generative AI for Beginners; `--course <slug>` applies any other
+folder under database/seed/courses/ the same way.
 
 The full seeder (`app.seed.run`) is deliberately not used for this. On a live
 database it would:
@@ -12,10 +15,10 @@ database it would:
 
 This script touches one course and nothing else:
 
-  * the `artificial-intelligence` course category (created only if missing)
-  * the `generative-ai-for-beginners` course row
+  * the course category named in its course.json (created only if missing)
+  * the one course row named by --course
   * its modules and lessons, matched on position and slug, safe to re-run
-  * its FAQs, under the `course:generative-ai-for-beginners` category
+  * its FAQs, under the `course:<slug>` category
 
 No user is created or modified. No other course, article, certification or
 setting is read or written.
@@ -25,6 +28,7 @@ Usage, pointed at whichever database DATABASE_URL names:
     DATABASE_URL="postgresql+asyncpg://user:pass@host:5432/db?ssl=require" \\
         python -m scripts.apply_genai_course --dry-run
     DATABASE_URL="..." python -m scripts.apply_genai_course
+    DATABASE_URL="..." python -m scripts.apply_genai_course --course digital-marketing-beginner-to-advanced
 
 Run from the `backend` directory so DATABASE_URL is read before
 `app.core.config.settings` is imported.
@@ -50,31 +54,51 @@ from app.models.enums import UserRole
 from app.models.user import User
 from app.utils.text import slugify
 
-COURSE_SLUG = "generative-ai-for-beginners"
-COURSE_DIR = (
-    Path(__file__).resolve().parents[2] / "database" / "seed" / "courses" / COURSE_SLUG
-)
+DEFAULT_COURSE_SLUG = "generative-ai-for-beginners"
+COURSES_DIR = Path(__file__).resolve().parents[2] / "database" / "seed" / "courses"
 # Created only if the category is genuinely absent; an existing one is left
-# exactly as the operator has it.
-CATEGORY_FALLBACK = {
-    "name": "Artificial Intelligence",
-    "slug": "artificial-intelligence",
-    "icon": "brain-circuit",
-    "description": "Practical courses on artificial intelligence and generative AI.",
+# exactly as the operator has it. Keyed by the `category` in course.json, so a
+# course whose category is missing from both the database and this table fails
+# loudly rather than being filed under some other subject.
+CATEGORY_FALLBACKS = {
+    "artificial-intelligence": {
+        "name": "Artificial Intelligence",
+        "slug": "artificial-intelligence",
+        "icon": "brain-circuit",
+        "description": "Practical courses on artificial intelligence and generative AI.",
+    },
+    "digital-marketing": {
+        "name": "Digital Marketing",
+        "slug": "digital-marketing",
+        "icon": "megaphone",
+        "description": (
+            "Practical courses on digital marketing, from SEO and content to "
+            "paid ads and analytics."
+        ),
+    },
 }
 
 
-def load_course() -> dict[str, Any]:
-    manifest = COURSE_DIR / "course.json"
+def course_dir(slug: str) -> Path:
+    return COURSES_DIR / slug
+
+
+def load_course(slug: str) -> dict[str, Any]:
+    folder = course_dir(slug)
+    manifest = folder / "course.json"
     if not manifest.is_file():
-        raise SystemExit(f"Course manifest not found: {manifest}")
+        available = sorted(p.name for p in COURSES_DIR.iterdir() if p.is_dir())
+        raise SystemExit(
+            f"Course manifest not found: {manifest}. "
+            f"Available: {', '.join(available) or 'none'}"
+        )
     row = json.loads(manifest.read_text(encoding="utf-8"))
     row["modules"] = [
         json.loads(path.read_text(encoding="utf-8"))
-        for path in sorted(COURSE_DIR.glob("module-*.json"))
+        for path in sorted(folder.glob("module-*.json"))
     ]
     if not row["modules"]:
-        raise SystemExit(f"No module-NN.json files in {COURSE_DIR}")
+        raise SystemExit(f"No module-NN.json files in {folder}")
     return row
 
 
@@ -126,7 +150,14 @@ async def resolve_category(db: AsyncSession, slug: str) -> CourseCategory:
     category = await db.scalar(select(CourseCategory).where(CourseCategory.slug == slug))
     if category is not None:
         return category
-    category = CourseCategory(**CATEGORY_FALLBACK)
+    fallback = CATEGORY_FALLBACKS.get(slug)
+    if fallback is None:
+        raise SystemExit(
+            f"Course category {slug!r} is not in this database and has no "
+            "fallback here. Seed the taxonomy first, or add one to "
+            "CATEGORY_FALLBACKS."
+        )
+    category = CourseCategory(**fallback)
     db.add(category)
     await db.flush()
     print(f"  created course category {slug!r}")
@@ -139,6 +170,7 @@ async def apply(
     *,
     dry_run: bool,
     instructor_email: str | None,
+    publish: bool | None = None,
 ) -> None:
     category = await resolve_category(db, row["category"])
     instructor = await resolve_instructor(db, instructor_email)
@@ -185,7 +217,13 @@ async def apply(
     else:
         for key, value in fields.items():
             setattr(course, key, value)
-        print(f"  is_published left as it is: {course.is_published}")
+        if publish is None:
+            print(f"  is_published left as it is: {course.is_published}")
+        elif course.is_published == publish:
+            print(f"  is_published already {publish}")
+        else:
+            course.is_published = publish
+            print(f"  is_published set to {publish} (asked for explicitly)")
 
     existing_modules = {m.position: m for m in (course.modules if not creating else [])}
     total_minutes = 0
@@ -269,20 +307,59 @@ async def main() -> None:
         "--instructor-email",
         help="Credit this existing account as the course author.",
     )
+    parser.add_argument(
+        "--publish",
+        action="store_true",
+        help=(
+            "Publish the course. Without this the script never changes "
+            "is_published, so a re-run cannot undo a decision made in Admin."
+        ),
+    )
+    parser.add_argument(
+        "--unpublish",
+        action="store_true",
+        help="Take the course out of the catalogue and the sitemap.",
+    )
+    parser.add_argument(
+        "--course",
+        default=DEFAULT_COURSE_SLUG,
+        help=(
+            "Folder under database/seed/courses/ to apply. "
+            f"Default: {DEFAULT_COURSE_SLUG}"
+        ),
+    )
     args = parser.parse_args()
 
-    row = load_course()
+    if args.publish and args.unpublish:
+        raise SystemExit("Pass --publish or --unpublish, not both.")
+    publish = True if args.publish else False if args.unpublish else None
+
+    row = load_course(args.course)
+    # The folder is what the operator asked for; the slug the course is written
+    # under comes from course.json. A mismatch means one of the two is wrong,
+    # and guessing which would write the course to the wrong row.
+    if row["slug"] != args.course:
+        raise SystemExit(
+            f"Folder {args.course!r} holds a course whose slug is "
+            f"{row['slug']!r}. Fix one of them before applying."
+        )
     lessons = sum(len(m["lessons"]) for m in row["modules"])
     print(f"Applying {row['slug']!r}: {len(row['modules'])} modules, {lessons} lessons")
-    print(f"  source: {COURSE_DIR}")
+    print(f"  source: {course_dir(args.course)}")
 
     async with SessionLocal() as db:
         # Guard against the obvious mistake of pointing this at the wrong
         # database: report what else is there before touching anything.
-        others = (await db.scalars(select(Course.slug).where(Course.slug != COURSE_SLUG))).all()
+        others = (
+            await db.scalars(select(Course.slug).where(Course.slug != row["slug"]))
+        ).all()
         print(f"  other courses in this database (untouched): {len(others)}")
         await apply(
-            db, row, dry_run=args.dry_run, instructor_email=args.instructor_email
+            db,
+            row,
+            dry_run=args.dry_run,
+            instructor_email=args.instructor_email,
+            publish=publish,
         )
 
 
