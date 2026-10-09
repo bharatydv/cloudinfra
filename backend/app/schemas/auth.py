@@ -48,6 +48,9 @@ class UserRead(ORMModel):
     bio: str | None = None
     is_active: bool
     is_email_verified: bool
+    #: False for an account that only signs in with Google, so the UI can
+    #: offer a way to set a password instead of a way to change one.
+    has_password: bool
     created_at: datetime
     last_login_at: datetime | None = None
 
@@ -88,11 +91,6 @@ class RegisterRequest(BaseModel):
         return self
 
 
-class RegisterResponse(BaseModel):
-    email: EmailStr
-    message: str
-
-
 class VerifyEmailRequest(BaseModel):
     email: EmailStr
     code: str = Field(min_length=6, max_length=6)
@@ -105,6 +103,23 @@ class ResendVerificationRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=1, max_length=128)
+
+
+class GoogleAuthRequest(BaseModel):
+    """The ID token Google Identity Services handed the browser."""
+
+    credential: str = Field(min_length=1, max_length=8192)
+
+
+class GoogleProviderConfig(BaseModel):
+    enabled: bool
+    #: The OAuth client ID the browser needs to start the Google flow. Public
+    #: by design -- it identifies the site, it does not authorise anything.
+    client_id: str | None = None
+
+
+class AuthProviders(BaseModel):
+    google: GoogleProviderConfig
 
 
 class RefreshRequest(BaseModel):

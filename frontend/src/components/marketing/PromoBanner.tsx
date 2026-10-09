@@ -48,17 +48,32 @@ export function PromoBanner() {
   return (
     <aside
       aria-label="Current offer"
-      className="relative border-b border-brand-500/40 bg-brand-700 text-white"
+      className="relative border-b border-brand-500/40 bg-brand-700 text-white print:hidden"
     >
       <Container className="flex items-center gap-3 py-2.5 pr-10">
         <Tag className="hidden h-4 w-4 shrink-0 text-brand-200 sm:block" aria-hidden="true" />
 
-        <p className="min-w-0 flex-1 text-sm font-medium">
-          {promotion.message}
-          {promotion.endsOn && (
-            <span className="ml-2 text-brand-200">Ends {promotion.endsOn}.</span>
-          )}
-        </p>
+        {/* Below `sm` the button is hidden, so the message itself carries the
+            link -- otherwise the offer has no action at all on a phone. */}
+        {promotion.linkLabel ? (
+          <Link
+            to={promotion.linkTo}
+            onClick={() => track(AnalyticsEvent.CtaClicked, { properties: { cta: 'promo_banner' } })}
+            className="min-w-0 flex-1 text-sm font-medium underline-offset-2 hover:underline sm:no-underline sm:hover:no-underline"
+          >
+            {promotion.message}
+            {promotion.endsOn && (
+              <span className="ml-2 text-brand-200">Ends {promotion.endsOn}.</span>
+            )}
+          </Link>
+        ) : (
+          <p className="min-w-0 flex-1 text-sm font-medium">
+            {promotion.message}
+            {promotion.endsOn && (
+              <span className="ml-2 text-brand-200">Ends {promotion.endsOn}.</span>
+            )}
+          </p>
+        )}
 
         {promotion.linkLabel && (
           <Link

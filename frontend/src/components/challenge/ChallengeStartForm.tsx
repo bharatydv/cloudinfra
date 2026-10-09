@@ -12,7 +12,7 @@ import {
 import { ApiError } from '@/api/client'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
-import { Card, Field, Input } from '@/components/ui/primitives'
+import { Card, Field, Input, Select } from '@/components/ui/primitives'
 import { ErrorState, InlineSpinner } from '@/components/ui/states'
 import { useAuth } from '@/hooks/useAuth'
 import { formatPrice, pluralize } from '@/lib/format'
@@ -49,14 +49,21 @@ export function ChallengeStartForm({
   certificationId?: string
   prefill?: ChallengePrefill
   bookingPreferences?: ChallengeBookingPreferences | null
-  onStarted: (session: ChallengeSession) => void
+  /** The chosen certification rides along, so the result can link to its booking. */
+  onStarted: (session: ChallengeSession, certificationId: string) => void
 }) {
   const { user } = useAuth()
   const { terms, options } = intro
-  // The certification is whatever the caller chose (a deal, the scheduling
-  // form); without one, the first the campaign offers.
-  const selected =
-    options.find((option) => option.id === certificationId) ?? options[0] ?? null
+  /**
+   * The certification the caller chose (a deal, the scheduling form). Without
+   * one the candidate picks: defaulting silently to the first option seated
+   * people for an exam they had not chosen, and the paper runs for
+   * `terms.duration_minutes` with a retake window behind it.
+   */
+  const [chosenId, setChosenId] = useState(certificationId ?? options[0]?.id ?? '')
+  const selected = options.find((option) => option.id === chosenId) ?? options[0] ?? null
+  // Only when the caller did not name one -- a deal's own test never asks.
+  const canChoose = !certificationId && options.length > 1
 
   const [form, setForm] = useState({
     full_name: prefill?.full_name ?? '',
@@ -90,7 +97,7 @@ export function ChallengeStartForm({
 
   const mutation = useMutation({
     mutationFn: startChallenge,
-    onSuccess: onStarted,
+    onSuccess: (session, variables) => onStarted(session, variables.certification_id),
     onError: (error) => {
       if (error instanceof ApiError) {
         setFieldErrors(error.fieldErrors)
@@ -180,11 +187,35 @@ export function ChallengeStartForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <p className="text-sm text-ink-600">
-        <span className="font-semibold text-ink-900">{selected.name}</span>
-        {selected.exam_code && <> &middot; {selected.exam_code}</>} &middot;{' '}
-        {pluralize(selected.question_count, 'question')} in {selected.duration_minutes} minutes
-      </p>
+      {canChoose ? (
+        <Field
+          label="Which certification are you testing on?"
+          htmlFor="challenge-certification"
+          required
+          hint={`${pluralize(selected.question_count, 'question')} in ${
+            selected.duration_minutes
+          } minutes, on this exam's published objectives.`}
+        >
+          <Select
+            id="challenge-certification"
+            value={chosenId}
+            onChange={(event) => setChosenId(event.target.value)}
+          >
+            {options.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.name}
+                {option.exam_code ? ` (${option.exam_code})` : ''}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      ) : (
+        <p className="text-sm text-ink-600">
+          <span className="font-semibold text-ink-900">{selected.name}</span>
+          {selected.exam_code && <> &middot; {selected.exam_code}</>} &middot;{' '}
+          {pluralize(selected.question_count, 'question')} in {selected.duration_minutes} minutes
+        </p>
+      )}
 
       {step === 'details' && (
         /* --- Step 1: register ----------------------------------------------- */
@@ -503,7 +534,7 @@ export function ChallengeStartModal({
   open: boolean
   certificationId?: string
   onClose: () => void
-  onStarted: (session: ChallengeSession) => void
+  onStarted: (session: ChallengeSession, certificationId: string) => void
 }) {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.challengeIntro,

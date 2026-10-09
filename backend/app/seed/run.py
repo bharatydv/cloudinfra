@@ -141,7 +141,8 @@ async def seed_users(session: AsyncSession) -> dict[str, User]:
         existing = await session.scalar(select(User).where(User.email == email))
         defaults = {**person, "is_active": True, "is_email_verified": True}
         if existing is None:
-            # password_hash is NOT NULL, so it must be present on the insert.
+            # Only set on the insert: a seed run must never reset the password
+            # of an account somebody is already using.
             defaults["password_hash"] = hash_password(password)
             logger.info("created user %s (%s)", email, defaults["role"])
         user, _ = await get_or_create(
@@ -284,12 +285,65 @@ async def seed_certifications(session: AsyncSession):
                 },
             )
 
+    await prune_certifications(session, set(providers), set(certifications))
+
     logger.info(
         "certifications: %d providers, %d certifications",
         len(providers),
         len(certifications),
     )
     return providers, certifications
+
+
+async def prune_certifications(
+    session: AsyncSession,
+    provider_slugs: set[str],
+    certification_slugs: set[str],
+) -> None:
+    """Delete catalogue rows the seed file no longer lists.
+
+    The rest of the seeder is additive, so dropping a certification from
+    certifications.json would otherwise leave it on the site forever.
+    Everything that points at a certification -- its resources, saved items,
+    course links and challenge questions -- cascades; an exam booking keeps its
+    row with the link set to NULL.
+    """
+    stale_certifications = (
+        (
+            await session.execute(
+                select(Certification).where(
+                    Certification.slug.notin_(certification_slugs)
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    for certification in stale_certifications:
+        logger.warning(
+            "certifications: deleting %s, no longer seeded", certification.slug
+        )
+        await session.delete(certification)
+
+    stale_providers = (
+        (
+            await session.execute(
+                select(CertificationProvider).where(
+                    CertificationProvider.slug.notin_(provider_slugs)
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    for provider in stale_providers:
+        logger.warning(
+            "certifications: deleting provider %s, no longer seeded", provider.slug
+        )
+        await session.delete(provider)
+
+    if stale_certifications or stale_providers:
+        await session.flush()
 
 
 # ---------------------------------------------------------------------------

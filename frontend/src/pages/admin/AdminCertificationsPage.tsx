@@ -6,6 +6,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react'
 import { z } from 'zod'
 
+import { ConfirmDelete } from '@/components/admin/ConfirmDelete'
 import { AdminPageHeader, DataTable, type Column } from '@/components/admin/DataTable'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
@@ -641,6 +642,7 @@ export function AdminProvidersPage() {
   const queryClient = useQueryClient()
   const toast = useToast()
   const [open, setOpen] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState<ProviderCard | null>(null)
   const [name, setName] = useState('')
   const [website, setWebsite] = useState('')
 
@@ -665,6 +667,7 @@ export function AdminProvidersPage() {
     mutationFn: (id: string) => deleteProvider(id),
     onSuccess: () => {
       toast.success('Provider deleted.')
+      setPendingDelete(null)
       void queryClient.invalidateQueries({ queryKey: queryKeys.providers })
     },
     onError: () => toast.error('We could not delete that provider.'),
@@ -688,7 +691,7 @@ export function AdminProvidersPage() {
           variant="ghost"
           size="sm"
           className="text-rose-600 hover:bg-rose-50"
-          onClick={() => remove.mutate(item.id)}
+          onClick={() => setPendingDelete(item)}
           aria-label={`Delete ${item.name}`}
         >
           <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -729,6 +732,21 @@ export function AdminProvidersPage() {
         onRetry={() => void refetch()}
         emptyTitle="No providers yet"
         emptyDescription="Add a provider before creating certifications."
+      />
+
+      <ConfirmDelete
+        open={Boolean(pendingDelete)}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={() => pendingDelete && remove.mutate(pendingDelete.id)}
+        loading={remove.isPending}
+        title="Delete this provider?"
+        description={
+          pendingDelete && pendingDelete.certification_count > 0
+            ? `This provider still has ${pendingDelete.certification_count} certification pages. Move or delete those first.`
+            : 'Its provider page and branding go with it. This cannot be undone.'
+        }
+        itemName={pendingDelete?.name}
+        confirmLabel="Delete provider"
       />
 
       <Modal

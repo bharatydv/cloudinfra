@@ -169,7 +169,14 @@ async def build_learn_view(
     if not course.is_published and not user.is_admin:
         raise NotFoundError("Course not found.")
 
-    enrollment = await require_enrollment(db, user, course)
+    # Staff read any course without enrolling. Reviewing what a learner will
+    # see is part of publishing it, and an enrollment row for an admin would
+    # otherwise count towards the course's own enrollment figures.
+    enrollment = (
+        await engagement_repo.get_enrollment(db, user.id, course.id)
+        if user.is_staff
+        else await require_enrollment(db, user, course)
+    )
 
     ordered_lessons: list[Lesson] = []
     modules_view: list[LearnModuleView] = []
@@ -255,18 +262,21 @@ async def build_learn_view(
         for lesson in ordered_lessons
         if progress_map.get(lesson.id) and progress_map[lesson.id].completed
     )
-    enrollment.last_accessed_at = _now()
-    await db.commit()
+    # Nothing is recorded for a staff member who is only looking.
+    if enrollment is not None:
+        enrollment.last_accessed_at = _now()
+        await db.commit()
 
     return LearnCourseView(
         course_id=course.id,
         title=course.title,
         slug=course.slug,
-        progress_percentage=enrollment.progress_percentage,
+        progress_percentage=enrollment.progress_percentage if enrollment else 0,
         total_lessons=len(ordered_lessons),
         completed_lessons=completed_count,
         modules=modules_view,
         current_lesson=current,
+        is_staff_preview=enrollment is None,
     )
 
 

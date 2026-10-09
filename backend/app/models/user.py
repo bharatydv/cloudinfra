@@ -33,7 +33,12 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     phone: Mapped[str] = mapped_column(String(30), nullable=False)
-    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    # Null for an account that only ever signed in through Google: there is no
+    # password to verify, and `has_password` is what the API reports.
+    password_hash: Mapped[str | None] = mapped_column(String(255))
+    #: Google's stable subject id, set once an account is linked to a Google
+    #: profile. Unique so one Google account cannot claim two logins.
+    google_sub: Mapped[str | None] = mapped_column(String(64), unique=True, index=True)
     role: Mapped[str] = mapped_column(
         String(20), default=UserRole.STUDENT.value, nullable=False, index=True
     )
@@ -65,6 +70,20 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     @property
     def is_admin(self) -> bool:
         return self.role == UserRole.ADMIN.value
+
+    @property
+    def is_staff(self) -> bool:
+        """Admin or instructor -- the roles that author and review content.
+
+        Mirrors the `require_staff` dependency, so a check made on a loaded
+        user and a check made on a route agree.
+        """
+        return self.role in {UserRole.ADMIN.value, UserRole.INSTRUCTOR.value}
+
+    @property
+    def has_password(self) -> bool:
+        """False for a Google-only account, which has no password to change."""
+        return self.password_hash is not None
 
 
 class RefreshToken(Base, UUIDPrimaryKeyMixin, TimestampMixin):

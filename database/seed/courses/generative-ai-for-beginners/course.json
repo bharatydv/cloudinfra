@@ -5,8 +5,8 @@
   "category": "artificial-intelligence",
   "level": "beginner",
   "icon": "sparkles",
-  "price": "0",
-  "currency": "USD",
+  "price": "999",
+  "currency": "INR",
   "is_featured": true,
   "is_published": true,
   "duration_minutes": 0,
@@ -179,5 +179,6 @@
       "answer": "Level 1 and Level 2 each end with an exam: twenty questions plus two applied tasks, marked out of 40 with a pass mark of 28. The Level 1 exam sits at the end of module 5 and the Level 2 exam at the end of module 13. Level 3 is the module 14 capstone, which is a working application, a written evaluation and a ten-minute presentation. The practice questions that close every module are ungraded and are there for you.",
       "position": 8
     }
-  ]
+  ],
+  "compare_at_price": "1499"
 }

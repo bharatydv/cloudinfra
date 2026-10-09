@@ -5,8 +5,8 @@
   "category": "digital-marketing",
   "level": "beginner",
   "icon": "megaphone",
-  "price": "0",
-  "currency": "USD",
+  "price": "1199",
+  "currency": "INR",
   "is_featured": true,
   "is_published": true,
   "duration_minutes": 0,
@@ -282,5 +282,6 @@
       "answer": "They overlap by one module and otherwise sit side by side. Generative AI for Beginners teaches how the models work and how to build with them. This course teaches marketing, and module 15 covers the slice of AI a marketer uses day to day. You can take either first.",
       "position": 10
     }
-  ]
+  ],
+  "compare_at_price": "1999"
 }

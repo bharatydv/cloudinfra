@@ -22,7 +22,7 @@ export function Footer() {
   )
 
   return (
-    <footer className="border-t border-ink-200 bg-ink-50">
+    <footer className="border-t border-ink-200 bg-ink-50 print:hidden">
       <Container className="py-6">
         <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div>

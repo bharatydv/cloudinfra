@@ -6,12 +6,14 @@ import { Eye, EyeOff } from 'lucide-react'
 import { z } from 'zod'
 
 import { AuthShell } from '@/pages/auth/AuthShell'
+import { GoogleSignIn } from '@/components/auth/GoogleSignIn'
 import { Button } from '@/components/ui/Button'
 import { Field, Input } from '@/components/ui/primitives'
 import { ApiError } from '@/api/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useSeo } from '@/hooks/useSeo'
 import { NOINDEX } from '@/lib/seo'
+import type { User } from '@/types/api'
 
 const schema = z.object({
   email: z.string().email('Please enter a valid email address.'),
@@ -39,15 +41,18 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>({ resolver: zodResolver(schema) })
 
+  // Admins land in the console; everyone else resumes where they were.
+  function goToLanding(user: User) {
+    const state = location.state as LocationState | null
+    navigate(state?.from ?? (user.role === 'admin' ? '/admin' : '/dashboard'), {
+      replace: true,
+    })
+  }
+
   async function onSubmit(values: LoginForm) {
     setFormError(null)
     try {
-      const user = await login(values.email, values.password)
-      const state = location.state as LocationState | null
-      // Admins land in the console; everyone else resumes where they were.
-      navigate(state?.from ?? (user.role === 'admin' ? '/admin' : '/dashboard'), {
-        replace: true,
-      })
+      goToLanding(await login(values.email, values.password))
     } catch (error) {
       if (error instanceof ApiError && error.code === 'email_not_verified') {
         navigate(`/verify-email?email=${encodeURIComponent(values.email)}`)
@@ -72,6 +77,8 @@ export default function LoginPage() {
         </>
       }
     >
+      <GoogleSignIn text="signin_with" onSuccess={goToLanding} onError={setFormError} />
+
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {formError && (
           <div

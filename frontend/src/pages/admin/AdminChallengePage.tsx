@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Mail, Phone, ShieldAlert, Trash2 } from 'lucide-react'
 
+import { ConfirmDelete } from '@/components/admin/ConfirmDelete'
 import { AdminPageHeader, DataTable, type Column } from '@/components/admin/DataTable'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
@@ -49,6 +50,7 @@ export default function AdminChallengePage() {
   const [leadFilter, setLeadFilter] = useState('')
   const [resultFilter, setResultFilter] = useState('')
   const [selected, setSelected] = useState<ChallengeAttempt | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<ChallengeAttempt | null>(null)
   const [notes, setNotes] = useState('')
   const queryClient = useQueryClient()
   const toast = useToast()
@@ -205,7 +207,7 @@ export default function AdminChallengePage() {
           variant="ghost"
           size="sm"
           className="text-rose-600 hover:bg-rose-50"
-          onClick={() => remove.mutate(attempt.id)}
+          onClick={() => setPendingDelete(attempt)}
           aria-label={`Delete attempt ${attempt.reference_code}`}
         >
           <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -298,6 +300,19 @@ export default function AdminChallengePage() {
         page={data?.page}
         totalPages={data?.total_pages}
         onPageChange={setPage}
+      />
+
+      <ConfirmDelete
+        open={Boolean(pendingDelete)}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={() => pendingDelete && remove.mutate(pendingDelete.id)}
+        loading={remove.isPending}
+        title="Delete this attempt?"
+        description="The candidate's details, score and any discount owed go with it. This cannot be undone."
+        itemName={
+          pendingDelete ? `${pendingDelete.reference_code} · ${pendingDelete.full_name}` : null
+        }
+        confirmLabel="Delete attempt"
       />
 
       <Modal

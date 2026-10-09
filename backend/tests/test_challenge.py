@@ -93,13 +93,21 @@ async def _questions(db, certification, count: int = 6, prefix: str = "q"):
     await db.commit()
 
 
-async def _setup(db, **terms):
-    """A published Google Cloud certification with a stocked question bank."""
+async def _setup(db, *, catalogue_discount: str | None = None, **terms):
+    """A published Google Cloud certification with a stocked question bank.
+
+    `catalogue_discount` is the percentage the exam is already advertised at,
+    which is what the challenge reward must not be stacked on top of.
+    """
     provider = await make_provider(db, name="Google Cloud")
     provider.slug = PROVIDER_SLUG
     await db.commit()
     certification = await make_certification(
-        db, provider, name="Associate Cloud Engineer", exam_fee="125.00"
+        db,
+        provider,
+        name="Associate Cloud Engineer",
+        exam_fee="125.00",
+        discount_percentage=catalogue_discount,
     )
     await _questions(db, certification)
     await _terms(db, **terms)
@@ -362,6 +370,9 @@ async def test_passing_records_the_discount_and_returns_the_review(client, db_se
     assert body["discount_percentage"] == "65.00"
     # 125.00 less 65% = 43.75, quoted against the price the site already shows.
     assert body["rewarded_price"] == "43.75"
+    # The discount comes off the provider's fee, never off an already
+    # discounted total.
+    assert body["pricing"]["exam_fee_amount"] == "125.00"
     assert len(body["review"]) == 4
     assert body["review"][0]["explanation"]
 
@@ -420,6 +431,61 @@ async def test_discount_scales_with_score_between_pass_mark_and_a_perfect_paper(
     assert body["passed"] is True
     # The Numeric(5,2) column always returns two decimal places.
     assert body["discount_percentage"] == "40.00"
+
+
+async def _sit_perfectly(client, db_session, certification) -> dict:
+    """Start a paper, answer every question correctly, return the result."""
+    session = (
+        await client.post("/api/challenge/attempts", json=_start_payload(certification.id))
+    ).json()
+    qids, key = await _answer_key(db_session, session["attempt_id"])
+    return (
+        await client.post(
+            f"/api/challenge/attempts/{session['attempt_id']}/submit",
+            json={
+                "token": session["token"],
+                "answers": [{"question_id": q, "option_key": key[q]} for q in qids],
+            },
+        )
+    ).json()
+
+
+async def test_the_earned_discount_is_not_stacked_on_the_catalogue_one(
+    client, db_session
+):
+    """Both discounts come off the provider's fee, and only the better one.
+
+    The card already advertises the exam at a discount. Cutting the reward out
+    of that total again would quote a candidate a price no other surface shows.
+    """
+    _, certification = await _setup(db_session, catalogue_discount="60.00")
+    body = await _sit_perfectly(client, db_session, certification)
+
+    assert body["passed"] is True
+    assert body["discount_percentage"] == "65.00"
+    # The card: 125.00 less the catalogue's 60%.
+    assert body["pricing"]["total_price_amount"] == "50.00"
+    # A perfect paper beats 60%, so 65% comes off the 125.00 fee -- once.
+    # Stacking would have charged 50.00 less 65% = 17.50.
+    assert body["rewarded_price"] == "43.75"
+
+
+async def test_a_weak_pass_is_never_charged_above_the_advertised_price(
+    client, db_session
+):
+    """A reward worth less than the catalogue discount does not raise the price."""
+    _, certification = await _setup(
+        db_session,
+        catalogue_discount="65.00",
+        rewardDiscountMinPercentage=20,
+        rewardDiscountMaxPercentage=20,
+    )
+    body = await _sit_perfectly(client, db_session, certification)
+
+    assert body["passed"] is True
+    assert body["discount_percentage"] == "20.00"
+    # 20% off would be 100.00. The advertised 43.75 stands instead.
+    assert body["rewarded_price"] == body["pricing"]["total_price_amount"] == "43.75"
 
 
 async def test_answers_for_questions_never_served_are_ignored(client, db_session):

@@ -87,16 +87,23 @@ export function ExamOfferCard({
           </div>
         </dl>
 
-        {/* Price in the button: the visitor never has to scroll back to check
-            what they are committing to. */}
+        {/* No price in the button. This goes to a request form, not a till:
+            the discounted fee is unlocked by a passed test or a code, so a
+            button reading "Schedule Exam · $40.89" would promise a purchase
+            the form cannot make. */}
         <ScheduleExamLink
           certificationId={certificationId}
           className="mt-5 w-full"
           cta="cert_offer_card"
           showBadge={false}
         >
-          Schedule Exam &middot; {formatPrice(pricing.total_price_amount, currency)}
+          Request this exam
         </ScheduleExamLink>
+        <p className="mt-2 text-center text-xs leading-relaxed text-ink-500">
+          We confirm your slot and the price by email. To pay{' '}
+          {formatPrice(pricing.total_price_amount, currency)} online, pass the free test
+          or use a coupon code.
+        </p>
 
         {promotion.reassurance && (
           <p className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-ink-600">

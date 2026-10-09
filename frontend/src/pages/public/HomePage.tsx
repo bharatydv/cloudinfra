@@ -40,6 +40,10 @@ export default function HomePage() {
   // a fact about the catalogue rather than a marketing claim.
   const topDiscount = data?.top_deals?.[0]?.discount_percentage ?? null
 
+  const realTestimonials = (data?.testimonials ?? []).filter(
+    (testimonial) => !testimonial.is_demo,
+  )
+
   return (
     <>
       <Hero topDiscount={topDiscount} />
@@ -105,18 +109,17 @@ export default function HomePage() {
             </Section>
           )}
 
-          {/* Testimonials */}
-          {(data?.testimonials.length ?? 0) > 0 && (
+          {/* Testimonials.
+
+              Seeded demo rows never reach the homepage: a quote labelled as
+              placeholder in the social-proof slot is worse than an empty
+              section, so the section only exists once real ones do. */}
+          {realTestimonials.length > 0 && (
             <Section tone="muted">
               <Container>
-                <SectionHeading
-                  eyebrow="Testimonials"
-                  title="What learners say"
-                  description="Quotes are labelled when they are placeholder content."
-                  align="center"
-                />
+                <SectionHeading eyebrow="Testimonials" title="What learners say" align="center" />
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {data?.testimonials.slice(0, 3).map((testimonial) => (
+                  {realTestimonials.slice(0, 3).map((testimonial) => (
                     <TestimonialCard key={testimonial.id} testimonial={testimonial} />
                   ))}
                 </div>

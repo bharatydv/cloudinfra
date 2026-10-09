@@ -79,6 +79,33 @@ class PaymentRead(ORMModel):
     created_at: datetime
 
 
+class ExamCheckout(BaseModel):
+    """Everything the browser needs to open the provider's checkout.
+
+    Shared by every exam payment -- a scheduling request, and the discounted
+    fee a passed challenge attempt earned -- so one component in the frontend
+    can open any of them.
+
+    Deliberately no secret: the key id is public by design and the order id is
+    useless without it. Whether the payment actually succeeded is decided by
+    the signed webhook, never by what the browser reports back.
+    """
+
+    provider: str
+    payment_id: uuid.UUID
+    amount: Decimal
+    currency: str
+    # Razorpay order id. Other providers may use a redirect instead.
+    order_id: str | None = None
+    checkout_url: str | None = None
+    public_key: str | None = None
+    # Prefilled into the provider's form so the payer does not retype them.
+    prefill_name: str
+    prefill_email: str
+    prefill_contact: str
+    description: str
+
+
 class PaymentIntentResponse(BaseModel):
     payment_id: uuid.UUID
     provider: str

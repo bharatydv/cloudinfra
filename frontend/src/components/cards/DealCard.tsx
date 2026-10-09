@@ -1,4 +1,3 @@
-import type { KeyboardEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, BookOpen, Clock, GraduationCap } from 'lucide-react'
 
@@ -15,36 +14,11 @@ import type { DealCard as DealCardType } from '@/types/api'
  * sale price, so the card only has to lay them out; nothing here recalculates
  * a discount, which is what keeps it agreeing with the detail page it links to.
  */
-export function DealCard({
-  deal,
-  className,
-  onQualify,
-}: {
-  deal: DealCardType
-  className?: string
-  /** When set, clicking the card opens the test-qualification flow. The title
-   * stays a real link to the deal's detail page so the certification remains
-   * reachable (and crawlable) from the listing. */
-  onQualify?: () => void
-}) {
+export function DealCard({ deal, className }: { deal: DealCardType; className?: string }) {
   const isExam = deal.kind === 'certification'
 
   return (
-    <Card
-      interactive
-      className={cn('group relative flex h-full flex-col p-5', onQualify && 'cursor-pointer', className)}
-      {...(onQualify && {
-        role: 'button',
-        tabIndex: 0,
-        onClick: onQualify,
-        onKeyDown: (event: KeyboardEvent) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault()
-            onQualify()
-          }
-        },
-      })}
-    >
+    <Card interactive className={cn('group relative flex h-full flex-col p-5', className)}>
       <DiscountFlag percentage={deal.discount_percentage} align="right" />
 
       <div className="mb-4 flex items-start gap-2.5 pr-24">
@@ -75,16 +49,12 @@ export function DealCard({
       </div>
 
       <h3 className="text-base font-bold leading-snug text-ink-900">
-        {/* Without onQualify the link's ::after overlay makes the whole card the
-            link. With it, the card itself is the button, so the overlay is
-            dropped and the title link stops the click reaching the card. */}
+        {/* The title's ::after overlay makes the whole card the link. Any
+            further action on a deal is a sibling button outside the card, so
+            nothing interactive is ever nested inside this one. */}
         <Link
           to={deal.url}
-          onClick={onQualify ? (event) => event.stopPropagation() : undefined}
-          className={cn(
-            'relative transition group-hover:text-brand-700',
-            !onQualify && 'after:absolute after:inset-0',
-          )}
+          className="relative transition after:absolute after:inset-0 group-hover:text-brand-700"
         >
           {deal.title}
         </Link>
@@ -127,7 +97,7 @@ export function DealCard({
           <span />
         )}
         <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">
-          {onQualify ? 'Take the test' : isExam ? 'View deal' : 'View course'}
+          View details
           <ArrowRight
             className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
             aria-hidden="true"

@@ -6,6 +6,7 @@ import { Check, X } from 'lucide-react'
 import { z } from 'zod'
 
 import { AuthShell } from '@/pages/auth/AuthShell'
+import { GoogleSignIn } from '@/components/auth/GoogleSignIn'
 import { Button } from '@/components/ui/Button'
 import { Field, Input } from '@/components/ui/primitives'
 import { ApiError } from '@/api/client'
@@ -64,8 +65,8 @@ export default function RegisterPage() {
   async function onSubmit(values: RegisterForm) {
     setFormError(null)
     try {
-      const { email } = await registerUser(values)
-      navigate(`/verify-email?email=${encodeURIComponent(email)}`, { replace: true })
+      await registerUser(values)
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.status === 409) {
@@ -92,6 +93,16 @@ export default function RegisterPage() {
         </>
       }
     >
+      {/* Google has already verified the address, so an account created this
+          way skips the emailed code and lands straight on the dashboard. */}
+      <GoogleSignIn
+        text="signup_with"
+        onSuccess={(user) =>
+          navigate(user.role === 'admin' ? '/admin' : '/dashboard', { replace: true })
+        }
+        onError={setFormError}
+      />
+
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {formError && (
           <div

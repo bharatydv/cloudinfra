@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Mail, Plus, Trash2 } from 'lucide-react'
 
+import { ConfirmDelete } from '@/components/admin/ConfirmDelete'
 import { AdminPageHeader, DataTable, type Column } from '@/components/admin/DataTable'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
@@ -324,6 +325,7 @@ export function AdminPaymentsPage() {
 export function AdminMessagesPage() {
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<ContactMessage | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<ContactMessage | null>(null)
   const queryClient = useQueryClient()
   const toast = useToast()
 
@@ -352,6 +354,7 @@ export function AdminMessagesPage() {
     onSuccess: () => {
       toast.success('Message deleted.')
       setSelected(null)
+      setPendingDelete(null)
       invalidate()
     },
   })
@@ -410,7 +413,7 @@ export function AdminMessagesPage() {
             variant="ghost"
             size="sm"
             className="text-rose-600 hover:bg-rose-50"
-            onClick={() => remove.mutate(message.id)}
+            onClick={() => setPendingDelete(message)}
             aria-label={`Delete message from ${message.name}`}
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -436,6 +439,17 @@ export function AdminMessagesPage() {
         page={data?.page}
         totalPages={data?.total_pages}
         onPageChange={setPage}
+      />
+
+      <ConfirmDelete
+        open={Boolean(pendingDelete)}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={() => pendingDelete && remove.mutate(pendingDelete.id)}
+        loading={remove.isPending}
+        title="Delete this message?"
+        description="The enquiry and the sender's details go with it. This cannot be undone."
+        itemName={pendingDelete ? `${pendingDelete.subject} — ${pendingDelete.name}` : null}
+        confirmLabel="Delete message"
       />
 
       <Modal
@@ -475,6 +489,7 @@ export function AdminFaqsPage() {
   const queryClient = useQueryClient()
   const toast = useToast()
   const [open, setOpen] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState<Faq | null>(null)
   const [question, setQuestion] = useState('')
   const [answer, setAnswer] = useState('')
   const [category, setCategory] = useState('home')
@@ -506,6 +521,7 @@ export function AdminFaqsPage() {
     mutationFn: (id: string) => deleteFaq(id),
     onSuccess: () => {
       toast.success('FAQ deleted.')
+      setPendingDelete(null)
       invalidate()
     },
   })
@@ -541,7 +557,7 @@ export function AdminFaqsPage() {
           variant="ghost"
           size="sm"
           className="text-rose-600 hover:bg-rose-50"
-          onClick={() => remove.mutate(faq.id)}
+          onClick={() => setPendingDelete(faq)}
           aria-label={`Delete FAQ: ${faq.question}`}
         >
           <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -570,6 +586,17 @@ export function AdminFaqsPage() {
         isError={isError}
         onRetry={() => void refetch()}
         emptyTitle="No FAQs yet"
+      />
+
+      <ConfirmDelete
+        open={Boolean(pendingDelete)}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={() => pendingDelete && remove.mutate(pendingDelete.id)}
+        loading={remove.isPending}
+        title="Delete this FAQ?"
+        description="It disappears from every page in its scope. This cannot be undone."
+        itemName={pendingDelete?.question}
+        confirmLabel="Delete FAQ"
       />
 
       <Modal
@@ -633,6 +660,7 @@ export function AdminTestimonialsPage() {
   const queryClient = useQueryClient()
   const toast = useToast()
   const [open, setOpen] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState<Testimonial | null>(null)
   const [name, setName] = useState('')
   const [role, setRole] = useState('')
   const [content, setContent] = useState('')
@@ -673,6 +701,7 @@ export function AdminTestimonialsPage() {
     mutationFn: (id: string) => deleteTestimonial(id),
     onSuccess: () => {
       toast.success('Testimonial deleted.')
+      setPendingDelete(null)
       invalidate()
     },
   })
@@ -709,7 +738,7 @@ export function AdminTestimonialsPage() {
           variant="ghost"
           size="sm"
           className="text-rose-600 hover:bg-rose-50"
-          onClick={() => remove.mutate(item.id)}
+          onClick={() => setPendingDelete(item)}
           aria-label={`Delete testimonial from ${item.user_name}`}
         >
           <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -746,6 +775,17 @@ export function AdminTestimonialsPage() {
         isError={isError}
         onRetry={() => void refetch()}
         emptyTitle="No testimonials yet"
+      />
+
+      <ConfirmDelete
+        open={Boolean(pendingDelete)}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={() => pendingDelete && remove.mutate(pendingDelete.id)}
+        loading={remove.isPending}
+        title="Delete this testimonial?"
+        description="The quote is removed from the homepage. This cannot be undone."
+        itemName={pendingDelete?.user_name}
+        confirmLabel="Delete testimonial"
       />
 
       <Modal

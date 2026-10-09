@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Mail, Trash2 } from 'lucide-react'
 
+import { ConfirmDelete } from '@/components/admin/ConfirmDelete'
 import { AdminPageHeader, DataTable, type Column } from '@/components/admin/DataTable'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
@@ -65,6 +66,7 @@ export default function AdminExamBookingsPage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [selected, setSelected] = useState<ExamBooking | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<ExamBooking | null>(null)
   const [notes, setNotes] = useState('')
   const queryClient = useQueryClient()
   const toast = useToast()
@@ -111,6 +113,7 @@ export default function AdminExamBookingsPage() {
     onSuccess: () => {
       toast.success('Exam request deleted.')
       setSelected(null)
+      setPendingDelete(null)
       invalidate()
     },
     onError: () => toast.error('We could not delete that request.'),
@@ -197,7 +200,7 @@ export default function AdminExamBookingsPage() {
           variant="ghost"
           size="sm"
           className="text-rose-600 hover:bg-rose-50"
-          onClick={() => remove.mutate(booking.id)}
+          onClick={() => setPendingDelete(booking)}
           aria-label={`Delete request ${booking.reference_code}`}
         >
           <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -270,6 +273,21 @@ export default function AdminExamBookingsPage() {
         page={data?.page}
         totalPages={data?.total_pages}
         onPageChange={setPage}
+      />
+
+      <ConfirmDelete
+        open={Boolean(pendingDelete)}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={() => pendingDelete && remove.mutate(pendingDelete.id)}
+        loading={remove.isPending}
+        title="Delete this exam request?"
+        description="The applicant's details and notes go with it. This cannot be undone."
+        itemName={
+          pendingDelete
+            ? `${pendingDelete.reference_code} · ${pendingDelete.full_name}`
+            : null
+        }
+        confirmLabel="Delete request"
       />
 
       <Modal

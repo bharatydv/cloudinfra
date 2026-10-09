@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,7 +8,6 @@ import {
   CalendarCheck,
   CheckCircle2,
   Clock,
-  CreditCard,
   Home,
   ShieldCheck,
   Tag,
@@ -27,13 +26,8 @@ import { siteConfig } from '@/config/brand'
 import { useAuth } from '@/hooks/useAuth'
 import { useSeo } from '@/hooks/useSeo'
 import { useSite } from '@/hooks/useSite'
-import type { ExamCheckout as ExamCheckoutPayload } from '@/types/api'
 import { AnalyticsEvent, track } from '@/lib/analytics'
 import { queryKeys } from '@/lib/queryClient'
-import { openRazorpayCheckout, toMinorUnits } from '@/lib/razorpay'
-
-/** What the browser knows about the payment. Never authoritative. */
-type PaymentState = 'idle' | 'opening' | 'abandoned' | 'submitted' | 'unavailable'
 
 const TIME_SLOTS = [
   { value: 'morning', label: 'Morning (9am - 12pm)' },
@@ -127,9 +121,13 @@ export default function ScheduleExamPage() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { promotion, brand } = useSite()
-  // Tracks only what the browser can see about payment, never the truth of it.
-  const [paymentState, setPaymentState] = useState<PaymentState>('idle')
+  const { promotion } = useSite()
+  /**
+   * Payment is opened through the shared hook, so this page, a passed test's
+   * result screen and the dashboard all treat the provider the same way.
+   * `submitted` means the payer got through the form, never that the money has
+   * landed -- only the signed webhook decides that.
+   */
   // Carried in from a certification page so the exam is already chosen.
   const preselected = params.get('certification') ?? ''
 
@@ -252,44 +250,6 @@ export default function ScheduleExamPage() {
     })
   })
 
-  /**
-   * Opens the provider's modal. `paid` only records that the payer got
-   * through the form -- the booking is confirmed by the signed webhook, which
-   * is why the wording below never claims the money has landed.
-   */
-  const startCheckout = useCallback(
-    async (checkout: ExamCheckoutPayload) => {
-      if (!checkout.public_key || !checkout.order_id) {
-        setPaymentState('unavailable')
-        return
-      }
-      setPaymentState('opening')
-      const opened = await openRazorpayCheckout({
-        publicKey: checkout.public_key,
-        orderId: checkout.order_id,
-        amountMinor: toMinorUnits(checkout.amount, checkout.currency),
-        currency: checkout.currency,
-        name: brand.brandName,
-        description: checkout.description,
-        prefill: {
-          name: checkout.prefill_name,
-          email: checkout.prefill_email,
-          contact: checkout.prefill_contact,
-        },
-        onDismiss: () => setPaymentState('abandoned'),
-        onComplete: () => setPaymentState('submitted'),
-      })
-      if (!opened) setPaymentState('unavailable')
-    },
-    [brand.brandName],
-  )
-
-  // Take the payer straight to checkout rather than making them click again.
-  useEffect(() => {
-    const checkout = mutation.data?.checkout
-    if (checkout && paymentState === 'idle') void startCheckout(checkout)
-  }, [mutation.data, paymentState, startCheckout])
-
   /* ---------------------------------------------------------------------- */
   /* Confirmation                                                            */
   /* ---------------------------------------------------------------------- */
@@ -302,41 +262,8 @@ export default function ScheduleExamPage() {
             <span className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
               <CheckCircle2 className="h-7 w-7" aria-hidden="true" />
             </span>
-            <h1 className="mt-5 text-heading-lg text-ink-900">
-              {receipt.checkout && paymentState !== 'submitted'
-                ? 'Request saved'
-                : 'Request received'}
-            </h1>
-            <p className="mt-3 text-base leading-relaxed text-ink-600">
-              {paymentState === 'submitted'
-                ? 'Thanks — your payment is being confirmed. We will email you once it clears and your slot is booked.'
-                : receipt.message}
-            </p>
-
-            {/* Payment is optional to complete: the request is already saved,
-                so an abandoned checkout is a follow-up, not a lost lead. */}
-            {receipt.checkout && paymentState !== 'submitted' && (
-              <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-left">
-                <p className="text-sm font-semibold text-amber-900">
-                  {paymentState === 'unavailable'
-                    ? 'We could not open the payment window.'
-                    : 'Payment not completed yet.'}
-                </p>
-                <p className="mt-1 text-sm leading-relaxed text-amber-900/90">
-                  Your request is saved under {receipt.reference_code}. You can pay now to
-                  confirm the booking, or leave it with us and our team will follow up by
-                  email.
-                </p>
-                <Button
-                  className="mt-3"
-                  loading={paymentState === 'opening'}
-                  leadingIcon={<CreditCard className="h-4 w-4" aria-hidden="true" />}
-                  onClick={() => void startCheckout(receipt.checkout!)}
-                >
-                  Pay {formatPrice(receipt.checkout.amount, receipt.checkout.currency)}
-                </Button>
-              </div>
-            )}
+            <h1 className="mt-5 text-heading-lg text-ink-900">Request received</h1>
+            <p className="mt-3 text-base leading-relaxed text-ink-600">{receipt.message}</p>
 
             <dl className="mx-auto mt-6 max-w-sm space-y-2 rounded-xl border border-ink-200 bg-ink-50/60 p-4 text-sm">
               <div className="flex justify-between gap-4">
@@ -399,8 +326,31 @@ export default function ScheduleExamPage() {
 
       <Section className="py-14">
         <Container>
+          {/* On a phone the full breakdown sits below an eleven-field form, so
+              what you are about to pay is restated above it. */}
+          {selected?.pricing && (
+            <Card className="mb-6 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 p-4 lg:hidden">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-ink-900">{selected.name}</p>
+                <p className="text-xs text-ink-500">
+                  {selected.provider_name}
+                  {selected.exam_code ? ` · Exam ${selected.exam_code}` : ''}
+                </p>
+              </div>
+              <p className="text-lg font-extrabold tracking-tight text-brand-700">
+                {formatPrice(
+                  selected.pricing.total_price_amount,
+                  selected.pricing.currency,
+                )}
+              </p>
+            </Card>
+          )}
+
+          {/* `min-w-0` on both columns: a grid item defaults to a minimum of
+              its content, and the timezone select is as wide as the longest
+              IANA zone name, which widened the whole page on a phone. */}
           <div className="grid gap-10 lg:grid-cols-[1.5fr_1fr]">
-            <Card className="p-6 sm:p-8">
+            <Card className="min-w-0 p-6 sm:p-8">
               {optionsError ? (
                 <ErrorState
                   title="We could not load the certification list"
@@ -646,27 +596,26 @@ export default function ScheduleExamPage() {
                       />
                     </div>
 
-                    <div className="space-y-3 rounded-xl border border-brand-200 bg-brand-50/60 p-4">
-                      <p className="text-sm font-semibold text-ink-900">
-                        Want a discount before you pay?
-                      </p>
-                      <p className="text-sm leading-relaxed text-ink-700">
-                        Take our free {Number(challengeTerms?.reward_discount_min_percentage ?? 20)}%
-                        &ndash;{Number(challengeTerms?.reward_discount_max_percentage ?? 65)}%
-                        discount test on this exam right now. Score{' '}
-                        {Number(challengeTerms?.pass_mark ?? 70)}% or more and our team calls you
-                        within {challengeTerms?.response_hours ?? 24} hours to apply the discount
-                        and confirm this slot.
-                      </p>
+                    {/* The page exists to capture a booking, so submitting is
+                        the primary action. The discount test is the
+                        alternative, not the default. */}
+                    <div className="space-y-3">
                       <Button
-                        type="button"
+                        type="submit"
                         size="lg"
                         fullWidth
-                        onClick={() => void startTest()}
-                        leadingIcon={<BadgePercent className="h-4 w-4" aria-hidden="true" />}
+                        loading={isSubmitting || mutation.isPending}
+                        leadingIcon={<CalendarCheck className="h-4 w-4" aria-hidden="true" />}
                       >
-                        Take the test for a discount
+                        Request this exam slot
                       </Button>
+                      <p className="text-center text-xs leading-relaxed text-ink-500">
+                        We use these details only to arrange your exam. See our{' '}
+                        <Link to="/privacy" className="underline underline-offset-2 hover:text-ink-700">
+                          privacy policy
+                        </Link>
+                        .
+                      </p>
                     </div>
 
                     <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-ink-400">
@@ -675,22 +624,37 @@ export default function ScheduleExamPage() {
                       <span className="h-px flex-1 bg-ink-200" />
                     </div>
 
-                    <Button
-                      type="submit"
-                      size="lg"
-                      variant="outline"
-                      fullWidth
-                      loading={isSubmitting || mutation.isPending}
-                      leadingIcon={<CalendarCheck className="h-4 w-4" aria-hidden="true" />}
-                    >
-                      Submit request without testing
-                    </Button>
+                    <div className="space-y-3 rounded-xl border border-brand-200 bg-brand-50/60 p-4">
+                      <p className="text-sm font-semibold text-ink-900">
+                        Prefer a bigger discount?
+                      </p>
+                      <p className="text-sm leading-relaxed text-ink-700">
+                        Sit a {challengeTerms?.question_count ?? 50}-question test on this exam, in{' '}
+                        {challengeTerms?.duration_minutes ?? 90} minutes. Score{' '}
+                        {Number(challengeTerms?.pass_mark ?? 70)}% or more and our team calls you
+                        within {challengeTerms?.response_hours ?? 24} hours with{' '}
+                        {Number(challengeTerms?.reward_discount_min_percentage ?? 20)}&ndash;
+                        {Number(challengeTerms?.reward_discount_max_percentage ?? 65)}% off, and
+                        confirms this slot.
+                      </p>
+                      <Button
+                        type="button"
+                        size="lg"
+                        variant="outline"
+                        fullWidth
+                        onClick={() => void startTest()}
+                        leadingIcon={<BadgePercent className="h-4 w-4" aria-hidden="true" />}
+                      >
+                        Take the test for up to{' '}
+                        {Number(challengeTerms?.reward_discount_max_percentage ?? 65)}% off
+                      </Button>
+                    </div>
                   </form>
                 </>
               )}
             </Card>
 
-            <aside className="space-y-6">
+            <aside className="min-w-0 space-y-6">
               {selected && (
                 <Card className="p-6">
                   <h2 className="text-sm font-bold uppercase tracking-wider text-ink-500">

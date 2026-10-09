@@ -34,6 +34,7 @@ from app.schemas.auth import (
     VerifyEmailRequest,
 )
 from app.services import email as email_service
+from app.services import google_oauth
 
 
 def _issue_tokens_payload(user: User) -> tuple[str, str]:
@@ -82,7 +83,16 @@ async def _send_verification_code(db: AsyncSession, user: User) -> None:
     await email_service.send_email(user.email, subject, body)
 
 
-async def register(db: AsyncSession, payload: RegisterRequest) -> User:
+async def register(
+    db: AsyncSession, payload: RegisterRequest, user_agent: str | None = None
+) -> tuple[User, TokenPair]:
+    """Create a student account and sign it straight in.
+
+    Sign-up no longer emails a code to type back: nothing in the product
+    depends on the address having been proven, so the step was friction with
+    little to show for it. The address is taken on trust here; Google sign-in
+    is the one path that actually proves one.
+    """
     email = payload.email.strip().lower()
     if await user_repo.email_exists(db, email):
         raise ConflictError("An account with that email already exists.")
@@ -93,13 +103,19 @@ async def register(db: AsyncSession, payload: RegisterRequest) -> User:
         phone=payload.phone,
         password_hash=hash_password(payload.password),
         role=UserRole.STUDENT.value,
+        is_email_verified=True,
     )
     db.add(user)
     await db.flush()
+
+    user.last_login_at = datetime.now(UTC)
+    tokens = await issue_token_pair(db, user, user_agent)
+    await db.commit()
     await db.refresh(user)
 
-    await _send_verification_code(db, user)
-    return user
+    subject, body = email_service.welcome_email(user.name)
+    await email_service.send_email(user.email, subject, body)
+    return user, tokens
 
 
 async def verify_email(
@@ -140,8 +156,13 @@ async def login(
     db: AsyncSession, payload: LoginRequest, user_agent: str | None = None
 ) -> tuple[User, TokenPair]:
     user = await user_repo.get_by_email(db, payload.email)
-    # Constant-ish response regardless of which half failed.
-    if user is None or not verify_password(payload.password, user.password_hash):
+    # Constant-ish response regardless of which half failed. A Google-only
+    # account has no hash, so no password can ever match it.
+    if (
+        user is None
+        or user.password_hash is None
+        or not verify_password(payload.password, user.password_hash)
+    ):
         raise AuthenticationError("Incorrect email or password.")
     if not user.is_active:
         raise AuthenticationError("This account has been deactivated.")
@@ -155,6 +176,63 @@ async def login(
     tokens = await issue_token_pair(db, user, user_agent)
     await db.commit()
     await db.refresh(user)
+    return user, tokens
+
+
+async def login_with_google(
+    db: AsyncSession, credential: str, user_agent: str | None = None
+) -> tuple[User, TokenPair]:
+    """Sign in with a verified Google ID token, creating the account if needed.
+
+    One path covers both halves of the flow, because the browser cannot tell us
+    which it is: Google returns the same credential whether the person has an
+    account here or not.
+    """
+    identity = await google_oauth.verify_id_token(credential)
+
+    # Match on the Google subject first -- it survives a Google-side email
+    # change, which the address does not.
+    user = await user_repo.get_by_google_sub(db, identity.sub)
+    if user is None:
+        user = await user_repo.get_by_email(db, identity.email)
+
+    created = user is None
+    if user is None:
+        # Google has already proved the address, so there is no code to email
+        # and no password to set. Phone is left blank: the profile page is
+        # where it gets filled in, and blocking sign-up on it would defeat the
+        # point of a one-click sign-in.
+        user = User(
+            name=identity.name,
+            email=identity.email,
+            phone="",
+            password_hash=None,
+            google_sub=identity.sub,
+            role=UserRole.STUDENT.value,
+            is_email_verified=True,
+            profile_image=identity.picture,
+        )
+        db.add(user)
+        await db.flush()
+    else:
+        if not user.is_active:
+            raise AuthenticationError("This account has been deactivated.")
+        # Linking an existing account to the Google profile on first use is
+        # safe because the address came back verified by Google itself.
+        if user.google_sub is None:
+            user.google_sub = identity.sub
+        user.is_email_verified = True
+        if not user.profile_image and identity.picture:
+            user.profile_image = identity.picture
+
+    user.last_login_at = datetime.now(UTC)
+    tokens = await issue_token_pair(db, user, user_agent)
+    await db.commit()
+    await db.refresh(user)
+
+    if created:
+        subject, body = email_service.welcome_email(user.name)
+        await email_service.send_email(user.email, subject, body)
     return user, tokens
 
 
@@ -232,6 +310,11 @@ async def reset_password(db: AsyncSession, payload: ResetPasswordRequest) -> Non
 async def change_password(
     db: AsyncSession, user: User, payload: ChangePasswordRequest
 ) -> None:
+    if user.password_hash is None:
+        raise ValidationFailedError(
+            "This account signs in with Google. Use the forgot-password link to "
+            "set a password for it."
+        )
     if not verify_password(payload.current_password, user.password_hash):
         raise ValidationFailedError("Your current password is incorrect.")
     user.password_hash = hash_password(payload.new_password)

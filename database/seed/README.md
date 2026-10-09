@@ -6,7 +6,8 @@ Demo content for local development, loaded by `backend/app/seed/run.py`.
 | --- | --- |
 | `taxonomy.json` | Course categories, resource categories, tags |
 | `certifications.json` | Providers, certifications, exam topics, roadmaps, study resources |
-| `courses.json` | Courses with modules and lesson content |
+| `courses.json` | Single-file courses. **Currently empty** — the catalogue is the two courses under `courses/` |
+| `courses/<slug>/` | One directory per course: `course.json` plus `module-NN.json` files |
 | `articles.json` | Long-form resource-hub articles |
 | `site.json` | FAQs, testimonials, site settings (brand, contact, about, legal) |
 

@@ -36,8 +36,11 @@ export function TrustSection({ categories }: { categories: CourseCategory[] }) {
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {categories.slice(0, 6).map((category) => (
             <li key={category.id}>
+              {/* These are *course* categories, so they filter the course
+                  catalogue. Pushing their names through certification search
+                  matched nothing: the two taxonomies are different sets. */}
               <Link
-                to={`/certifications?q=${encodeURIComponent(category.name)}`}
+                to={`/courses?category=${encodeURIComponent(category.slug)}`}
                 className="group flex h-full flex-col items-center gap-3 rounded-xl border border-ink-200 bg-white p-5 text-center transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card"
               >
                 <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition group-hover:bg-brand-100">
@@ -90,7 +93,8 @@ export function LearningPathSection({
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-brand-500/15 text-brand-300">
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </span>
-                  <span className="text-xs font-bold tracking-widest text-ink-500">
+                  {/* ink-300, not ink-500: 12px bold on ink-950 needs 4.5:1. */}
+                  <span className="text-xs font-bold tracking-widest text-ink-300">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                 </div>

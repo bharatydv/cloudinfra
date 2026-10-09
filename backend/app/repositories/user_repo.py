@@ -18,6 +18,10 @@ async def get_by_email(db: AsyncSession, email: str) -> User | None:
     return await db.scalar(select(User).where(func.lower(User.email) == email.strip().lower()))
 
 
+async def get_by_google_sub(db: AsyncSession, google_sub: str) -> User | None:
+    return await db.scalar(select(User).where(User.google_sub == google_sub))
+
+
 async def email_exists(db: AsyncSession, email: str) -> bool:
     return await get_by_email(db, email) is not None
 

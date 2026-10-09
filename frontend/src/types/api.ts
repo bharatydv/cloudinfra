@@ -86,8 +86,18 @@ export interface User {
   bio: string | null
   is_active: boolean
   is_email_verified: boolean
+  /** False for an account that only signs in with Google: it has no password. */
+  has_password: boolean
   created_at: string
   last_login_at: string | null
+}
+
+/** Which third-party sign-ins the API has configured. */
+export interface AuthProviders {
+  google: {
+    enabled: boolean
+    client_id: string | null
+  }
 }
 
 export interface TokenPair {
@@ -644,13 +654,71 @@ export interface ExamCheckout {
   description: string
 }
 
+/**
+ * What a coupon code unlocks.
+ *
+ * A code carries no rate of its own, so there is no percentage here: it
+ * unlocks the price the catalogue already advertises, which is the same price
+ * a passed challenge paper unlocks. `amount_payable` is
+ * `pricing.total_price_amount`, repeated so no caller has to pick.
+ */
+export interface ExamCouponQuote {
+  code: string
+  certification_id: string
+  certification_name: string
+  pricing: ExamPricing
+  amount_payable: string
+  can_pay: boolean
+}
+
+/**
+ * What a code can do right now. Decided by the server from the same rules the
+ * redeem endpoint applies, so the admin badge cannot disagree with the site.
+ */
+export type ExamCouponStatus = 'live' | 'scheduled' | 'expired' | 'spent' | 'off'
+
+/** One coupon, as the admin table lists it. */
+export interface ExamCouponRow {
+  id: string
+  code: string
+  description: string | null
+  /** Who the batch was handed to. A label for attribution, not an account. */
+  owner_name: string | null
+  owner_email: string | null
+  certification_id: string | null
+  certification_name: string | null
+  is_active: boolean
+  starts_at: string | null
+  expires_at: string | null
+  max_redemptions: number | null
+  redemption_count: number
+  status: ExamCouponStatus
+  created_at: string
+}
+
+/** Staff-side create and update body. */
+export interface ExamCouponWrite {
+  code: string
+  description?: string | null
+  owner_name?: string | null
+  owner_email?: string | null
+  certification_id?: string | null
+  is_active: boolean
+  starts_at?: string | null
+  expires_at?: string | null
+  max_redemptions?: number | null
+}
+
+/**
+ * Confirmation of a scheduling request. Carries no checkout, deliberately:
+ * the form is open to everyone, so the discounted fee is not on sale there —
+ * it is unlocked by a passed challenge paper or a coupon code.
+ */
 export interface ExamBookingReceipt {
   message: string
   reference_code: string
   certification_name: string
   certification_url: string | null
-  /** Null when the exam is unpriced or payments are switched off. */
-  checkout: ExamCheckout | null
 }
 
 /** Minimal certification record used to populate the scheduling form. */
@@ -829,6 +897,8 @@ export interface ChallengeReviewItem {
 }
 
 export interface ChallengeResult {
+  /** Paired with the session token, this is what authorises paying for the exam. */
+  attempt_id: string
   reference_code: string
   certification_name: string
   exam_code: string | null
@@ -846,7 +916,36 @@ export interface ChallengeResult {
   message: string
   pricing: ExamPricing | null
   rewarded_price: string | null
+  payment_status: string
+  /** True when the discounted fee can actually be charged right now. */
+  can_pay: boolean
+  /** When another sitting is allowed; null means one is allowed now. */
+  retake_available_on: string | null
   review: ChallengeReviewItem[]
+}
+
+/** One of the signed-in learner's own sittings, and what it earned. */
+export interface ChallengeAttemptSummary {
+  id: string
+  reference_code: string
+  certification_id: string | null
+  certification_name: string
+  exam_code: string | null
+  certification_url: string | null
+  status: string
+  question_count: number
+  correct_count: number
+  score_percentage: string | null
+  pass_mark: string | null
+  passed: boolean | null
+  discount_percentage: string | null
+  pricing: ExamPricing | null
+  rewarded_price: string | null
+  payment_status: string
+  can_pay: boolean
+  retake_available_on: string | null
+  submitted_at: string | null
+  created_at: string
 }
 
 export interface ChallengeAttempt {
@@ -868,6 +967,7 @@ export interface ChallengeAttempt {
   pass_mark: string | null
   passed: boolean | null
   discount_percentage: string | null
+  payment_status: string
   warnings: number
   auto_submitted: boolean
   lead_status: ChallengeLeadStatus

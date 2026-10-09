@@ -2,13 +2,27 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, date, datetime
-from decimal import Decimal
 
 from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 from app.models.enums import ExamBookingStatus, ExamDeliveryMode
 from app.schemas.certification import ExamPricing
 from app.schemas.common import ORMModel
+
+# Lives with the other payment shapes: exam bookings and challenge attempts
+# both pay through it. Re-exported here because this module is where the
+# scheduling flow's callers already look for it.
+from app.schemas.system import ExamCheckout
+
+__all__ = [
+    "CertificationOption",
+    "ExamBookingCreate",
+    "ExamBookingReceipt",
+    "ExamBookingRead",
+    "ExamBookingUpdate",
+    "ExamCheckout",
+    "TIME_SLOTS",
+]
 
 # Kept short and fixed so the admin console can group requests by slot rather
 # than parsing free text.
@@ -88,29 +102,6 @@ class ExamBookingUpdate(BaseModel):
     admin_notes: str | None = Field(default=None, max_length=2000)
 
 
-class ExamCheckout(BaseModel):
-    """Everything the browser needs to open the provider's checkout.
-
-    Deliberately no secret: the key id is public by design and the order id is
-    useless without it. Whether the payment actually succeeded is decided by
-    the signed webhook, never by what the browser reports back.
-    """
-
-    provider: str
-    payment_id: uuid.UUID
-    amount: Decimal
-    currency: str
-    # Razorpay order id. Other providers may use a redirect instead.
-    order_id: str | None = None
-    checkout_url: str | None = None
-    public_key: str | None = None
-    # Prefilled into the provider's form so the payer does not retype them.
-    prefill_name: str
-    prefill_email: str
-    prefill_contact: str
-    description: str
-
-
 class ExamBookingReceipt(BaseModel):
     """What the confirmation screen needs to route the applicant onwards."""
 
@@ -120,9 +111,6 @@ class ExamBookingReceipt(BaseModel):
     # Deep link back to the certification the request was made against, so the
     # success screen can offer it without a second round trip.
     certification_url: str | None = None
-    # None when the exam has no price or payments are switched off; the request
-    # is then recorded and the team follows up, exactly as before.
-    checkout: ExamCheckout | None = None
 
 
 class CertificationOption(BaseModel):

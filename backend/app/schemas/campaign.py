@@ -224,6 +224,10 @@ class ChallengeReviewItem(BaseModel):
 
 
 class ChallengeResult(BaseModel):
+    # The sitting this result belongs to. Paired with the session token it is
+    # what lets a signed-out candidate pay for the exam they just earned a
+    # discount on, without an account.
+    attempt_id: uuid.UUID
     reference_code: str
     certification_name: str
     exam_code: str | None = None
@@ -242,7 +246,57 @@ class ChallengeResult(BaseModel):
     # What the reward is worth against this exam's quoted fee, when it is priced.
     pricing: ExamPricing | None = None
     rewarded_price: Decimal | None = None
+    # Where the exam fee stands: "unpaid" until a checkout is opened, and only
+    # the signed provider webhook ever moves it to "successful".
+    payment_status: str = "unpaid"
+    # True when there is a discounted fee that can be paid right now. False for
+    # a failed paper, an unpriced exam, or one already paid for.
+    can_pay: bool = False
+    # When another sitting is allowed, or None when one is allowed now. The
+    # retake button reads this instead of adding the cooldown up itself.
+    retake_available_on: date | None = None
     review: list[ChallengeReviewItem] = []
+
+
+class ChallengeAttemptSummary(BaseModel):
+    """One of the signed-in learner's own sittings.
+
+    Everything the dashboard, a certification page and a deal card need to say
+    what happened and what to do next. No question ids and no answers: this is
+    the outcome, not the paper.
+    """
+
+    id: uuid.UUID
+    reference_code: str
+    certification_id: uuid.UUID | None = None
+    certification_name: str
+    exam_code: str | None = None
+    # Deep link to the certification, when it still exists.
+    certification_url: str | None = None
+    status: str
+    question_count: int
+    correct_count: int
+    score_percentage: Decimal | None = None
+    pass_mark: Decimal | None = None
+    passed: bool | None = None
+    discount_percentage: Decimal | None = None
+    pricing: ExamPricing | None = None
+    rewarded_price: Decimal | None = None
+    payment_status: str = "unpaid"
+    can_pay: bool = False
+    retake_available_on: date | None = None
+    submitted_at: datetime | None = None
+    created_at: datetime
+
+
+class ChallengeCheckoutRequest(BaseModel):
+    """Open checkout for the exam a passed sitting earned a discount on.
+
+    The token is how a signed-out candidate proves the sitting is theirs; a
+    signed-in owner needs none, because the account already proves it.
+    """
+
+    token: str | None = Field(default=None, min_length=10, max_length=128)
 
 
 # --- Admin -------------------------------------------------------------------
@@ -267,6 +321,7 @@ class ChallengeAttemptRead(ORMModel):
     pass_mark: Decimal | None = None
     passed: bool | None = None
     discount_percentage: Decimal | None = None
+    payment_status: str = "unpaid"
     warnings: int
     auto_submitted: bool
     lead_status: ChallengeLeadStatus

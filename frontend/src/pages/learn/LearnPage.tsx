@@ -137,10 +137,12 @@ export default function LearnPage() {
 
       <div className="flex flex-1">
         {/* Curriculum sidebar */}
+        {/* Hidden rather than merely translated away, so the curriculum is not
+            a long run of invisible links in the tab order on a phone. */}
         <aside
           className={cn(
-            'fixed inset-y-14 left-0 z-20 w-80 overflow-y-auto border-r border-ink-200 bg-ink-50 transition-transform lg:static lg:inset-auto lg:translate-x-0',
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+            'fixed inset-y-14 left-0 z-20 w-80 overflow-y-auto border-r border-ink-200 bg-ink-50 transition-[transform,visibility] lg:static lg:inset-auto lg:visible lg:translate-x-0',
+            sidebarOpen ? 'visible translate-x-0' : 'invisible -translate-x-full',
           )}
         >
           <nav aria-label="Course contents" className="p-4">

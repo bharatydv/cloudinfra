@@ -36,11 +36,9 @@ async def submit_exam_booking(
     Open to signed-out visitors; a signed-in request is linked to the account so
     the admin console can group requests by learner.
 
-    When the exam is priced and a payment provider is configured, the receipt
-    carries a checkout the browser can open. The booking is saved either way --
-    payment confirms it, it does not create it.
+    Takes no money. The discounted fee is payable only by someone who earned
+    it -- through a passed challenge paper or a coupon code -- and this form
+    is open to everyone, so a request is a lead the team follows up on.
     """
-    booking, url, checkout = await scheduling_service.submit(
-        db, payload, user=user, source_ip=ip
-    )
-    return scheduling_service.build_receipt(booking, url, checkout)
+    booking, url = await scheduling_service.submit(db, payload, user=user, source_ip=ip)
+    return scheduling_service.build_receipt(booking, url)

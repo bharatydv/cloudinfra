@@ -26,7 +26,7 @@ import secrets
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from random import SystemRandom
 
@@ -35,17 +35,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.config import settings
-from app.core.errors import NotFoundError, ValidationFailedError
+from app.core.errors import ConflictError, NotFoundError, ValidationFailedError
 from app.models.campaign import ChallengeAttempt, ChallengeQuestion
 from app.models.certification import Certification, CertificationProvider
+from app.models.commerce import Payment
 from app.models.enums import (
     ChallengeAttemptStatus,
     ChallengeLeadStatus,
     ChallengeViolationKind,
+    PaymentStatus,
 )
 from app.models.user import User
 from app.repositories import campaign_repo, misc_repo
 from app.schemas.campaign import (
+    ChallengeAttemptSummary,
     ChallengeCertificationOption,
     ChallengeIntro,
     ChallengeOptionPublic,
@@ -58,8 +61,10 @@ from app.schemas.campaign import (
     ChallengeTerms,
     ChallengeWarningReceipt,
 )
+from app.schemas.certification import ExamPricing
+from app.schemas.system import ExamCheckout
 from app.services import email as email_service
-from app.services import pricing, verification_service
+from app.services import payment_service, pricing, verification_service
 
 logger = logging.getLogger(__name__)
 
@@ -660,28 +665,14 @@ async def _build_result(
             )
         )
 
-    quote = None
-    rewarded_price = None
-    if attempt.certification_id:
-        certification = await db.scalar(
-            select(Certification).where(Certification.id == attempt.certification_id)
-        )
-        if certification is not None:
-            price_config = await pricing.load_config(db)
-            quote = pricing.compute(
-                exam_fee_amount=certification.exam_fee_amount,
-                currency=certification.exam_fee_currency,
-                fee_checked_on=certification.exam_fee_checked_on,
-                discount_override=certification.discount_percentage,
-                config=price_config,
-            )
-    if quote is not None and attempt.discount_percentage:
-        # Quoted against the price the visitor is already shown, so the reward
-        # reads as a further saving rather than a different set of numbers.
-        reward = quote.total_price_amount * attempt.discount_percentage / 100
-        rewarded_price = (quote.total_price_amount - reward).quantize(
-            _CENTS, rounding=ROUND_HALF_UP
-        )
+    certifications = await _certifications_by_id(
+        db, [attempt.certification_id] if attempt.certification_id else []
+    )
+    quote, rewarded_price = _price_for(
+        _pick(certifications, attempt.certification_id),
+        attempt.discount_percentage,
+        await pricing.load_config(db),
+    )
 
     score = attempt.score_percentage or Decimal("0.00")
     passed = bool(attempt.passed)
@@ -720,6 +711,7 @@ async def _build_result(
         )
 
     return ChallengeResult(
+        attempt_id=attempt.id,
         reference_code=attempt.reference_code,
         certification_name=attempt.certification_name,
         exam_code=attempt.exam_code,
@@ -737,6 +729,9 @@ async def _build_result(
         message=message,
         pricing=quote,
         rewarded_price=rewarded_price,
+        payment_status=attempt.payment_status,
+        can_pay=_can_pay(attempt, rewarded_price),
+        retake_available_on=_retake_available_on(attempt.submitted_at, config),
         review=review,
     )
 
@@ -803,6 +798,300 @@ async def _send_result_emails(
         logger.exception(
             "Could not notify sales about challenge lead %s", attempt.reference_code
         )
+
+
+# --- What a passed paper is worth, and paying for it --------------------------
+async def _certifications_by_id(
+    db: AsyncSession, ids: list[uuid.UUID | None]
+) -> dict[uuid.UUID, Certification]:
+    """The certifications behind a set of attempts, in one query.
+
+    Batched because the dashboard lists every sitting a learner has ever made,
+    and a price per row would otherwise be a query per row.
+    """
+    wanted = [value for value in ids if value is not None]
+    if not wanted:
+        return {}
+    rows = await db.scalars(
+        select(Certification)
+        .options(selectinload(Certification.provider))
+        .where(Certification.id.in_(wanted))
+    )
+    return {row.id: row for row in rows}
+
+
+def _price_for(
+    certification: Certification | None,
+    discount: Decimal | None,
+    price_config: pricing.PricingConfig,
+) -> tuple[ExamPricing | None, Decimal | None]:
+    """The exam's usual quote, and what this attempt unlocks.
+
+    Discounts do not stack. The catalogue price and a passed paper are two
+    routes to the same saving, so the better of the two percentages is applied
+    once, to the provider's fee -- never a second cut off a price that was
+    discounted already. A sitting therefore never costs more than the price the
+    card advertises, and a perfect paper against a fully discounted exam lands
+    on exactly that price.
+
+    Both halves are None for an exam nobody has priced.
+    """
+    if certification is None:
+        return None, None
+    quote = pricing.compute(
+        exam_fee_amount=certification.exam_fee_amount,
+        currency=certification.exam_fee_currency,
+        fee_checked_on=certification.exam_fee_checked_on,
+        discount_override=certification.discount_percentage,
+        config=price_config,
+    )
+    if quote is None or not discount:
+        return quote, None
+    if discount <= quote.discount_percentage:
+        return quote, quote.total_price_amount
+    unlocked = pricing.compute(
+        exam_fee_amount=certification.exam_fee_amount,
+        currency=certification.exam_fee_currency,
+        fee_checked_on=certification.exam_fee_checked_on,
+        discount_override=discount,
+        config=price_config,
+    )
+    return quote, unlocked.total_price_amount if unlocked else None
+
+
+def _can_pay(attempt: ChallengeAttempt, rewarded_price: Decimal | None) -> bool:
+    """Whether a "pay now" button could actually charge anything.
+
+    A failed paper earned no discount, an unpriced exam has no amount, and the
+    noop provider cannot take money -- in all three cases the surfaces say the
+    team will follow up instead of offering a button that goes nowhere. A
+    pending payment stays payable: an abandoned checkout is reopened, not lost.
+    """
+    return bool(
+        attempt.passed
+        and rewarded_price is not None
+        and rewarded_price > 0
+        and attempt.payment_status != PaymentStatus.SUCCESSFUL.value
+        and payment_service.payments_enabled()
+    )
+
+
+def _retake_available_on(
+    last_submitted: datetime | None, config: ChallengeConfig
+) -> date | None:
+    """The date another sitting is allowed, or None when one is allowed now.
+
+    Mirrors `_guard_retake`, so a retake button can never promise a paper the
+    start endpoint will refuse.
+    """
+    if last_submitted is None or config.retake_after_days <= 0:
+        return None
+    if last_submitted.tzinfo is None:
+        last_submitted = last_submitted.replace(tzinfo=UTC)
+    due = last_submitted + timedelta(days=config.retake_after_days)
+    return due.date() if due > datetime.now(UTC) else None
+
+
+def _pick(
+    certifications: dict[uuid.UUID, Certification], certification_id: uuid.UUID | None
+) -> Certification | None:
+    """The certification an attempt points at, if it still exists.
+
+    A sitting keeps its `certification_name` snapshot when the certification is
+    deleted, so the id can be NULL and the lookup can miss.
+    """
+    return certifications.get(certification_id) if certification_id else None
+
+
+def _certification_url(certification: Certification | None) -> str | None:
+    if certification is None:
+        return None
+    return f"/certifications/{certification.provider.slug}/{certification.slug}"
+
+
+async def list_my_attempts(
+    db: AsyncSession, user: User
+) -> list[ChallengeAttemptSummary]:
+    """Every sitting this learner has made, newest first.
+
+    Matched on the account *and* on its email address: the test is open to
+    signed-out visitors, so a paper sat before registering -- or from a phone
+    while signed out -- still belongs to the person who sat it.
+    """
+    rows = await campaign_repo.attempts_for_user(
+        db, user_id=user.id, email=user.email.strip().lower()
+    )
+    config = await load_config(db)
+    price_config = await pricing.load_config(db)
+    certifications = await _certifications_by_id(
+        db, [row.certification_id for row in rows]
+    )
+
+    # The cooldown runs from the latest submission on an address, not from the
+    # row being rendered, so every sitting quotes the same unlock date.
+    latest: dict[str, datetime] = {}
+    for row in rows:
+        if row.submitted_at is None:
+            continue
+        current = latest.get(row.email)
+        if current is None or row.submitted_at > current:
+            latest[row.email] = row.submitted_at
+
+    summaries: list[ChallengeAttemptSummary] = []
+    for row in rows:
+        certification = _pick(certifications, row.certification_id)
+        quote, rewarded = _price_for(
+            certification, row.discount_percentage, price_config
+        )
+        summaries.append(
+            ChallengeAttemptSummary(
+                id=row.id,
+                reference_code=row.reference_code,
+                certification_id=row.certification_id,
+                certification_name=row.certification_name,
+                exam_code=row.exam_code,
+                certification_url=_certification_url(certification),
+                status=row.status,
+                question_count=row.question_count,
+                correct_count=row.correct_count,
+                score_percentage=row.score_percentage,
+                pass_mark=row.pass_mark,
+                passed=row.passed,
+                discount_percentage=row.discount_percentage,
+                pricing=quote,
+                rewarded_price=rewarded,
+                payment_status=row.payment_status,
+                can_pay=_can_pay(row, rewarded),
+                retake_available_on=_retake_available_on(latest.get(row.email), config),
+                submitted_at=row.submitted_at,
+                created_at=row.created_at,
+            )
+        )
+    return summaries
+
+
+def _authorise_owner(
+    attempt: ChallengeAttempt, *, token: str | None, user: User | None
+) -> None:
+    """Prove the sitting belongs to whoever is asking.
+
+    Two ways in, because the test has two kinds of candidate: the one-time
+    session token for a guest, and the account for a learner who was signed in
+    -- or who has since registered with the address that sat the paper.
+
+    The failure is the same `NotFoundError` the rest of the module raises, so a
+    wrong id and a wrong token stay indistinguishable.
+    """
+    if token and secrets.compare_digest(attempt.token_hash, _hash_token(token)):
+        return
+    if user is not None and (
+        user.is_admin
+        or attempt.user_id == user.id
+        or attempt.email == user.email.strip().lower()
+    ):
+        return
+    raise NotFoundError("That test session could not be found.")
+
+
+async def start_checkout(
+    db: AsyncSession,
+    attempt_id: uuid.UUID,
+    *,
+    token: str | None = None,
+    user: User | None = None,
+) -> ExamCheckout:
+    """Open checkout for the exam fee at the discount this sitting earned.
+
+    The amount is recomputed here from the certification, the live pricing rules
+    and the discount snapshotted onto the attempt. Nothing about the price comes
+    from the request, so a candidate cannot name their own.
+
+    Paying does not confirm anything by itself: as everywhere else, only the
+    signed provider webhook moves the payment -- and this attempt's
+    `payment_status` -- to successful.
+    """
+    attempt = await campaign_repo.get_attempt(db, attempt_id)
+    if attempt is None:
+        raise NotFoundError("That test session could not be found.")
+    _authorise_owner(attempt, token=token, user=user)
+
+    if not attempt.passed:
+        raise ValidationFailedError(
+            "This test did not earn a discount, so there is nothing to pay for."
+        )
+    if attempt.payment_status == PaymentStatus.SUCCESSFUL.value:
+        raise ConflictError("This exam fee has already been paid.")
+
+    certifications = await _certifications_by_id(db, [attempt.certification_id])
+    certification = _pick(certifications, attempt.certification_id)
+    quote, rewarded = _price_for(
+        certification, attempt.discount_percentage, await pricing.load_config(db)
+    )
+    if quote is None or rewarded is None or rewarded <= 0:
+        raise ValidationFailedError(
+            "This exam does not have a published fee yet, so it cannot be paid "
+            "for online. Our team will confirm the price with you."
+        )
+
+    description = (
+        f"{attempt.certification_name} exam at "
+        f"{_plain(attempt.discount_percentage or Decimal(0))}% challenge discount "
+        f"({attempt.reference_code})"
+    )
+
+    # An abandoned checkout is reopened rather than re-ordered: the provider's
+    # order is still good for the same amount, and minting a new one per click
+    # litters the provider's dashboard with orders nobody paid.
+    existing = await db.scalar(
+        select(Payment)
+        .where(
+            Payment.challenge_attempt_id == attempt.id,
+            Payment.status == PaymentStatus.PENDING.value,
+            Payment.amount == rewarded,
+            Payment.currency == quote.currency,
+            Payment.payment_provider == settings.payment_provider,
+            Payment.provider_reference.is_not(None),
+        )
+        .order_by(Payment.created_at.desc())
+        .limit(1)
+    )
+    if existing is not None:
+        return ExamCheckout(
+            provider=existing.payment_provider,
+            payment_id=existing.id,
+            # `Payment.amount` is a Numeric column the model types as float;
+            # re-reading it through str keeps the quoted figure exact.
+            amount=Decimal(str(existing.amount)),
+            currency=existing.currency,
+            order_id=existing.provider_reference,
+            public_key=settings.payment_provider_key,
+            prefill_name=attempt.full_name,
+            prefill_email=attempt.email,
+            prefill_contact=attempt.phone,
+            description=description,
+        )
+
+    started = await payment_service.start_exam_checkout(
+        db,
+        amount=rewarded,
+        currency=quote.currency,
+        description=description,
+        payer_name=attempt.full_name,
+        payer_email=attempt.email,
+        payer_phone=attempt.phone,
+        user_id=attempt.user_id,
+        challenge_attempt_id=attempt.id,
+        # This endpoint exists only to pay, so a provider outage is an error the
+        # candidate can see and retry -- not the silent no-op it is on the
+        # scheduling form, where saving the lead was what mattered.
+        raise_on_failure=True,
+    )
+    if started is None:  # pragma: no cover -- raise_on_failure leaves no other path
+        raise ValidationFailedError("We could not open the payment window.")
+    _, checkout = started
+    attempt.payment_status = PaymentStatus.PENDING.value
+    await db.commit()
+    return checkout
 
 
 # --- Admin -------------------------------------------------------------------

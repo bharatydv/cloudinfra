@@ -131,7 +131,12 @@ export function ErrorState({
 
 export function InlineSpinner({ label = 'Loading' }: { label?: string }) {
   return (
-    <div className="flex items-center justify-center gap-3 py-10 text-sm text-ink-500">
+    // Announced, so route and session loading is not silent on a screen reader.
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex items-center justify-center gap-3 py-10 text-sm text-ink-500"
+    >
       <span
         className="h-4 w-4 animate-spin rounded-full border-2 border-ink-300 border-t-brand-600"
         aria-hidden="true"

@@ -93,6 +93,7 @@ const AdminEnrollmentsPage = lazyImport(() =>
 )
 const AdminExamBookingsPage = lazyImport(() => import('@/pages/admin/AdminExamBookingsPage'))
 const AdminChallengePage = lazyImport(() => import('@/pages/admin/AdminChallengePage'))
+const AdminExamCouponsPage = lazyImport(() => import('@/pages/admin/AdminExamCouponsPage'))
 const AdminPaymentsPage = lazyImport(() =>
   import('@/pages/admin/AdminOpsPages').then((m) => ({ default: m.AdminPaymentsPage })),
 )
@@ -203,6 +204,7 @@ export default function App() {
               <Route path="enrollments" element={<AdminEnrollmentsPage />} />
               <Route path="exam-bookings" element={<AdminExamBookingsPage />} />
               <Route path="challenge-leads" element={<AdminChallengePage />} />
+              <Route path="exam-coupons" element={<AdminExamCouponsPage />} />
               <Route path="payments" element={<AdminPaymentsPage />} />
               <Route path="messages" element={<AdminMessagesPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />

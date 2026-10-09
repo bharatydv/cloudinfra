@@ -7,6 +7,7 @@ from app.api.v1.routers import (
     certifications,
     challenge,
     contact,
+    coupons,
     courses,
     deals,
     learning,
@@ -32,6 +33,7 @@ api_router.include_router(contact.router)
 api_router.include_router(payments.router)
 api_router.include_router(scheduling.router)
 api_router.include_router(challenge.router)
+api_router.include_router(coupons.router)
 api_router.include_router(site.router)
 api_router.include_router(admin.router)
 

@@ -4,13 +4,15 @@ from app.core.config import settings
 from app.core.deps import CurrentUser, DbSession
 from app.core.rate_limit import limiter
 from app.schemas.auth import (
+    AuthProviders,
     AuthResponse,
     ChangePasswordRequest,
     ForgotPasswordRequest,
+    GoogleAuthRequest,
+    GoogleProviderConfig,
     LoginRequest,
     RefreshRequest,
     RegisterRequest,
-    RegisterResponse,
     ResendVerificationRequest,
     ResetPasswordRequest,
     TokenPair,
@@ -27,19 +29,17 @@ def _agent(request: Request) -> str | None:
     return request.headers.get("user-agent")
 
 
-@router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit(settings.rate_limit_auth)
-async def register(request: Request, payload: RegisterRequest, db: DbSession) -> RegisterResponse:
-    """Create a student account and email it a verification code.
+async def register(request: Request, payload: RegisterRequest, db: DbSession) -> AuthResponse:
+    """Create a student account and return a session for it.
 
-    No tokens are issued yet -- the account cannot sign in until the code is
-    confirmed through /auth/verify-email.
+    Sign-up confirms nothing by email: the account is usable immediately.
+    /auth/verify-email and /auth/resend-verification remain for accounts
+    created under the older flow that never had their code entered.
     """
-    user = await auth_service.register(db, payload)
-    return RegisterResponse(
-        email=user.email,
-        message="We sent a 6-digit code to your email. Enter it to finish creating your account.",
-    )
+    user, tokens = await auth_service.register(db, payload, _agent(request))
+    return AuthResponse(user=UserRead.model_validate(user), tokens=tokens)
 
 
 @router.post("/verify-email", response_model=AuthResponse)
@@ -64,6 +64,38 @@ async def resend_verification(
 @limiter.limit(settings.rate_limit_auth)
 async def login(request: Request, payload: LoginRequest, db: DbSession) -> AuthResponse:
     user, tokens = await auth_service.login(db, payload, _agent(request))
+    return AuthResponse(user=UserRead.model_validate(user), tokens=tokens)
+
+
+@router.get("/providers", response_model=AuthProviders)
+async def providers() -> AuthProviders:
+    """Which third-party sign-ins this deployment has configured.
+
+    Served rather than baked into the frontend bundle, so switching Google
+    sign-in on is an environment change and not a rebuild.
+    """
+    return AuthProviders(
+        google=GoogleProviderConfig(
+            enabled=settings.google_sign_in_enabled,
+            client_id=settings.google_client_id,
+        )
+    )
+
+
+@router.post("/google", response_model=AuthResponse)
+@limiter.limit(settings.rate_limit_auth)
+async def google_sign_in(
+    request: Request, payload: GoogleAuthRequest, db: DbSession
+) -> AuthResponse:
+    """Sign in, or sign up, with a Google ID token from the browser.
+
+    Both halves share this endpoint: an address Google has verified either
+    matches an account or creates one, and either way a token pair comes back
+    exactly as it does from /auth/login.
+    """
+    user, tokens = await auth_service.login_with_google(
+        db, payload.credential, _agent(request)
+    )
     return AuthResponse(user=UserRead.model_validate(user), tokens=tokens)
 
 

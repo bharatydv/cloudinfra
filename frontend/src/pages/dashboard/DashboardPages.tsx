@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -12,10 +12,12 @@ import {
   GraduationCap,
   Target,
   TrendingUp,
+  Trophy,
 } from 'lucide-react'
 import { z } from 'zod'
 
 import { CertificationCard } from '@/components/cards/CertificationCard'
+import { AttemptOutcome } from '@/components/challenge/AttemptOutcome'
 import { CourseCard } from '@/components/cards/CourseCard'
 import { ResourceCard, StatsCard } from '@/components/cards/misc'
 import { Button, ButtonLink } from '@/components/ui/Button'
@@ -41,9 +43,11 @@ import {
 } from '@/api/endpoints'
 import { ApiError } from '@/api/client'
 import { useAuth } from '@/hooks/useAuth'
+import { useMyChallengeAttempts } from '@/hooks/useMyChallengeAttempts'
 import { useToast } from '@/hooks/useToast'
 import { formatDate } from '@/lib/format'
 import { queryKeys } from '@/lib/queryClient'
+import { cn } from '@/lib/cn'
 
 /* -------------------------------------------------------------------------- */
 /* Overview                                                                   */
@@ -280,7 +284,7 @@ export function ProgressPage() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Saved certifications                                                       */
+/* Certifications: the tests sat, and the ones saved for later                 */
 /* -------------------------------------------------------------------------- */
 export function SavedCertificationsPage() {
   const queryClient = useQueryClient()
@@ -290,6 +294,15 @@ export function SavedCertificationsPage() {
     queryKey: queryKeys.savedCertifications,
     queryFn: getSavedCertifications,
   })
+
+  /**
+   * Every discount test this learner has sat. A pass carries the discounted
+   * exam fee and a way to pay it; a fail carries the score and when it can be
+   * sat again. Papers sat before registering are included, matched on the
+   * account's email address.
+   */
+  const { attempts, isLoading: attemptsLoading } = useMyChallengeAttempts()
+  const graded = attempts.filter((attempt) => attempt.passed !== null)
 
   const remove = useMutation({
     mutationFn: (id: string) => unsaveCertification(id),
@@ -301,30 +314,76 @@ export function SavedCertificationsPage() {
     onError: () => toast.error('We could not remove that certification.'),
   })
 
-  if (isError) return <ErrorState onRetry={() => void refetch()} />
-  if (isLoading) return <CardGridSkeleton count={3} />
-
-  if (!data || data.length === 0) {
-    return (
-      <EmptyState
-        icon={<Bookmark className="h-6 w-6" aria-hidden="true" />}
-        title="No saved certifications"
-        description="Save a certification while browsing and it will be waiting here."
-        action={<ButtonLink to="/certifications">Explore certifications</ButtonLink>}
-      />
-    )
-  }
-
   return (
-    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-      {data.map((saved) => (
-        <CertificationCard
-          key={saved.id}
-          certification={saved.certification}
-          onToggleSave={(certification) => remove.mutate(certification.id)}
-          saving={remove.isPending}
-        />
-      ))}
+    <div className="space-y-10">
+      <section aria-labelledby="my-tests">
+        <div className="mb-4">
+          <h2 id="my-tests" className="text-base font-bold text-ink-900">
+            Certification tests
+          </h2>
+          <p className="mt-1 text-sm text-ink-600">
+            Tests you have sat, what each one earned, and what is left to do.
+          </p>
+        </div>
+
+        {attemptsLoading ? (
+          <ListSkeleton rows={2} />
+        ) : graded.length === 0 ? (
+          <EmptyState
+            icon={<Trophy className="h-6 w-6" aria-hidden="true" />}
+            title="No tests sat yet"
+            description="Pass a certification test and the discount it earns — and the exam fee to pay — appear here."
+            action={<ButtonLink to="/challenge">Take a test</ButtonLink>}
+          />
+        ) : (
+          <ul className="space-y-4">
+            {graded.map((attempt) => (
+              <li key={attempt.id}>
+                <AttemptOutcome
+                  attempt={attempt}
+                  showCertification
+                  retakeTo="/challenge"
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section aria-labelledby="saved-certifications">
+        <div className="mb-4">
+          <h2 id="saved-certifications" className="text-base font-bold text-ink-900">
+            Saved certifications
+          </h2>
+          <p className="mt-1 text-sm text-ink-600">
+            Exams you bookmarked while browsing.
+          </p>
+        </div>
+
+        {isError ? (
+          <ErrorState onRetry={() => void refetch()} />
+        ) : isLoading ? (
+          <CardGridSkeleton count={3} />
+        ) : !data || data.length === 0 ? (
+          <EmptyState
+            icon={<Bookmark className="h-6 w-6" aria-hidden="true" />}
+            title="No saved certifications"
+            description="Save a certification while browsing and it will be waiting here."
+            action={<ButtonLink to="/certifications">Explore certifications</ButtonLink>}
+          />
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {data.map((saved) => (
+              <CertificationCard
+                key={saved.id}
+                certification={saved.certification}
+                onToggleSave={(certification) => remove.mutate(certification.id)}
+                saving={remove.isPending}
+              />
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   )
 }
@@ -373,10 +432,31 @@ export function PracticePage() {
 /* Certificates                                                               */
 /* -------------------------------------------------------------------------- */
 export function CertificatesPage() {
+  /**
+   * Which certificate is being printed.
+   *
+   * `window.print()` on its own printed the whole dashboard -- navigation,
+   * rail, every card. The id narrows the page to one certificate through the
+   * `print:` variants below, and is cleared once the dialog closes.
+   */
+  const [printing, setPrinting] = useState<string | null>(null)
+
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.certificates,
     queryFn: getMyCertificates,
   })
+
+  useEffect(() => {
+    if (!printing) return
+    const clear = () => setPrinting(null)
+    window.addEventListener('afterprint', clear)
+    // A frame for the print-only classes to apply before the dialog opens.
+    const timer = window.setTimeout(() => window.print(), 50)
+    return () => {
+      window.removeEventListener('afterprint', clear)
+      window.clearTimeout(timer)
+    }
+  }, [printing])
 
   if (isError) return <ErrorState onRetry={() => void refetch()} />
   if (isLoading) return <ListSkeleton rows={2} />
@@ -394,7 +474,7 @@ export function CertificatesPage() {
 
   return (
     <div className="space-y-6">
-      <Card className="p-5">
+      <Card className="p-5 print:hidden">
         <p className="text-sm text-ink-600">
           These certificates record what you completed on this platform. They are{' '}
           <strong className="font-semibold text-ink-900">not</strong> vendor certifications, which
@@ -404,8 +484,11 @@ export function CertificatesPage() {
 
       <ul className="grid gap-4 sm:grid-cols-2">
         {data.map((certificate) => (
-          <li key={certificate.id}>
-            <Card className="p-6">
+          <li
+            key={certificate.id}
+            className={cn(printing && printing !== certificate.id && 'print:hidden')}
+          >
+            <Card className="p-6 print:border-0 print:shadow-none">
               <div className="flex items-start gap-4">
                 <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
                   <GraduationCap className="h-6 w-6" aria-hidden="true" />
@@ -420,11 +503,14 @@ export function CertificatesPage() {
                   <p className="mt-2 font-mono text-xs text-ink-600">{certificate.serial}</p>
                 </div>
               </div>
+              <p className="mt-4 hidden text-xs leading-relaxed text-ink-500 print:block">
+                A completion certificate from this platform. It is not a vendor certification.
+              </p>
               <Button
                 variant="outline"
                 size="sm"
-                className="mt-5"
-                onClick={() => window.print()}
+                className="mt-5 print:hidden"
+                onClick={() => setPrinting(certificate.id)}
                 leadingIcon={<Download className="h-4 w-4" aria-hidden="true" />}
               >
                 Save as PDF
@@ -473,6 +559,9 @@ export function ProfilePage() {
   })
 
   const passwordForm = useForm<PasswordForm>({ resolver: zodResolver(passwordSchema) })
+  // A Google-only account has no password to change: the reset flow is how it
+  // gets one in the first place.
+  const hasPassword = user?.has_password !== false
 
   const saveProfile = useMutation({
     mutationFn: (values: ProfileForm) => updateProfile(values),
@@ -537,58 +626,70 @@ export function ProfilePage() {
       </Card>
 
       <Card className="p-6">
-        <h2 className="text-base font-bold text-ink-900">Change password</h2>
+        <h2 className="text-base font-bold text-ink-900">
+          {hasPassword ? 'Change password' : 'Set a password'}
+        </h2>
         <p className="mt-1 text-sm text-ink-600">
-          Changing your password signs you out of every device.
+          {hasPassword
+            ? 'Changing your password signs you out of every device.'
+            : 'You sign in with Google. A password is an optional second way in.'}
         </p>
 
-        <form
-          noValidate
-          onSubmit={passwordForm.handleSubmit((values) => {
-            setPasswordError(null)
-            savePassword.mutate(values)
-          })}
-          className="mt-6 space-y-5"
-        >
-          {passwordError && (
-            <div
-              role="alert"
-              className="rounded-lg border border-rose-200 bg-rose-50 p-3.5 text-sm text-rose-900"
-            >
-              {passwordError}
-            </div>
-          )}
+        {!hasPassword && (
+          <ButtonLink to="/forgot-password" variant="secondary" className="mt-6">
+            Email me a link to set one
+          </ButtonLink>
+        )}
 
-          <Field
-            label="Current password"
-            htmlFor="current-password"
-            required
-            error={passwordForm.formState.errors.current_password?.message}
+        {hasPassword && (
+          <form
+            noValidate
+            onSubmit={passwordForm.handleSubmit((values) => {
+              setPasswordError(null)
+              savePassword.mutate(values)
+            })}
+            className="mt-6 space-y-5"
           >
-            <Input
-              id="current-password"
-              type="password"
-              autoComplete="current-password"
-              {...passwordForm.register('current_password')}
-            />
-          </Field>
-          <Field
-            label="New password"
-            htmlFor="new-password"
-            required
-            error={passwordForm.formState.errors.new_password?.message}
-          >
-            <Input
-              id="new-password"
-              type="password"
-              autoComplete="new-password"
-              {...passwordForm.register('new_password')}
-            />
-          </Field>
-          <Button type="submit" variant="secondary" loading={savePassword.isPending}>
-            Update password
-          </Button>
-        </form>
+            {passwordError && (
+              <div
+                role="alert"
+                className="rounded-lg border border-rose-200 bg-rose-50 p-3.5 text-sm text-rose-900"
+              >
+                {passwordError}
+              </div>
+            )}
+
+            <Field
+              label="Current password"
+              htmlFor="current-password"
+              required
+              error={passwordForm.formState.errors.current_password?.message}
+            >
+              <Input
+                id="current-password"
+                type="password"
+                autoComplete="current-password"
+                {...passwordForm.register('current_password')}
+              />
+            </Field>
+            <Field
+              label="New password"
+              htmlFor="new-password"
+              required
+              error={passwordForm.formState.errors.new_password?.message}
+            >
+              <Input
+                id="new-password"
+                type="password"
+                autoComplete="new-password"
+                {...passwordForm.register('new_password')}
+              />
+            </Field>
+            <Button type="submit" variant="secondary" loading={savePassword.isPending}>
+              Update password
+            </Button>
+          </form>
+        )}
       </Card>
     </div>
   )

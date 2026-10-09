@@ -274,6 +274,24 @@ if [ -n "${SMS_AUTH_TOKEN:-}" ]; then
   SMS_SECRET_REF="          - name: SMS_AUTH_TOKEN
             secretRef: sms-auth-token"
 fi
+# Payments. The provider key id is public by design -- it identifies the
+# merchant in the browser's checkout and authorises nothing -- so it rides as a
+# plain env var; the API secret and the webhook secret do not. Without all
+# three the app keeps its noop provider and simply never offers to charge.
+PAYMENT_SECRET="" PAYMENT_SECRET_REF=""
+if [ -n "${PAYMENT_PROVIDER_SECRET:-}" ]; then
+  PAYMENT_SECRET="      - name: payment-provider-secret
+        value: \"${PAYMENT_PROVIDER_SECRET}\""
+  PAYMENT_SECRET_REF="          - name: PAYMENT_PROVIDER_SECRET
+            secretRef: payment-provider-secret"
+fi
+PAYMENT_WEBHOOK_SECRET_BLOCK="" PAYMENT_WEBHOOK_SECRET_REF=""
+if [ -n "${PAYMENT_WEBHOOK_SECRET:-}" ]; then
+  PAYMENT_WEBHOOK_SECRET_BLOCK="      - name: payment-webhook-secret
+        value: \"${PAYMENT_WEBHOOK_SECRET}\""
+  PAYMENT_WEBHOOK_SECRET_REF="          - name: PAYMENT_WEBHOOK_SECRET
+            secretRef: payment-webhook-secret"
+fi
 
 cat > "$SPEC" <<YAML
 location: ${LOCATION}
@@ -298,6 +316,8 @@ properties:
         value: "${ACR_PASSWORD}"
 ${SMTP_SECRET}
 ${SMS_SECRET}
+${PAYMENT_SECRET}
+${PAYMENT_WEBHOOK_SECRET_BLOCK}
     registries:
       - server: ${ACR_SERVER}
         username: ${ACR_USER}
@@ -338,6 +358,11 @@ ${SMS_SECRET}
             value: /api
           - name: RATE_LIMIT_ENABLED
             value: "true"
+          # Public by design -- it identifies the site to Google, it does not
+          # authorise anything, so it is an env var and not a secret. Empty
+          # switches the Google sign-in button off.
+          - name: GOOGLE_CLIENT_ID
+            value: "${GOOGLE_CLIENT_ID:-}"
           - name: EMAIL_PROVIDER
             value: "${EMAIL_PROVIDER:-console}"
           - name: EMAIL_FROM_ADDRESS
@@ -372,6 +397,10 @@ ${SMS_SECRET_REF}
             value: "${PAYMENT_PROVIDER:-noop}"
           - name: PAYMENT_CURRENCY
             value: "${PAYMENT_CURRENCY:-USD}"
+          - name: PAYMENT_PROVIDER_KEY
+            value: "${PAYMENT_PROVIDER_KEY:-}"
+${PAYMENT_SECRET_REF}
+${PAYMENT_WEBHOOK_SECRET_REF}
           - name: STORAGE_PROVIDER
             value: local
         volumeMounts:

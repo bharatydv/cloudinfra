@@ -9,7 +9,7 @@ from app.models.certification import (
     CertificationResource,
     course_certifications,
 )
-from app.models.commerce import Payment
+from app.models.commerce import ExamCoupon, Payment
 from app.models.content import (
     Article,
     ArticleCategory,
@@ -49,6 +49,7 @@ __all__ = [
     "CourseReview",
     "Enrollment",
     "ExamBooking",
+    "ExamCoupon",
     "Faq",
     "Lesson",
     "LessonProgress",

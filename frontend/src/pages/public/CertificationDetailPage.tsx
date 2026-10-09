@@ -13,10 +13,13 @@ import {
 } from 'lucide-react'
 
 import { CertificationCard } from '@/components/cards/CertificationCard'
+import { AttemptOutcome } from '@/components/challenge/AttemptOutcome'
+import { ChallengeStartModal } from '@/components/challenge/ChallengeStartForm'
 import { ExamOfferCard } from '@/components/cards/ExamOfferCard'
 import { ExamPriceComparison } from '@/components/cards/ExamPrice'
 import { CourseCard } from '@/components/cards/CourseCard'
 import { ResourceCard } from '@/components/cards/misc'
+import { UnlockExamCard } from '@/components/certifications/UnlockExamCard'
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
 import { CTASection } from '@/components/marketing/sections'
 import { ScheduleExamLink } from '@/components/scheduling/ScheduleExamCta'
@@ -29,6 +32,10 @@ import { DetailSkeleton, ErrorState } from '@/components/ui/states'
 import { getCertification, saveCertification, unsaveCertification } from '@/api/endpoints'
 import { siteConfig } from '@/config/brand'
 import { useAuth } from '@/hooks/useAuth'
+import {
+  latestAttemptFor,
+  useMyChallengeAttempts,
+} from '@/hooks/useMyChallengeAttempts'
 import { useServerSeo } from '@/hooks/useSeo'
 import { useToast } from '@/hooks/useToast'
 import { AnalyticsEvent, track } from '@/lib/analytics'
@@ -45,6 +52,8 @@ export default function CertificationDetailPage() {
   const { isAuthenticated } = useAuth()
   const toast = useToast()
   const [openResource, setOpenResource] = useState<CertificationResource | null>(null)
+  // Open while the learner is re-sitting the discount test for this exam.
+  const [retaking, setRetaking] = useState(false)
   // Watched so the sticky bar appears only once the offer scrolls away.
   const offerRef = useRef<HTMLDivElement>(null)
 
@@ -53,6 +62,15 @@ export default function CertificationDetailPage() {
     queryFn: () => getCertification(provider, slug),
     enabled: Boolean(provider && slug),
   })
+
+  /**
+   * The learner's own discount test for this exam, when they have sat one.
+   * A pass puts the discounted fee next to the usual price; a fail puts the
+   * score and the date another sitting is allowed there instead.
+   */
+  const { attempts } = useMyChallengeAttempts()
+  const attempt = latestAttemptFor(attempts, data?.id)
+  const gradedAttempt = attempt && attempt.passed !== null ? attempt : null
 
   useServerSeo(data?.seo, data?.name ?? 'Certification')
 
@@ -153,23 +171,27 @@ export default function CertificationDetailPage() {
               <div className="mt-6 flex flex-wrap gap-3">
                 {/* The exam is known here, so the form opens already filled in. */}
                 <ScheduleExamLink certificationId={data.id} cta="cert_detail_schedule" />
+                {/* Only when there is a roadmap to scroll to: the button used
+                    to render regardless and silently do nothing. */}
+                {data.preparation_roadmap.length > 0 && (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white/40 bg-transparent text-white hover:bg-white/10"
+                    onClick={() => {
+                      document
+                        .getElementById('roadmap')
+                        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      track(AnalyticsEvent.CtaClicked, { properties: { cta: 'start_preparing' } })
+                    }}
+                  >
+                    See the preparation roadmap
+                  </Button>
+                )}
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-white/25 bg-transparent text-white hover:bg-white/10"
-                  onClick={() => {
-                    document
-                      .getElementById('roadmap')
-                      ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                    track(AnalyticsEvent.CtaClicked, { properties: { cta: 'start_preparing' } })
-                  }}
-                >
-                  Start Preparing
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/25 bg-transparent text-white hover:bg-white/10"
+                  className="border-white/40 bg-transparent text-white hover:bg-white/10"
                   loading={toggleSave.isPending}
                   onClick={() => {
                     if (!isAuthenticated) {
@@ -194,8 +216,27 @@ export default function CertificationDetailPage() {
             </div>
 
             <div ref={offerRef} className="h-fit space-y-5">
+              {/* Above the usual price, because it changes what that price is. */}
+              {gradedAttempt && (
+                <AttemptOutcome
+                  attempt={gradedAttempt}
+                  onRetake={() => setRetaking(true)}
+                />
+              )}
+
               {data.pricing && (
                 <ExamOfferCard pricing={data.pricing} certificationId={data.id} />
+              )}
+
+              {/* Both routes to the discounted fee, in one place. Hidden once
+                  a graded paper is on the page: that card already offers the
+                  price, and a second way in would only ask the same question
+                  twice. */}
+              {data.pricing && !gradedAttempt && (
+                <UnlockExamCard
+                  certificationId={data.id}
+                  onStartTest={() => setRetaking(true)}
+                />
               )}
 
               <Card className="p-6">
@@ -432,16 +473,23 @@ export default function CertificationDetailPage() {
                   <Route className="h-4 w-4" aria-hidden="true" />
                   On this page
                 </h2>
+                {/* Built from the sections this certification actually has:
+                    every entry was listed before, so half of them scrolled
+                    nowhere on a page without a roadmap or resources. */}
                 <ul className="mt-4 space-y-2 text-sm">
-                  {[
-                    ['overview', 'Overview'],
-                    ['audience', 'Who it is for'],
-                    ['skills', 'Skills covered'],
-                    ['topics', 'Exam topics'],
-                    ['roadmap', 'Preparation roadmap'],
-                    ['resources', 'Study resources'],
-                    ['practice', 'Practice resources'],
-                  ].map(([id, label]) => (
+                  {(
+                    [
+                      ['overview', 'Overview', Boolean(data.description)],
+                      ['audience', 'Who it is for', Boolean(data.audience)],
+                      ['skills', 'Skills covered', data.skills.length > 0],
+                      ['topics', 'Exam topics', data.exam_topics.length > 0],
+                      ['roadmap', 'Preparation roadmap', data.preparation_roadmap.length > 0],
+                      ['resources', 'Study resources', data.resources.length > 0],
+                      ['practice', 'Practice resources', data.practice_resources.length > 0],
+                    ] as const
+                  )
+                    .filter(([, , present]) => present)
+                    .map(([id, label]) => (
                     <li key={id}>
                       <a
                         href={`#${id}`}
@@ -492,6 +540,19 @@ export default function CertificationDetailPage() {
         description="Work the roadmap, use the practice resources, then tell us when you want to sit it."
         primary={{ label: 'Schedule this exam', to: scheduleExamPath(data.id) }}
         secondary={{ label: 'Explore Deals', to: '/deals' }}
+      />
+
+      {/* Rules in a popup; the paper itself opens on its own page so the
+          proctoring has a clean window to watch. */}
+      <ChallengeStartModal
+        open={retaking}
+        certificationId={data.id}
+        onClose={() => setRetaking(false)}
+        onStarted={(session, startedCertificationId) =>
+          navigate('/challenge', {
+            state: { session, certificationId: startedCertificationId },
+          })
+        }
       />
 
       <StickyExamCta

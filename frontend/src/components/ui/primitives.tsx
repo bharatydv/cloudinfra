@@ -1,8 +1,11 @@
 import {
+  cloneElement,
   forwardRef,
+  isValidElement,
   type HTMLAttributes,
   type InputHTMLAttributes,
   type LabelHTMLAttributes,
+  type ReactElement,
   type ReactNode,
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
@@ -242,17 +245,38 @@ export function Field({
     .filter(Boolean)
     .join(' ')
 
+  /**
+   * `aria-describedby` has to land on the control itself. On a wrapper it
+   * describes the wrapper, and neither the hint nor the error is announced --
+   * which is every form in the product. Cloning the single child keeps every
+   * caller's markup unchanged; anything else (a relative wrapper for a
+   * password toggle, say) keeps the attribute on its container, where it is
+   * still better than nothing.
+   */
+  const described =
+    describedBy && isValidElement(children)
+      ? cloneElement(children as ReactElement<{ 'aria-describedby'?: string }>, {
+          'aria-describedby':
+            [(children.props as { 'aria-describedby'?: string })['aria-describedby'], describedBy]
+              .filter(Boolean)
+              .join(' ') || undefined,
+        })
+      : children
+
   return (
     <div className="space-y-1.5">
       <Label htmlFor={htmlFor}>
         {label}
         {required && (
-          <span className="ml-1 text-rose-600" aria-hidden="true">
-            *
-          </span>
+          <>
+            <span className="ml-1 text-rose-600" aria-hidden="true">
+              *
+            </span>
+            <span className="sr-only"> (required)</span>
+          </>
         )}
       </Label>
-      <div aria-describedby={describedBy || undefined}>{children}</div>
+      {described}
       {hint && !error && (
         <p id={`${htmlFor}-hint`} className="text-xs text-ink-500">
           {hint}

@@ -5,6 +5,7 @@ import {
   Award,
   BookOpen,
   BookMarked,
+  Search,
   CalendarRange,
   CheckCircle2,
   ChevronDown,
@@ -47,6 +48,7 @@ export default function CourseDetailPage() {
   const { isAuthenticated } = useAuth()
   const toast = useToast()
   const [openModules, setOpenModules] = useState<string[]>([])
+  const [lessonQuery, setLessonQuery] = useState('')
 
   const { data: course, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.course(slug),
@@ -103,6 +105,27 @@ export default function CourseDetailPage() {
     { name: course.title, url: `/courses/${course.slug}` },
   ]
 
+  // Searching a 352-lesson curriculum beats scrolling it. Matching modules are
+  // force-opened while a query is active, so a hit is never hidden behind a
+  // collapsed accordion.
+  const query = lessonQuery.trim().toLowerCase()
+  const moduleMatches = (module: (typeof course.modules)[number]) =>
+    !query ||
+    module.title.toLowerCase().includes(query) ||
+    module.lessons.some((lesson) => lesson.title.toLowerCase().includes(query))
+  const lessonMatches = (title: string) =>
+    !query || title.toLowerCase().includes(query)
+
+  const visibleModules = course.modules.filter(moduleMatches)
+  const matchCount = query
+    ? course.modules.reduce(
+        (total, module) =>
+          total + module.lessons.filter((lesson) => lessonMatches(lesson.title)).length,
+        0,
+      )
+    : 0
+  const allOpen = openModules.length === course.modules.length
+
   // A reference pack is a module whose lessons are every one of them free. A
   // module with a few preview lessons among locked ones is a teaching module
   // with tasters, and belongs in the curriculum rather than here.
@@ -121,7 +144,7 @@ export default function CourseDetailPage() {
   }
 
   const enrollLabel = !isAuthenticated
-    ? 'Log in to Enroll'
+    ? 'Log in to enroll'
     : course.is_enrolled
       ? 'Continue learning'
       : course.is_free
@@ -312,9 +335,65 @@ export default function CourseDetailPage() {
                   {formatDuration(course.duration_minutes)}
                 </p>
 
+                {/* Finding one lesson among hundreds by scrolling is miserable,
+                    so the curriculum gets a filter and a bulk toggle. Both are
+                    hidden on short courses, where they would be clutter. */}
+                {course.lesson_count > 40 && (
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <div className="relative min-w-0 flex-1 sm:max-w-xs">
+                      <Search
+                        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400"
+                        aria-hidden="true"
+                      />
+                      <input
+                        type="search"
+                        value={lessonQuery}
+                        onChange={(event) => setLessonQuery(event.target.value)}
+                        placeholder="Find a lesson"
+                        aria-label="Find a lesson in this course"
+                        className="w-full rounded-lg border border-ink-200 bg-white py-2 pl-9 pr-3 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                      />
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setOpenModules(allOpen ? [] : course.modules.map((item) => item.id))
+                      }
+                    >
+                      {allOpen ? 'Collapse all' : 'Expand all'}
+                    </Button>
+                    {query && (
+                      <p className="text-sm text-ink-600" role="status">
+                        {matchCount === 0
+                          ? 'No lessons match'
+                          : `${pluralize(matchCount, 'lesson')} in ${pluralize(
+                              visibleModules.length,
+                              'module',
+                            )}`}
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 <div className="mt-5 divide-y divide-ink-200 overflow-hidden rounded-xl border border-ink-200 bg-white">
-                  {course.modules.map((module) => {
-                    const isOpen = openModules.includes(module.id)
+                  {visibleModules.length === 0 && (
+                    <p className="px-5 py-8 text-center text-sm text-ink-600">
+                      Nothing matches &ldquo;{lessonQuery}&rdquo;.
+                    </p>
+                  )}
+                  {visibleModules.map((module) => {
+                    // A query forces matching modules open, so a hit is never
+                    // hidden behind a collapsed accordion.
+                    const isOpen = query ? true : openModules.includes(module.id)
+                    const moduleMinutes = module.lessons.reduce(
+                      (total, lesson) => total + lesson.duration_minutes,
+                      0,
+                    )
+                    const freeCount = module.lessons.filter((lesson) => lesson.is_preview).length
+                    const shownLessons = module.lessons.filter((lesson) =>
+                      lessonMatches(lesson.title),
+                    )
                     return (
                       <div key={module.id}>
                         <h3>
@@ -331,6 +410,13 @@ export default function CourseDetailPage() {
                               </span>
                               <span className="mt-0.5 block text-xs text-ink-500">
                                 {pluralize(module.lessons.length, 'lesson')}
+                                {moduleMinutes > 0 && ` · ${formatDuration(moduleMinutes)}`}
+                                {freeCount > 0 && !course.is_enrolled && (
+                                  <span className="text-brand-700">
+                                    {' '}
+                                    · {freeCount} free
+                                  </span>
+                                )}
                               </span>
                             </span>
                             <ChevronDown
@@ -342,8 +428,9 @@ export default function CourseDetailPage() {
                             />
                           </button>
                         </h3>
-                        <ul id={`module-${module.id}`} hidden={!isOpen} className="pb-2">
-                          {module.lessons.map((lesson) => {
+                        {isOpen && (
+                        <ul id={`module-${module.id}`} className="pb-2">
+                          {shownLessons.map((lesson) => {
                             // An enrolled learner opens the lesson itself; a
                             // visitor can open only the lessons marked as a
                             // preview. Everything else is plain text, because a
@@ -391,6 +478,7 @@ export default function CourseDetailPage() {
                             )
                           })}
                         </ul>
+                        )}
                       </div>
                     )
                   })}

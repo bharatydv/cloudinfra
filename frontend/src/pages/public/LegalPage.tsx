@@ -43,11 +43,17 @@ const PAGES: Record<string, { key: LegalKey; title: string; description: string 
  */
 export default function LegalPage() {
   const { pathname } = useLocation()
-  const { legal, brand } = useSite()
+  const { legal, brand, contact } = useSite()
 
   const page = PAGES[pathname] ?? PAGES['/disclaimer']!
   const body = legal[page.key] ?? ''
   const lastUpdated = legal.lastUpdated
+  /**
+   * The configured contact address first: `brand.supportEmail` falls back to a
+   * placeholder when nobody has set it, and a placeholder address on a privacy
+   * policy is worse than none.
+   */
+  const supportEmail = contact.email ?? brand.supportEmail
 
   useSeo({ title: page.title, description: page.description })
 
@@ -79,8 +85,8 @@ export default function LegalPage() {
               </div>
             ) : (
               <p className="text-sm text-ink-600">
-                This policy has not been published yet. An administrator can add it under
-                Settings.
+                This policy is being updated. Email {supportEmail} in the meantime and we will
+                send you the current version.
               </p>
             )}
 
@@ -93,7 +99,14 @@ export default function LegalPage() {
             )}
 
             <p className="mt-8 border-t border-ink-200 pt-6 text-sm text-ink-600">
-              Questions about this policy? Contact {brand.supportEmail}.
+              Questions about this policy? Email{' '}
+              <a
+                href={`mailto:${supportEmail}`}
+                className="font-medium text-brand-700 underline underline-offset-2"
+              >
+                {supportEmail}
+              </a>
+              .
             </p>
           </Card>
         </Container>

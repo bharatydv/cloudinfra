@@ -14,6 +14,7 @@ import {
   MessageSquareQuote,
   Settings,
   Building2,
+  Ticket,
   Trophy,
   Users,
   X,
@@ -52,6 +53,7 @@ const SECTIONS = [
       { to: '/admin/enrollments', label: 'Enrollments', icon: BookOpen },
       { to: '/admin/exam-bookings', label: 'Exam requests', icon: CalendarCheck },
       { to: '/admin/challenge-leads', label: 'Challenge leads', icon: Trophy },
+      { to: '/admin/exam-coupons', label: 'Exam coupons', icon: Ticket },
       { to: '/admin/payments', label: 'Payments', icon: CreditCard },
       { to: '/admin/messages', label: 'Messages', icon: Mail },
       { to: '/admin/settings', label: 'Settings', icon: Settings },
@@ -72,10 +74,14 @@ export default function AdminLayout() {
       </a>
 
       {/* Data-dense sidebar: fixed on desktop, drawer on mobile. */}
+      {/* `visibility` as well as the transform: translating the drawer away
+          left fifteen invisible links in the tab order. Unlike `display:none`
+          it still animates, and `lg:visible` keeps the static desktop sidebar
+          reachable whatever the drawer state is. */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-40 w-64 shrink-0 overflow-y-auto border-r border-ink-800 bg-ink-950 transition-transform duration-200 lg:static lg:translate-x-0',
-          open ? 'translate-x-0' : '-translate-x-full',
+          'fixed inset-y-0 left-0 z-40 w-64 shrink-0 overflow-y-auto border-r border-ink-800 bg-ink-950 transition-[transform,visibility] duration-200 lg:static lg:visible lg:translate-x-0',
+          open ? 'visible translate-x-0' : 'invisible -translate-x-full',
         )}
       >
         <div className="flex h-16 items-center justify-between border-b border-ink-800 px-5">

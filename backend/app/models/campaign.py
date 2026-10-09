@@ -105,6 +105,11 @@ class ChallengeAttempt(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         ),
         CheckConstraint("warnings >= 0", name="warnings_non_negative"),
         CheckConstraint(
+            "payment_status IN "
+            "('unpaid', 'pending', 'successful', 'failed', 'refunded')",
+            name="payment_status_valid",
+        ),
+        CheckConstraint(
             "score_percentage IS NULL "
             "OR (score_percentage >= 0 AND score_percentage <= 100)",
             name="score_percentage_valid",
@@ -176,6 +181,15 @@ class ChallengeAttempt(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     # What the applicant was actually promised, at the terms in force that day.
     discount_percentage: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
     pass_mark: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
+
+    # --- Paying for the exam -----------------------------------------------
+    # Denormalised from the linked Payment, exactly as `ExamBooking` does it, so
+    # the lead queue and the candidate's own dashboard can tell a passed test
+    # that has been paid for from one that has not without a join. The payment
+    # webhook is its only writer; the Payment row stays the source of truth.
+    payment_status: Mapped[str] = mapped_column(
+        String(20), default="unpaid", nullable=False, index=True
+    )
 
     # --- Follow-up ---------------------------------------------------------
     lead_status: Mapped[str] = mapped_column(

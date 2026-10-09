@@ -82,7 +82,7 @@ export default function CertificationsPage() {
   useSeo({
     title: 'Cloud certifications and exam preparation',
     description:
-      'Compare AWS, Microsoft Azure and Google Cloud certifications by exam code, level and price, with current discounts on every exam we list.',
+      'Compare cloud certifications by exam code, level and price, with current discounts on every exam we list.',
     robots: params.toString() ? 'noindex,follow' : 'index,follow',
   })
 
@@ -199,7 +199,7 @@ export default function CertificationsPage() {
         <div className="mt-8 max-w-2xl">
           <SearchBar
             defaultValue={q}
-            placeholder="Search certifications or exam codes, e.g. SAA-C03"
+            placeholder="Search certifications or exam codes, e.g. CDL"
             onSubmitQuery={(value) => update('q', value)}
           />
         </div>

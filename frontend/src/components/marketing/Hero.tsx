@@ -40,13 +40,16 @@ export function Hero({ topDiscount }: { topDiscount?: number | null }) {
               Certifications, courses and exam preparation
             </span>
 
-            <h1 className="mt-6 text-display-lg text-ink-900 sm:text-[3.5rem]">
-              Cloud Certifications &amp; Courses
-              <br />
+            {/* Steps down to 32px on a phone: `display-lg` is 56px, which wraps
+                into four ragged lines at 360px. */}
+            <h1 className="mt-6 text-[2rem] leading-tight tracking-tight text-ink-900 sm:text-display-lg">
+              Cloud certifications and courses{' '}
               {/* The headline figure is the deepest discount actually on offer,
                   so it changes with the catalogue instead of being a claim. */}
+              {/* Non-breaking space after the dash so the clause wraps as a
+                  whole, instead of leaving the dash stranded on its own line. */}
               <span className="text-brand-600">
-                {topDiscount ? `at Up to ${topDiscount}% Off` : 'at Discounted Prices'}
+                {topDiscount ? `\u2014\u00a0up to ${topDiscount}% off` : 'at discounted prices'}
               </span>
             </h1>
 
@@ -74,7 +77,10 @@ export function Hero({ topDiscount }: { topDiscount?: number | null }) {
               </p>
             </div>
 
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            {/* Two buttons, not three: at one size each they competed for the
+                same glance. Booking keeps its path as a text link, since the
+                search box above is what a visitor with an exam in mind uses. */}
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
               <ButtonLink
                 to="/deals"
                 size="lg"
@@ -83,7 +89,7 @@ export function Hero({ topDiscount }: { topDiscount?: number | null }) {
                   track(AnalyticsEvent.CtaClicked, { properties: { cta: 'hero_deals' } })
                 }
               >
-                Explore Deals
+                Explore deals
               </ButtonLink>
               <ButtonLink
                 to="/certifications"
@@ -94,19 +100,19 @@ export function Hero({ topDiscount }: { topDiscount?: number | null }) {
                   track(AnalyticsEvent.CtaClicked, { properties: { cta: 'hero_certifications' } })
                 }
               >
-                Browse Certifications
+                Browse certifications
               </ButtonLink>
-              <ButtonLink
+              <Link
                 to="/schedule-exam"
-                size="lg"
-                variant="ghost"
+                className="text-sm font-semibold text-brand-700 underline underline-offset-4 hover:text-brand-800 sm:ml-1"
                 onClick={() =>
                   track(AnalyticsEvent.CtaClicked, { properties: { cta: 'hero_schedule_exam' } })
                 }
               >
-                Schedule an Exam
-              </ButtonLink>
+                Or schedule an exam
+              </Link>
             </div>
+
           </div>
 
           <HeroVisual />
@@ -133,7 +139,7 @@ function HeroVisual() {
 
         <ol className="mt-5 space-y-3">
           {[
-            { icon: Layers, label: 'Cloud Computing Fundamentals', meta: '9 lessons', progress: 100 },
+            { icon: Layers, label: 'Generative AI for Beginners', meta: '163 lessons', progress: 100 },
             { icon: Target, label: 'Practice & knowledge checks', meta: '6 resources', progress: 64 },
             { icon: GraduationCap, label: 'Certification preparation', meta: '5 stages', progress: 25 },
           ].map((item) => (

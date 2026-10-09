@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   AlertTriangle,
   ArrowLeft,
@@ -18,11 +18,13 @@ import {
 
 import { getChallengeIntro, reportChallengeWarning, submitChallenge } from '@/api/endpoints'
 import { ApiError } from '@/api/client'
+import { PayExamButton, RetakeTestButton } from '@/components/challenge/AttemptOutcome'
 import {
   ChallengeStartForm,
   type ChallengePrefill,
 } from '@/components/challenge/ChallengeStartForm'
 import { Button, ButtonLink } from '@/components/ui/Button'
+import { Modal } from '@/components/ui/Modal'
 import {
   Badge,
   Card,
@@ -36,6 +38,7 @@ import { useProctor } from '@/hooks/useProctor'
 import { useSeo } from '@/hooks/useSeo'
 import { cn } from '@/lib/cn'
 import { formatPrice, pluralize } from '@/lib/format'
+import { scheduleExamPath } from '@/lib/scheduling'
 import { queryKeys } from '@/lib/queryClient'
 import type {
   ChallengeBookingPreferences,
@@ -62,10 +65,18 @@ interface ChallengeHandoff {
 
 export default function ChallengePage() {
   const location = useLocation()
+  const queryClient = useQueryClient()
   const handoff = (location.state as ChallengeHandoff | null) ?? null
-  const [session, setSession] = useState<ChallengeSession | null>(handoff?.session ?? null)
-  const [phase, setPhase] = useState<Phase>(handoff?.session ? 'test' : 'intro')
+  // An open paper survives a reload: the server's clock keeps running either
+  // way, so losing the session in memory used to cost the whole sitting.
+  const restored = handoff?.session ?? readOpenAttempt()
+  const [session, setSession] = useState<ChallengeSession | null>(restored)
+  const [phase, setPhase] = useState<Phase>(restored ? 'test' : 'intro')
   const [result, setResult] = useState<ChallengeResult | null>(null)
+  // Carried to the result screen so its booking link arrives prefilled.
+  const [certificationId, setCertificationId] = useState<string | null>(
+    handoff?.certificationId ?? null,
+  )
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.challengeIntro,
@@ -73,10 +84,19 @@ export default function ChallengePage() {
   })
 
   useSeo({
-    title: 'Google Cloud Certification Challenge',
-    description:
-      'Take a short proctored test on any Google Cloud certification. Pass it and our team calls you within 24 hours with a discount on your exam.',
+    title: data
+      ? `${data.provider_name} certification challenge`
+      : 'Certification challenge',
+    description: data
+      ? `Sit a ${data.terms.question_count}-question test on a ${data.provider_name} certification in ${data.terms.duration_minutes} minutes. Pass it and our team calls you within ${data.terms.response_hours} hours with a discount on your exam.`
+      : 'Sit a proctored test on your target certification and earn a discount on the exam fee.',
   })
+
+  // An attempt handed over from another page (the deals popup starts it there)
+  // is recorded too, so a reload on this page can pick it up.
+  useEffect(() => {
+    if (handoff?.session) storeOpenAttempt(handoff.session)
+  }, [handoff?.session])
 
   // A paper that is already open never waits on the intro: the attempt was
   // started elsewhere and its clock is already running.
@@ -85,8 +105,12 @@ export default function ChallengePage() {
       <TestScreen
         session={session}
         onFinished={(finished) => {
+          clearOpenAttempt(session.attempt_id)
           setResult(finished)
           setPhase('result')
+          // A signed-in learner's dashboard, and any certification or deal
+          // card they open next, should show this sitting straight away.
+          void queryClient.invalidateQueries({ queryKey: queryKeys.myChallengeAttempts })
         }}
       />
     )
@@ -95,7 +119,18 @@ export default function ChallengePage() {
   if (phase === 'result' && result) {
     return (
       <ChallengeShell>
-        <ResultScreen result={result} />
+        <ResultScreen
+          result={result}
+          certificationId={certificationId}
+          /* The session token authorises paying for the exam this paper just
+             earned a discount on, which is how a signed-out candidate can. */
+          token={session?.token ?? null}
+          onRetake={() => {
+            setResult(null)
+            setSession(null)
+            setPhase('intro')
+          }}
+        />
       </ChallengeShell>
     )
   }
@@ -126,12 +161,96 @@ export default function ChallengePage() {
     <IntroScreen
       intro={data}
       handoff={handoff}
-      onStarted={(started) => {
+      onStarted={(started, startedCertificationId) => {
+        storeOpenAttempt(started)
+        setCertificationId(startedCertificationId)
         setSession(started)
         setPhase('test')
       }}
     />
   )
+}
+
+/* -------------------------------------------------------------------------- */
+/* Resuming an open attempt                                                   */
+/* -------------------------------------------------------------------------- */
+/**
+ * An attempt lives in `sessionStorage` while it is open.
+ *
+ * The timer belongs to the server, so a reload mid-paper does not stop the
+ * clock -- it used to lose the token needed to submit, which forfeited the
+ * sitting and, with a retake window, locked the candidate out for days. The
+ * record is dropped the moment the paper is submitted, and an expired one is
+ * never restored.
+ */
+const OPEN_ATTEMPT_KEY = 'lb.challenge_attempt'
+
+function storeOpenAttempt(session: ChallengeSession): void {
+  try {
+    sessionStorage.setItem(OPEN_ATTEMPT_KEY, JSON.stringify(session))
+  } catch {
+    /* Private browsing: the attempt simply will not survive a reload. */
+  }
+}
+
+function clearOpenAttempt(attemptId?: string): void {
+  try {
+    sessionStorage.removeItem(OPEN_ATTEMPT_KEY)
+    if (attemptId) sessionStorage.removeItem(answersKey(attemptId))
+  } catch {
+    /* Nothing to clear. */
+  }
+}
+
+/** Answers in progress, so a reload restores the work and not just the paper. */
+function answersKey(attemptId: string): string {
+  return `lb.challenge_answers.${attemptId}`
+}
+
+function storeAnswers(attemptId: string, answers: Record<string, string>): void {
+  try {
+    sessionStorage.setItem(answersKey(attemptId), JSON.stringify(answers))
+  } catch {
+    /* Nothing to persist to. */
+  }
+}
+
+function readAnswers(attemptId: string): Record<string, string> {
+  try {
+    const raw = sessionStorage.getItem(answersKey(attemptId))
+    if (!raw) return {}
+    const parsed = JSON.parse(raw) as unknown
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
+    // Only string values survive: this is storage the candidate can edit.
+    return Object.fromEntries(
+      Object.entries(parsed as Record<string, unknown>).filter(
+        ([, value]) => typeof value === 'string',
+      ) as [string, string][],
+    )
+  } catch {
+    return {}
+  }
+}
+
+function readOpenAttempt(): ChallengeSession | null {
+  try {
+    const raw = sessionStorage.getItem(OPEN_ATTEMPT_KEY)
+    if (!raw) return null
+    const session = JSON.parse(raw) as ChallengeSession
+    // Shape-checked rather than trusted: this is storage anyone can edit.
+    if (!session?.attempt_id || !session.token || !Array.isArray(session.questions)) {
+      clearOpenAttempt()
+      return null
+    }
+    if (remainingSeconds(session.expires_at) <= 0) {
+      clearOpenAttempt()
+      return null
+    }
+    return session
+  } catch {
+    clearOpenAttempt()
+    return null
+  }
 }
 
 function ChallengeShell({ children }: { children: React.ReactNode }) {
@@ -152,7 +271,7 @@ function IntroScreen({
 }: {
   intro: ChallengeIntro
   handoff: ChallengeHandoff | null
-  onStarted: (session: ChallengeSession) => void
+  onStarted: (session: ChallengeSession, certificationId: string) => void
 }) {
   const { terms } = intro
   const minReward = Number(terms.reward_discount_min_percentage)
@@ -236,11 +355,15 @@ function TestScreen({
   session: ChallengeSession
   onFinished: (result: ChallengeResult) => void
 }) {
-  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [answers, setAnswers] = useState<Record<string, string>>(() =>
+    readAnswers(session.attempt_id),
+  )
   const [index, setIndex] = useState(0)
   const [warning, setWarning] = useState<{ message: string; count: number } | null>(null)
   const [secondsLeft, setSecondsLeft] = useState(() => remainingSeconds(session.expires_at))
   const [submitError, setSubmitError] = useState<string | null>(null)
+  // Asked before an early submit, never before the timer's own.
+  const [confirmSubmit, setConfirmSubmit] = useState(false)
 
   // Submission must happen exactly once, whether it is triggered by the button,
   // the timer or the final warning -- all three can land in the same tick.
@@ -306,6 +429,11 @@ function TestScreen({
     }, 1000)
     return () => window.clearInterval(tick)
   }, [session.expires_at, finish])
+
+  // Kept beside the attempt, so a reload restores the paper *and* the answers.
+  useEffect(() => {
+    storeAnswers(session.attempt_id, answers)
+  }, [session.attempt_id, answers])
 
   const question = session.questions[index]
   const answeredCount = Object.keys(answers).length
@@ -427,7 +555,9 @@ function TestScreen({
 
           {isLast ? (
             <Button
-              onClick={() => finish(false)}
+              onClick={() =>
+                answeredCount < session.questions.length ? setConfirmSubmit(true) : finish(false)
+              }
               loading={submitMutation.isPending}
               size="lg"
             >
@@ -465,6 +595,38 @@ function TestScreen({
             </button>
           ))}
         </div>
+
+        {/* One sitting and a retake window, so an early submit is checked. */}
+        <Modal
+          open={confirmSubmit}
+          onClose={() => setConfirmSubmit(false)}
+          title="Submit with unanswered questions?"
+          description={`${pluralize(
+            session.questions.length - answeredCount,
+            'question',
+          )} still unanswered. Unanswered questions are marked wrong, and you cannot reopen the paper.`}
+          size="sm"
+          footer={
+            <>
+              <Button variant="outline" onClick={() => setConfirmSubmit(false)}>
+                Keep working
+              </Button>
+              <Button
+                loading={submitMutation.isPending}
+                onClick={() => {
+                  setConfirmSubmit(false)
+                  finish(false)
+                }}
+              >
+                Submit anyway
+              </Button>
+            </>
+          }
+        >
+          <p className="text-sm text-ink-600">
+            You have {formatClock(secondsLeft)} left on the clock.
+          </p>
+        </Modal>
       </Container>
     </Section>
   )
@@ -473,7 +635,17 @@ function TestScreen({
 /* -------------------------------------------------------------------------- */
 /* Result                                                                     */
 /* -------------------------------------------------------------------------- */
-function ResultScreen({ result }: { result: ChallengeResult }) {
+function ResultScreen({
+  result,
+  certificationId,
+  token,
+  onRetake,
+}: {
+  result: ChallengeResult
+  certificationId: string | null
+  token: string | null
+  onRetake: () => void
+}) {
   const passed = result.passed
   const scored = Number(result.score_percentage)
 
@@ -518,21 +690,56 @@ function ResultScreen({ result }: { result: ChallengeResult }) {
               <BadgePercent className="h-3.5 w-3.5" aria-hidden="true" />
               {Number(result.discount_percentage)}% off unlocked
             </Badge>
+            {/* The unlocked price, once. It is the figure the catalogue
+                already advertises, not a further cut off it. */}
             {result.pricing && result.rewarded_price && (
               <p className="text-sm text-ink-700">
-                <s className="text-ink-500">
-                  {formatPrice(result.pricing.total_price_amount, result.pricing.currency)}
-                </s>{' '}
                 <span className="text-xl font-extrabold text-emerald-700">
                   {formatPrice(result.rewarded_price, result.pricing.currency)}
                 </span>{' '}
                 for {result.certification_name}
               </p>
             )}
-            <p className="mt-3 flex items-center justify-center gap-2 text-sm font-medium text-ink-800">
-              <PhoneCall className="h-4 w-4 text-emerald-700" aria-hidden="true" />
-              We call you within {result.response_hours} hours to book it
-            </p>
+            {/* Pay now when there is a working checkout for this exam;
+                otherwise the campaign's original promise still stands. */}
+            {result.can_pay && result.rewarded_price && result.pricing ? (
+              <>
+                <div className="mt-4">
+                  <PayExamButton
+                    attemptId={result.attempt_id}
+                    token={token}
+                    amount={result.rewarded_price}
+                    currency={result.pricing.currency}
+                    discountPercentage={result.discount_percentage}
+                    fullWidth
+                  />
+                </div>
+                <p className="mt-3 text-xs text-ink-600">
+                  Pay now to lock the discount in, or leave it and we will call you
+                  within {result.response_hours} hours to take payment.
+                </p>
+              </>
+            ) : (
+              <p className="mt-3 flex items-center justify-center gap-2 text-sm font-medium text-ink-800">
+                <PhoneCall className="h-4 w-4 text-emerald-700" aria-hidden="true" />
+                We call you within {result.response_hours} hours to book it
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* A failed paper gets the one thing it needs: another go, as soon as
+            the cooldown the campaign sets allows one. */}
+        {!passed && (
+          <div className="mx-auto mt-6 max-w-md rounded-xl border border-ink-200 bg-ink-50/70 p-5">
+            <p className="text-sm font-semibold text-ink-900">Try again</p>
+            <div className="mt-3 flex justify-center">
+              <RetakeTestButton
+                retakeAvailableOn={result.retake_available_on}
+                onRetake={onRetake}
+                variant="primary"
+              />
+            </div>
           </div>
         )}
 
@@ -550,8 +757,11 @@ function ResultScreen({ result }: { result: ChallengeResult }) {
           </p>
         )}
 
+        {/* Deep-linked, so the exam and the reference are not re-entered. */}
         <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <ButtonLink to="/schedule-exam">Schedule your exam</ButtonLink>
+          <ButtonLink to={scheduleExamPath(certificationId)}>
+            Schedule {result.certification_name}
+          </ButtonLink>
           <ButtonLink to="/certifications" variant="outline">
             Browse certifications
           </ButtonLink>

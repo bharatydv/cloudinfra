@@ -47,6 +47,14 @@ class Settings(BaseSettings):
     password_reset_token_expire_minutes: int = 60
     email_verification_code_expire_minutes: int = 15
 
+    # --- Google sign-in -------------------------------------------------
+    # The OAuth 2.0 Web client ID from the Google Cloud console. Leaving it
+    # unset switches Google sign-in off: /auth/providers reports it as
+    # disabled, the button never renders, and /auth/google refuses.
+    # No client secret is needed -- the browser flow returns a signed ID token
+    # which the backend verifies against Google's public keys.
+    google_client_id: str | None = None
+
     # --- URLs / CORS ----------------------------------------------------
     frontend_url: str = "http://localhost:5173"
     public_site_url: str = "http://localhost:5173"
@@ -126,6 +134,10 @@ class Settings(BaseSettings):
     @property
     def backend_cors_origins(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def google_sign_in_enabled(self) -> bool:
+        return bool(self.google_client_id)
 
     @property
     def is_production(self) -> bool:

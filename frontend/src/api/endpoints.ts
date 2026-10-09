@@ -6,6 +6,7 @@ import type {
   ArticleCard,
   ArticleCategory,
   ArticleDetail,
+  AuthProviders,
   AuthResponse,
   Certificate,
   CertificationCard,
@@ -13,6 +14,7 @@ import type {
   CertificationOption,
   CertificationResource,
   ChallengeAttempt,
+  ChallengeAttemptSummary,
   ChallengeBookingPreferences,
   ChallengeIntro,
   ChallengeLeadStatus,
@@ -31,6 +33,10 @@ import type {
   Enrollment,
   ExamBooking,
   ExamBookingReceipt,
+  ExamCheckout,
+  ExamCouponQuote,
+  ExamCouponRow,
+  ExamCouponWrite,
   Faq,
   HomePayload,
   LearnCourse,
@@ -72,7 +78,7 @@ export interface RegisterPayload {
 }
 
 export const register = (payload: RegisterPayload) =>
-  api.post<{ email: string; message: string }>('/auth/register', payload, { auth: false })
+  api.post<AuthResponse>('/auth/register', payload, { auth: false })
 
 export const verifyEmail = (payload: { email: string; code: string }) =>
   api.post<AuthResponse>('/auth/verify-email', payload, { auth: false })
@@ -82,6 +88,13 @@ export const resendVerification = (email: string) =>
 
 export const login = (payload: { email: string; password: string }) =>
   api.post<AuthResponse>('/auth/login', payload, { auth: false })
+
+export const getAuthProviders = () =>
+  api.get<AuthProviders>('/auth/providers', { auth: false })
+
+/** Exchange the ID token Google handed the browser for a session here. */
+export const googleSignIn = (credential: string) =>
+  api.post<AuthResponse>('/auth/google', { credential }, { auth: false })
 
 export const logout = (refreshToken: string | null) =>
   api.post<{ message: string }>('/auth/logout', { refresh_token: refreshToken ?? '' })
@@ -522,6 +535,77 @@ export const submitChallenge = (
     auto_submitted: boolean
   },
 ) => api.post<ChallengeResult>(`/challenge/attempts/${attemptId}/submit`, payload, { auth: false })
+
+/** Every test this learner has sat, including papers sat before registering. */
+export const getMyChallengeAttempts = () =>
+  api.get<ChallengeAttemptSummary[]>('/challenge/attempts/mine')
+
+/**
+ * Open checkout for the exam fee at the discount a passed paper earned.
+ *
+ * A signed-out candidate passes the session token from their sitting; a
+ * signed-in owner needs none. The amount comes back from the server -- it is
+ * never sent up.
+ */
+export const startChallengeCheckout = (attemptId: string, token?: string | null) =>
+  api.post<ExamCheckout>(
+    `/challenge/attempts/${attemptId}/checkout`,
+    token ? { token } : {},
+    { auth: !token },
+  )
+
+/* -------------------------------------------------------------------------- */
+/* Exam coupons                                                               */
+/* -------------------------------------------------------------------------- */
+/**
+ * Check a code against one exam and get back the price it unlocks.
+ *
+ * Checking spends nothing -- a code is only counted as redeemed once the
+ * payment behind it clears -- so this is safe to call on every keystroke of
+ * an Apply button.
+ */
+export const redeemExamCoupon = (code: string, certificationId: string) =>
+  api.post<ExamCouponQuote>('/exam-coupons/redeem', {
+    code,
+    certification_id: certificationId,
+  })
+
+/**
+ * Open checkout for an exam at the price a code unlocks.
+ *
+ * Open to signed-out visitors: the code is the authorisation. The amount
+ * comes back from the server and is never sent up.
+ */
+export const startCouponCheckout = (code: string, certificationId: string) =>
+  api.post<ExamCheckout>(
+    '/exam-coupons/checkout',
+    { code, certification_id: certificationId },
+    { auth: false },
+  )
+
+export const getAdminExamCoupons = () =>
+  api.get<ExamCouponRow[]>('/exam-coupons/admin', { auth: true })
+
+/**
+ * Ask the server for an unused code, prefixed with the influencer's name.
+ *
+ * Generated server-side so the suggestion can be checked against the table
+ * before it is offered.
+ */
+export const generateExamCouponCode = (ownerName?: string) =>
+  api.get<{ code: string }>(
+    `/exam-coupons/admin/generate${ownerName ? `?owner_name=${encodeURIComponent(ownerName)}` : ''}`,
+    { auth: true },
+  )
+
+export const createExamCoupon = (payload: ExamCouponWrite) =>
+  api.post<ExamCouponRow>('/exam-coupons/admin', payload, { auth: true })
+
+export const updateExamCoupon = (couponId: string, payload: ExamCouponWrite) =>
+  api.put<ExamCouponRow>(`/exam-coupons/admin/${couponId}`, payload, { auth: true })
+
+export const deleteExamCoupon = (couponId: string) =>
+  api.delete<{ message: string }>(`/exam-coupons/admin/${couponId}`, { auth: true })
 
 export const getAdminChallengeAttempts = (
   query: {

@@ -2,9 +2,11 @@ import uuid
 
 from fastapi import APIRouter, Depends, Request, status
 
-from app.core.deps import DbSession, OptionalUser, client_ip
+from app.core.deps import CurrentUser, DbSession, OptionalUser, client_ip
 from app.core.rate_limit import limiter
 from app.schemas.campaign import (
+    ChallengeAttemptSummary,
+    ChallengeCheckoutRequest,
     ChallengeIntro,
     ChallengeResult,
     ChallengeSession,
@@ -17,6 +19,7 @@ from app.schemas.campaign import (
     ContactVerificationRequest,
     ContactVerificationStatus,
 )
+from app.schemas.system import ExamCheckout
 from app.services import challenge_service, verification_service
 
 router = APIRouter(prefix="/challenge", tags=["Certification challenge"])
@@ -113,3 +116,33 @@ async def submit_attempt(
     This is the first and only point at which correct answers are disclosed.
     """
     return await challenge_service.submit(db, attempt_id, payload)
+
+
+@router.get("/attempts/mine", response_model=list[ChallengeAttemptSummary])
+async def my_attempts(db: DbSession, user: CurrentUser) -> list[ChallengeAttemptSummary]:
+    """Every test this learner has sat, with what each one earned.
+
+    Includes papers sat before registering, matched on the account's email, so
+    the dashboard does not lose a result to having been a guest at the time.
+    """
+    return await challenge_service.list_my_attempts(db, user)
+
+
+@router.post("/attempts/{attempt_id}/checkout", response_model=ExamCheckout)
+@limiter.limit("20/minute")
+async def start_attempt_checkout(
+    request: Request,
+    attempt_id: uuid.UUID,
+    payload: ChallengeCheckoutRequest,
+    db: DbSession,
+    user: OptionalUser,
+) -> ExamCheckout:
+    """Pay the exam fee at the discount a passed paper earned.
+
+    Open to signed-out candidates, who authorise with the session token from
+    their sitting; a signed-in owner needs none. The amount is recomputed
+    server-side, and only the signed provider webhook can mark it paid.
+    """
+    return await challenge_service.start_checkout(
+        db, attempt_id, token=payload.token, user=user
+    )

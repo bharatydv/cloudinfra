@@ -64,9 +64,13 @@ export function FilterPanel({
     </div>
   )
 
+  /**
+   * The fields are rendered once and repositioned with CSS. Rendering a mobile
+   * copy and a desktop copy duplicated every field `id`, so each `<label for>`
+   * resolved to the hidden control and no filter could be reached by name.
+   */
   return (
     <div className={className}>
-      {/* Mobile trigger */}
       <div className="lg:hidden">
         <Button
           variant="outline"
@@ -89,14 +93,14 @@ export function FilterPanel({
             </span>
           )}
         </Button>
-        <div id="filter-panel" hidden={!open} className="mt-3">
-          <Card className="p-5">{body}</Card>
-        </div>
       </div>
 
-      {/* Desktop sidebar */}
-      <Card className={cn('hidden p-5 lg:block')}>
-        <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-ink-500">
+      <Card
+        id="filter-panel"
+        // Collapsed below `lg`, always open above it.
+        className={cn('mt-3 p-5 lg:mt-0 lg:block', !open && 'hidden lg:block')}
+      >
+        <h2 className="mb-4 hidden items-center gap-2 text-sm font-bold uppercase tracking-wider text-ink-500 lg:flex">
           <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
           Filters
         </h2>

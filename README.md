@@ -254,7 +254,7 @@ python -m app.seed.run --reset      # delete seeded content first
 ```
 
 It creates: 6 course categories · 10 resource categories · 15 tags ·
-3 certification providers · 9 certifications with exam topics, roadmaps and
+1 certification provider · 2 certifications with exam topics, roadmaps and
 study resources · 6 courses with 18 modules and 53 lessons of real written
 content · 8 long-form articles · 18 FAQs · 3 clearly-labelled demo testimonials ·
 5 site-settings records (brand, contact, about, legal, learning path).
@@ -313,7 +313,9 @@ models:
 ### Endpoint summary
 
 **Auth** — `POST /api/auth/register` · `login` · `refresh` · `logout` ·
-`forgot-password` · `reset-password` · `change-password` · `GET /api/auth/me`
+`forgot-password` · `reset-password` · `change-password` · `GET /api/auth/me` ·
+`POST /api/auth/google` (sign in or sign up with a Google ID token) ·
+`GET /api/auth/providers` (which third-party sign-ins are configured)
 
 **Courses** — `GET /api/courses` · `GET /api/courses/{slug}` ·
 `GET /api/course-categories` · `POST|PUT|DELETE /api/courses` (staff) ·
@@ -350,7 +352,21 @@ with no quoted vendor fee, and a course with no `compare_at_price` above its
 
 **Exam scheduling** — `GET /api/exam-bookings/options` ·
 `POST /api/exam-bookings` (open to signed-out visitors; linked to the account
-when one is signed in)
+when one is signed in). Takes no money: the form is open to everyone, so
+charging the discounted total there would hand the discount to every visitor
+who asked and make both ways of earning it pointless. A request is a lead,
+and the team confirms the slot and the price.
+
+**Exam coupons** — `POST /api/exam-coupons/redeem` ·
+`POST /api/exam-coupons/checkout` (both open to signed-out visitors; the code
+is the authorisation) · full CRUD plus `GET /api/exam-coupons/admin/generate`
+under `/api/exam-coupons/admin` (staff). A coupon carries no rate of its own:
+it unlocks the price the catalogue already advertises, which is the same price
+a passed challenge paper unlocks, so the two routes to the discounted fee can
+never quote different figures. Each code records who the batch went to — an
+influencer, a college, a community — and a custom validity window with either
+end open. A code is counted as redeemed by the payment webhook, not when it is
+typed, so `redemption_count` is money taken rather than codes tried.
 
 **Payments** — `POST /api/payments/create` · `GET /api/payments/{id}` ·
 `POST /api/payments/webhook` (signature-verified)
@@ -359,7 +375,8 @@ when one is signed in)
 `/settings` · `/seo/page`
 
 **Admin** — `GET /api/admin/dashboard` · `/users` · `/enrollments` ·
-`/exam-bookings` · `/payments` · `/messages` · `/faqs` · `/testimonials` · `/settings`
+`/exam-bookings` · `/exam-coupons` · `/payments` · `/messages` · `/faqs` ·
+`/testimonials` · `/settings`
 
 **Crawlers** — `GET /robots.txt` · `GET /sitemap.xml` (site root, not under `/api`)
 
@@ -384,8 +401,8 @@ SEO is a first-class feature rather than an afterthought.
 - **Filtered listing URLs** (`?category=`, `?level=`, …) are served
   `noindex,follow`, so facet permutations do not compete with the canonical
   listing page.
-- **Clean URLs** — `/certifications/google-cloud/professional-cloud-architect`,
-  `/courses/cloud-computing-fundamentals`, `/resources/cloud-certification-roadmap`.
+- **Clean URLs** — `/certifications/google-cloud/cloud-digital-leader`,
+  `/courses/generative-ai-for-beginners`, `/resources/cloud-certification-roadmap`.
 - **Internal linking** is built into the content model: articles link to related
   courses and certifications, certifications link to preparing courses, providers
   link to their certifications and related guides.
@@ -472,7 +489,8 @@ committed.**
 | Variable | Notes |
 | --- | --- |
 | `REDIS_URL` | Shares rate-limit buckets across workers when set |
-| `PAYMENT_PROVIDER` / `_KEY` / `_SECRET` / `PAYMENT_WEBHOOK_SECRET` | `noop` until configured |
+| `GOOGLE_CLIENT_ID` | Turns Google sign-in on. OAuth 2.0 **Web** client ID; no client secret is needed. Blank hides the button |
+| `PAYMENT_PROVIDER` / `_KEY` / `_SECRET` / `PAYMENT_WEBHOOK_SECRET` | `noop` until configured. Until the provider, key and secret are all set, nothing offers to charge: the exam booking form and a passed discount test both fall back to "our team will call you". The webhook secret is what lets a payment be confirmed at all |
 | `EMAIL_PROVIDER` / `EMAIL_PROVIDER_KEY` / `EMAIL_FROM_*` | `console` logs instead of sending |
 | `EMAIL_CONTACT_ADDRESS` | Sender for test results and exam scheduling mail; blank uses `EMAIL_FROM_ADDRESS` |
 | `STORAGE_PROVIDER` / `STORAGE_*` | `local` in development, `s3` in production |
@@ -500,6 +518,13 @@ Implemented:
 - **Short-lived JWT access tokens** plus **rotating refresh tokens**. Refresh
   tokens are stored only as SHA-256 digests and are single-use: presenting one
   revokes it and issues a new pair. Changing a password revokes every session.
+- **Google sign-in is verified server-side.** The ID token the browser returns
+  is only accepted after its RS256 signature is checked against Google's
+  published keys and its `iss`, `aud` and `exp` are confirmed. An address is
+  only linked to an account when Google reports it as verified, so adding
+  somebody else's email to a Google profile cannot take over their login. A
+  Google-only account has a null `password_hash`, not a placeholder, so no
+  password can ever match it.
 - **No account enumeration** — `forgot-password` returns an identical response
   whether or not the account exists, and login failures do not distinguish
   between a wrong email and a wrong password.

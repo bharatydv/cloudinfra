@@ -41,8 +41,19 @@ async def payment_webhook(
     request: Request,
     db: DbSession,
     signature: str | None = Header(default=None, alias="X-Payment-Signature"),
+    razorpay_signature: str | None = Header(default=None, alias="X-Razorpay-Signature"),
 ) -> Message:
-    """Signature-verified provider callback. The only path that grants paid access."""
+    """Signature-verified provider callback. The only path that grants paid access.
+
+    Razorpay sends its HMAC in `X-Razorpay-Signature`; the generic header is
+    what the noop provider and our own tests use. Both carry the same thing --
+    a hex SHA-256 HMAC of the raw body under the webhook secret -- so either is
+    accepted and the verification itself is unchanged. Without this a real
+    Razorpay callback would be rejected, money would be taken and nothing would
+    ever be marked paid.
+    """
     body = await request.body()
-    outcome = await payment_service.handle_webhook(db, body, signature)
+    outcome = await payment_service.handle_webhook(
+        db, body, signature or razorpay_signature
+    )
     return Message(message=outcome)

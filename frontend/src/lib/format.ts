@@ -18,7 +18,7 @@ export function formatDuration(minutes: number): string {
   if (minutes < 60) return `${minutes} min`
   const hours = Math.floor(minutes / 60)
   const rest = minutes % 60
-  if (hours < 24) return rest ? `${hours}h ${rest}m` : `${hours} hours`
+  if (hours < 24) return rest ? `${hours}h ${rest}m` : `${hours} ${hours === 1 ? 'hour' : 'hours'}`
   return `${Math.round(hours)} hours`
 }
 

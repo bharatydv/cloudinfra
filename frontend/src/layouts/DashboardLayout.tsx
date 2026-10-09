@@ -23,7 +23,8 @@ const LINKS = [
   { to: '/dashboard', label: 'Overview', icon: LayoutDashboard, end: true },
   { to: '/dashboard/courses', label: 'My courses', icon: BookOpen },
   { to: '/dashboard/progress', label: 'Learning progress', icon: TrendingUp },
-  { to: '/dashboard/certifications', label: 'Saved certifications', icon: Bookmark },
+  // Both the tests this learner has sat and the exams they bookmarked.
+  { to: '/dashboard/certifications', label: 'Certifications', icon: Bookmark },
   { to: '/dashboard/practice', label: 'Practice', icon: Target },
   { to: '/dashboard/certificates', label: 'Certificates', icon: Award },
   { to: '/dashboard/profile', label: 'Profile', icon: UserCircle },
@@ -43,7 +44,7 @@ export default function DashboardLayout() {
       <Navbar />
 
       <Container className="w-full flex-1 py-8">
-        <header className="mb-6">
+        <header className="mb-6 print:hidden">
           <h1 className="text-heading-lg text-ink-900">
             Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}
           </h1>
@@ -53,7 +54,7 @@ export default function DashboardLayout() {
         </header>
 
         <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
-          <nav aria-label="Dashboard" className="lg:sticky lg:top-24 lg:self-start">
+          <nav aria-label="Dashboard" className="print:hidden lg:sticky lg:top-24 lg:self-start">
             {/* Horizontal scroller on small screens, sidebar on large. */}
             <ul className="scroll-x flex gap-1.5 lg:flex-col">
               {LINKS.map((link) => (

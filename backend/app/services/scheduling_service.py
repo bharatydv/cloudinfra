@@ -13,8 +13,6 @@ from sqlalchemy.orm import selectinload
 from app.core.config import settings
 from app.core.errors import NotFoundError, ValidationFailedError
 from app.models.certification import Certification
-from app.models.commerce import Payment
-from app.models.enums import PaymentStatus
 from app.models.scheduling import ExamBooking
 from app.models.user import User
 from app.repositories import scheduling_repo
@@ -23,12 +21,9 @@ from app.schemas.scheduling import (
     ExamBookingCreate,
     ExamBookingReceipt,
     ExamBookingUpdate,
-    ExamCheckout,
 )
-from app.services import challenge_service
+from app.services import challenge_service, pricing
 from app.services import email as email_service
-from app.services import pricing
-from app.services.payments import get_payment_provider
 
 # No vowels and no 0/1/I/O: a code is read out over the phone as often as it is
 # copied, so ambiguous glyphs cost support time.
@@ -95,7 +90,15 @@ async def submit(
     *,
     user: User | None = None,
     source_ip: str | None = None,
-) -> tuple[ExamBooking, str, ExamCheckout | None]:
+) -> tuple[ExamBooking, str]:
+    """Record a scheduling request. Takes no money, by design.
+
+    The discounted fee is a reward, not a list price: it is payable only by
+    someone who earned it, through a passed challenge paper or a coupon code.
+    This form is open to anyone, so charging the discounted total here handed
+    the discount to every visitor who asked and made both routes pointless.
+    The request is a lead; the team confirms the slot and the price.
+    """
     if payload.website:
         # Honeypot tripped -- almost certainly a bot.
         raise ValidationFailedError("Your request could not be submitted.")
@@ -133,9 +136,7 @@ async def submit(
     campaign = await challenge_service.load_config(db)
     await _send_request_emails(booking, campaign.response_hours)
 
-    config = await pricing.load_config(db)
-    checkout = await _start_checkout(db, booking, certification, config)
-    return booking, certification_url(certification), checkout
+    return booking, certification_url(certification)
 
 
 async def _send_request_emails(booking: ExamBooking, response_hours: int) -> None:
@@ -189,92 +190,9 @@ async def _send_request_emails(booking: ExamBooking, response_hours: int) -> Non
         logger.exception("Could not notify the team about exam request %s", booking.reference_code)
 
 
-async def _start_checkout(
-    db: AsyncSession,
-    booking: ExamBooking,
-    certification: Certification,
-    config: pricing.PricingConfig,
-) -> ExamCheckout | None:
-    """Create a pending payment and a provider order for this booking.
-
-    Returns None when there is nothing to charge -- an unpriced exam, or no
-    payment provider configured. The booking still stands in both cases; it is
-    simply handled the way it was before payments existed.
-
-    The amount is recomputed here from the certification and the current
-    pricing rules. It is never taken from the request, so a tampered client
-    cannot choose its own price.
-    """
-    if settings.payment_provider == "noop":
-        return None
-
-    quote = pricing.compute(
-        exam_fee_amount=certification.exam_fee_amount,
-        currency=certification.exam_fee_currency,
-        fee_checked_on=certification.exam_fee_checked_on,
-        discount_override=certification.discount_percentage,
-        config=config,
-    )
-    if quote is None or quote.total_price_amount <= 0:
-        return None
-
-    # The id is generated up front so the provider can be called before
-    # anything is written. A failed checkout then leaves nothing to roll back --
-    # and rolling back here would expire the booking that was already committed
-    # above, turning a recoverable provider outage into a broken response.
-    payment_id = uuid.uuid4()
-    description = f"{certification.name} exam booking {booking.reference_code}"
-    provider = get_payment_provider()
-    try:
-        session = await provider.create_checkout(
-            amount=quote.total_price_amount,
-            currency=quote.currency,
-            reference=str(payment_id),
-            description=description,
-        )
-    except Exception:
-        # The request is already saved and the applicant has their reference.
-        # Losing checkout is recoverable by a follow-up; losing the lead is not.
-        logger.exception("Checkout failed for booking %s", booking.reference_code)
-        return None
-
-    payment = Payment(
-        id=payment_id,
-        user_id=booking.user_id,
-        exam_booking_id=booking.id,
-        amount=quote.total_price_amount,
-        currency=quote.currency,
-        payment_provider=settings.payment_provider,
-        provider_reference=session.reference,
-        status=PaymentStatus.PENDING.value,
-    )
-    db.add(payment)
-    booking.payment_status = PaymentStatus.PENDING.value
-    await db.commit()
-    await db.refresh(payment)
-
-    return ExamCheckout(
-        provider=session.provider,
-        payment_id=payment.id,
-        amount=payment.amount,
-        currency=payment.currency,
-        order_id=session.client_secret,
-        checkout_url=session.checkout_url,
-        public_key=settings.payment_provider_key,
-        prefill_name=booking.full_name,
-        prefill_email=booking.email,
-        prefill_contact=booking.phone,
-        description=description,
-    )
-
-
-def build_receipt(
-    booking: ExamBooking, url: str | None, checkout: ExamCheckout | None = None
-) -> ExamBookingReceipt:
+def build_receipt(booking: ExamBooking, url: str | None) -> ExamBookingReceipt:
     message = (
-        "Your request is saved. Complete payment to confirm your booking."
-        if checkout
-        else "Your exam scheduling request has been received. "
+        "Your exam scheduling request has been received. "
         "Our team will confirm your slot by email."
     )
     return ExamBookingReceipt(
@@ -282,7 +200,6 @@ def build_receipt(
         reference_code=booking.reference_code,
         certification_name=booking.certification_name,
         certification_url=url,
-        checkout=checkout,
     )
 
 

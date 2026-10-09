@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Compass, Eye, Info, Target } from 'lucide-react'
+import { ArrowRight, Compass, Eye, Target } from 'lucide-react'
 
 import { PageHeader } from '@/components/layout/PageHeader'
 import { CTASection, WhyChooseUsSection } from '@/components/marketing/sections'
@@ -11,6 +11,7 @@ import { siteConfig } from '@/config/brand'
 import { useSeo } from '@/hooks/useSeo'
 import { useSite } from '@/hooks/useSite'
 import { queryKeys } from '@/lib/queryClient'
+import { cn } from '@/lib/cn'
 
 interface AboutValue {
   title: string
@@ -145,10 +146,12 @@ export default function AboutPage() {
 
       <WhyChooseUsSection />
 
-      <Section tone="muted" className="py-14">
-        <Container>
-          <SectionHeading eyebrow="Our team" title="The people behind the content" />
-          {team.length > 0 ? (
+      {/* No section until there is something in it: a heading over "coming
+          soon" reads as an unfinished site, which is worse than silence. */}
+      {team.length > 0 && (
+        <Section tone="muted" className="py-14">
+          <Container>
+            <SectionHeading eyebrow="Our team" title="The people behind the content" />
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {team.map((member) => (
                 <Card key={member.name} className="p-6 text-center">
@@ -161,46 +164,28 @@ export default function AboutPage() {
                 </Card>
               ))}
             </div>
-          ) : (
-            /* No invented biographies: the section states its own status. */
-            <Card className="flex items-start gap-4 p-6">
-              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-500">
-                <Info className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <div>
-                <h3 className="text-base font-bold text-ink-900">Team profiles coming soon</h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink-600">
-                  Team members are added through the admin settings once profiles are approved. We
-                  do not publish placeholder people.
-                </p>
-              </div>
-            </Card>
-          )}
-        </Container>
-      </Section>
+          </Container>
+        </Section>
+      )}
 
       <Section className="py-14">
         <Container className="max-w-3xl">
-          <SectionHeading eyebrow="Achievements" title="What we can verify" align="center" />
-          {achievements.length > 0 ? (
-            <ul className="grid gap-4 sm:grid-cols-2">
-              {achievements.map((item) => (
-                <li key={item}>
-                  <Card className="p-5 text-sm text-ink-700">{item}</Card>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <Card className="p-6 text-center">
-              <p className="text-sm leading-relaxed text-ink-600">
-                {(about.achievementsNote as string) ??
-                  'We publish metrics here only once they are real and verifiable.'}
-              </p>
-            </Card>
+          {achievements.length > 0 && (
+            <>
+              <SectionHeading eyebrow="Achievements" title="What we can verify" align="center" />
+              <ul className="grid gap-4 sm:grid-cols-2">
+                {achievements.map((item) => (
+                  <li key={item}>
+                    <Card className="p-5 text-sm text-ink-700">{item}</Card>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
 
-          <Card className="mt-8 border-amber-200 bg-amber-50 p-5">
-            <p className="text-xs leading-relaxed text-amber-900">
+          {/* A disclosure, not a warning: neutral surface, same words. */}
+          <Card className={cn('p-5', achievements.length > 0 && 'mt-8')}>
+            <p className="text-xs leading-relaxed text-ink-500">
               {siteConfig.independenceNotice} {siteConfig.trademarkNotice}
             </p>
           </Card>

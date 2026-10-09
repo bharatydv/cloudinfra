@@ -109,3 +109,6 @@ class LearnCourseView(BaseModel):
     completed_lessons: int
     modules: list[LearnModuleView] = []
     current_lesson: LearnLessonView | None = None
+    # True when a staff member is reading a course they are not enrolled in:
+    # the content is all there, but nothing they do is recorded.
+    is_staff_preview: bool = False

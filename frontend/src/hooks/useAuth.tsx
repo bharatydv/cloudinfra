@@ -21,7 +21,9 @@ interface AuthContextValue {
   /** True until the stored session has been validated against the API. */
   isLoading: boolean
   login: (email: string, password: string) => Promise<User>
-  register: (payload: endpoints.RegisterPayload) => Promise<{ email: string; message: string }>
+  /** Signs in or signs up from a Google ID token -- the API decides which. */
+  loginWithGoogle: (credential: string) => Promise<User>
+  register: (payload: endpoints.RegisterPayload) => Promise<User>
   verifyEmail: (email: string, code: string) => Promise<User>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
@@ -76,10 +78,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return response.user
   }, [])
 
+  const loginWithGoogle = useCallback(async (credential: string) => {
+    const response = await endpoints.googleSignIn(credential)
+    tokenStore.set(response.tokens.access_token, response.tokens.refresh_token)
+    setUser(response.user)
+    await queryClient.invalidateQueries()
+    return response.user
+  }, [])
+
   const register = useCallback(async (payload: endpoints.RegisterPayload) => {
-    // No session yet: the account is not usable until the emailed code is
-    // confirmed through verifyEmail.
-    return endpoints.register(payload)
+    // Sign-up confirms nothing by email, so the account is usable at once.
+    const response = await endpoints.register(payload)
+    tokenStore.set(response.tokens.access_token, response.tokens.refresh_token)
+    setUser(response.user)
+    await queryClient.invalidateQueries()
+    return response.user
   }, [])
 
   const verifyEmail = useCallback(async (email: string, code: string) => {
@@ -115,13 +128,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isStaff: user?.role === 'admin' || user?.role === 'instructor',
       isLoading,
       login,
+      loginWithGoogle,
       register,
       verifyEmail,
       logout,
       refreshUser,
       setUser,
     }),
-    [user, isLoading, login, register, verifyEmail, logout, refreshUser],
+    [user, isLoading, login, loginWithGoogle, register, verifyEmail, logout, refreshUser],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

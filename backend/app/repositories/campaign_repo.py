@@ -94,6 +94,29 @@ async def last_submission_for(db: AsyncSession, email: str) -> datetime | None:
     )
 
 
+async def attempts_for_user(
+    db: AsyncSession, *, user_id: uuid.UUID, email: str, limit: int = 50
+) -> list[ChallengeAttempt]:
+    """Sittings belonging to one learner, newest first.
+
+    Matched on the account or on its address: the test is open to signed-out
+    visitors, so an attempt sat before registering has no `user_id` to find it
+    by and only the email ties it back to the person who sat it.
+    """
+    rows = await db.scalars(
+        select(ChallengeAttempt)
+        .where(
+            or_(
+                ChallengeAttempt.user_id == user_id,
+                ChallengeAttempt.email == email,
+            )
+        )
+        .order_by(ChallengeAttempt.created_at.desc())
+        .limit(limit)
+    )
+    return list(rows)
+
+
 async def list_attempts(
     db: AsyncSession,
     params: PageParams,

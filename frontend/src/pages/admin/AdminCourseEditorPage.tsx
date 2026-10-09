@@ -3,9 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, GripVertical, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import { z } from 'zod'
 
+import { ConfirmDelete } from '@/components/admin/ConfirmDelete'
 import { AdminPageHeader } from '@/components/admin/DataTable'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
@@ -78,6 +79,10 @@ export default function AdminCourseEditorPage() {
   const toast = useToast()
   const [moduleTitle, setModuleTitle] = useState('')
   const [lessonModuleId, setLessonModuleId] = useState<string | null>(null)
+  // Deleting curriculum takes lesson content and progress records with it, so
+  // both ask first and name what is going.
+  const [pendingModule, setPendingModule] = useState<{ id: string; title: string } | null>(null)
+  const [pendingLesson, setPendingLesson] = useState<{ id: string; title: string } | null>(null)
 
   const { data: categories } = useQuery({
     queryKey: queryKeys.courseCategories,
@@ -174,6 +179,7 @@ export default function AdminCourseEditorPage() {
     mutationFn: (moduleId: string) => deleteModule(moduleId),
     onSuccess: () => {
       toast.success('Module deleted.')
+      setPendingModule(null)
       void queryClient.invalidateQueries({ queryKey: queryKeys.adminCourse(id!) })
     },
   })
@@ -182,6 +188,7 @@ export default function AdminCourseEditorPage() {
     mutationFn: (lessonId: string) => deleteLesson(lessonId),
     onSuccess: () => {
       toast.success('Lesson deleted.')
+      setPendingLesson(null)
       void queryClient.invalidateQueries({ queryKey: queryKeys.adminCourse(id!) })
     },
   })
@@ -402,8 +409,9 @@ export default function AdminCourseEditorPage() {
                 {course?.modules.map((module) => (
                   <div key={module.id} className="rounded-lg border border-ink-200 p-4">
                     <div className="flex items-start justify-between gap-3">
+                      {/* No drag handle: nothing here reorders, and drawing
+                          one promised a gesture that did nothing. */}
                       <div className="flex min-w-0 items-center gap-2">
-                        <GripVertical className="h-4 w-4 shrink-0 text-ink-300" aria-hidden="true" />
                         <p className="truncate text-sm font-semibold text-ink-900">
                           {module.position}. {module.title}
                         </p>
@@ -412,7 +420,7 @@ export default function AdminCourseEditorPage() {
                         variant="ghost"
                         size="sm"
                         className="text-rose-600 hover:bg-rose-50"
-                        onClick={() => removeModule.mutate(module.id)}
+                        onClick={() => setPendingModule({ id: module.id, title: module.title })}
                         aria-label={`Delete module ${module.title}`}
                       >
                         <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -430,7 +438,9 @@ export default function AdminCourseEditorPage() {
                           <span className="text-ink-500">{lesson.duration_minutes}m</span>
                           <button
                             type="button"
-                            onClick={() => removeLesson.mutate(lesson.id)}
+                            onClick={() =>
+                              setPendingLesson({ id: lesson.id, title: lesson.title })
+                            }
                             className="rounded p-1 text-rose-600 hover:bg-rose-50"
                             aria-label={`Delete lesson ${lesson.title}`}
                           >
@@ -475,6 +485,28 @@ export default function AdminCourseEditorPage() {
           )}
         </div>
       </div>
+
+      <ConfirmDelete
+        open={Boolean(pendingModule)}
+        onClose={() => setPendingModule(null)}
+        onConfirm={() => pendingModule && removeModule.mutate(pendingModule.id)}
+        loading={removeModule.isPending}
+        title="Delete this module?"
+        description="Every lesson inside it is deleted too, along with learners' progress through them. This cannot be undone."
+        itemName={pendingModule?.title}
+        confirmLabel="Delete module"
+      />
+
+      <ConfirmDelete
+        open={Boolean(pendingLesson)}
+        onClose={() => setPendingLesson(null)}
+        onConfirm={() => pendingLesson && removeLesson.mutate(pendingLesson.id)}
+        loading={removeLesson.isPending}
+        title="Delete this lesson?"
+        description="Its content and every learner's progress through it go with it. This cannot be undone."
+        itemName={pendingLesson?.title}
+        confirmLabel="Delete lesson"
+      />
 
       <Modal
         open={Boolean(lessonModuleId)}

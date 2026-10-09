@@ -18,6 +18,7 @@ from app.services import pricing
 from app.services.payments import RazorpayPaymentProvider, to_minor_units
 from tests.conftest import auth_override
 from tests.factories import make_certification, make_provider
+from tests.test_challenge_payments import razorpay  # noqa: F401 -- fixture
 from tests.test_exam_scheduling import _payload
 
 pytestmark = pytest.mark.asyncio
@@ -136,32 +137,37 @@ async def _book(client: AsyncClient, db_session, admin, **pricing_setting) -> di
     return response.json()
 
 
-async def test_no_checkout_when_payments_are_off(client: AsyncClient, db_session, admin):
-    """The default provider is noop, so the flow stays exactly as it was."""
+async def test_the_booking_form_never_takes_money(client: AsyncClient, db_session, admin):
+    """The scheduling form is a lead, not a till.
+
+    It is open to anyone, so charging the discounted total here would hand the
+    discount to every visitor who asked and make both ways of earning it --
+    a passed challenge paper, a coupon code -- pointless. The request saves a
+    lead and the team confirms the price.
+    """
     receipt = await _book(client, db_session, admin)
-    assert receipt["checkout"] is None
-
-
-async def test_booking_survives_a_failing_provider(
-    client: AsyncClient, db_session, admin, monkeypatch
-):
-    """A checkout failure must never cost the lead."""
-    monkeypatch.setattr(settings, "payment_provider", "razorpay")
-    monkeypatch.setattr(settings, "payment_provider_key", None)  # forces a failure
-    from app.services import payments
-
-    payments.get_payment_provider.cache_clear()
-
-    receipt = await _book(client, db_session, admin)
-    assert receipt["checkout"] is None
     assert receipt["reference_code"]
+    # The receipt has no checkout to offer, at all.
+    assert "checkout" not in receipt
 
     booking = await db_session.scalar(
         select(ExamBooking).where(ExamBooking.reference_code == receipt["reference_code"])
     )
     assert booking is not None
     assert booking.payment_status == "unpaid"
-    payments.get_payment_provider.cache_clear()
+    # Nothing was ordered from the provider either.
+    assert await db_session.scalar(select(Payment)) is None
+
+
+async def test_a_working_provider_does_not_reopen_the_booking_till(
+    client: AsyncClient, db_session, admin, razorpay  # noqa: F811
+):
+    """Configuring payments must not quietly put the discount back on sale."""
+    receipt = await _book(client, db_session, admin, discountPercentage=65)
+
+    assert "checkout" not in receipt
+    assert razorpay == []
+    assert await db_session.scalar(select(Payment)) is None
 
 
 async def test_webhook_is_the_only_thing_that_marks_a_booking_paid(
